@@ -1283,6 +1283,94 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "shows inline error when the stop selector is blurred with exactly one stop selected for suspension",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _ -> [@subway_route] end, get: fn _, _ -> @subway_route end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@subway_stop, @stop_2] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Suspension")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@subway_route.id]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "stop_names_and_ids" => ["#{@subway_stop.name}|#{@subway_stop.id}"]
+          }
+        })
+
+        refute render(view) =~ "Select 2 or more stops"
+        refute has_element?(view, "#flash")
+
+        view
+        |> element("#alert_data_stop_names_and_ids")
+        |> render_blur()
+
+        assert has_element?(
+                 view,
+                 "p.text-text-error",
+                 "Select 2 or more stops between which service is not running"
+               )
+
+        refute has_element?(view, "#flash")
+      end
+    end
+
+    @tag :logged_in_user
+    test "shows flash error on review attempt with exactly one stop selected for suspension",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _ -> [@subway_route] end, get: fn _, _ -> @subway_route end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@subway_stop, @stop_2] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Suspension")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@subway_route.id]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "stop_names_and_ids" => ["#{@subway_stop.name}|#{@subway_stop.id}"]
+          }
+        })
+
+        open_review_modal(view)
+        render_async(view)
+
+        assert has_element?(
+                 view,
+                 "p.text-text-error",
+                 "Select 2 or more stops between which service is not running"
+               )
+
+        assert view
+               |> element("#flash")
+               |> render() =~ "Select 2 or more stops between which service is not running"
+      end
+    end
+
+    @tag :logged_in_user
     test "renders with 'All Future Trips' selected while editing an existing commuter rail alert",
          %{conn: conn} do
       alert_params =
