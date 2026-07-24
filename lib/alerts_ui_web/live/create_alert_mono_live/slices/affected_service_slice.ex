@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   alias Ecto.Changeset
@@ -17,10 +18,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   import Phoenix.LiveView, only: [push_event: 3, start_async: 3]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
-    only: [get_single_route_effect_names: 0, humanize_effect_name: 1]
+    only: [get_single_route_effect_names: 0, humanize_effect_name: 1, humanize_effect_name: 2]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
+
+  @min_stops_message "Select 2 or more stops between which service is not running"
 
   defstruct [
     :direction,
@@ -85,10 +88,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def validate(_service_data, changeset, _params, socket) do
-      if socket.assigns.submitted? do
-        AffectedServiceSlice.validate_changeset(changeset)
-      else
-        changeset
+      cond do
+        socket.assigns.submitted? ->
+          AffectedServiceSlice.validate_changeset(changeset)
+
+        Map.get(socket.assigns, :stops_touched?, false) ->
+          AffectedServiceSlice.validate_min_stops(changeset)
+
+        true ->
+          changeset
       end
     end
 
@@ -173,6 +181,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def validate_changeset(changeset) do
+    changeset
+    |> validate_route_required()
+    |> validate_min_stops()
+  end
+
+  defp validate_route_required(changeset) do
     normalized_single_route_effects =
       Enum.map(get_single_route_effect_names(), fn name ->
         name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
@@ -182,6 +196,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       always_validate_required(changeset, :single_route_id, "You must select a route")
     else
       always_validate_required(changeset, :route_ids, "You must select a route")
+    end
+  end
+
+  def validate_min_stops(changeset) do
+    route_type = Changeset.get_field(changeset, :route_type)
+    effect_name = Changeset.get_field(changeset, :effect_name)
+    humanized_effect_name = humanize_effect_name(route_type, effect_name)
+
+    min_stops =
+      GetKeyForModeEffect.get_value_of_key(:min_stops, route_type, humanized_effect_name) || 1
+
+    stop_count = changeset |> Changeset.get_field(:stop_names_and_ids, []) |> length()
+
+    if min_stops > 1 and stop_count == 1 do
+      Changeset.add_error(changeset, :stop_names_and_ids, @min_stops_message)
+    else
+      changeset
     end
   end
 
@@ -680,6 +711,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
                 do: nil,
                 else: "All Stops"
             }
+            phx-blur="stop_selector_blur"
           />
         </div>
       </div>

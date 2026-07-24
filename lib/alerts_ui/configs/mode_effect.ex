@@ -17,7 +17,8 @@ defmodule AlertsUI.Models.ModeEffectStruct do
     :send_push_notification_on_edit,
     :prediction_suppression_warning,
     :path_name,
-    send_push_notification_on_create: true
+    send_push_notification_on_create: true,
+    min_stops: 1
   ]
 
   @type t :: %{
@@ -27,7 +28,8 @@ defmodule AlertsUI.Models.ModeEffectStruct do
           send_push_notification_on_create: boolean(),
           send_push_notification_on_edit: boolean(),
           prediction_suppression_warning: boolean(),
-          path_name: String.t()
+          path_name: String.t(),
+          min_stops: integer()
         }
 end
 
@@ -92,7 +94,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true,
-        path_name: "shuttle"
+        path_name: "shuttle",
+        min_stops: 2
       },
       "Single Tracking" => %ModeEffectStruct{
         combination: :RDS,
@@ -101,7 +104,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false,
-        path_name: "single_tracking"
+        path_name: "single_tracking",
+        min_stops: 2
       },
       "Station Bypass" => %ModeEffectStruct{
         combination: :RDS,
@@ -137,7 +141,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: true,
-        path_name: "suspension"
+        path_name: "suspension",
+        min_stops: 2
       }
     },
     commuter_rail: %{
@@ -202,7 +207,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: true,
-        path_name: "shuttle"
+        path_name: "shuttle",
+        min_stops: 2
       },
       "Station Bypass" => %ModeEffectStruct{
         combination: :RDTS,
@@ -238,7 +244,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: true,
-        path_name: "suspension"
+        path_name: "suspension",
+        min_stops: 2
       },
       "Track Change" => %ModeEffectStruct{
         combination: :RDTS,
