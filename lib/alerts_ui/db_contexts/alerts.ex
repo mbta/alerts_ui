@@ -248,8 +248,12 @@ defmodule AlertsUI.Alerts do
       from(
         a in Alert,
         where: a.primary_service_type == "2",
-        where: fragment("date_part(?, ?)", "year", a.created_at) == ^year,
-        where: fragment("date_part(?, ?)", "month", a.created_at) == ^month,
+        where:
+          fragment("date_part(?, ?)", "year", a.created_at) == ^year or
+            fragment("date_part(?, ?)", "year", a.created_timestamp) == ^year,
+        where:
+          fragment("date_part(?, ?)", "month", a.created_at) == ^month or
+            fragment("date_part(?, ?)", "month", a.created_timestamp) == ^month,
         select: a.alert_id,
         order_by: a.created_at
       )
