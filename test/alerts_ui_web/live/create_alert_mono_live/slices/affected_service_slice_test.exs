@@ -1286,7 +1286,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     test "shows inline error when the stop selector is blurred with exactly one stop selected for suspension",
          %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _ -> [@subway_route] end, get: fn _, _ -> @subway_route end]},
+        {RoutesRepo, [],
+         [by_type: fn _ -> [@subway_route] end, get: fn _, _ -> @subway_route end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@subway_stop, @stop_2] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -1334,7 +1335,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     test "shows flash error on review attempt with exactly one stop selected for suspension",
          %{conn: conn} do
       with_mocks([
-        {RoutesRepo, [], [by_type: fn _ -> [@subway_route] end, get: fn _, _ -> @subway_route end]},
+        {RoutesRepo, [],
+         [by_type: fn _ -> [@subway_route] end, get: fn _, _ -> @subway_route end]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@subway_stop, @stop_2] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
