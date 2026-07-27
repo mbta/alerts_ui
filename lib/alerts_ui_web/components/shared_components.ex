@@ -1003,7 +1003,7 @@ defmodule AlertsUIWeb.SharedComponents do
         </option>
         {Form.options_for_select(@options, @value)}
       </select>
-      <.input_error :for={msg <- @errors}>{msg}</.input_error>
+      <.input_error :for={msg <- @errors} class="mt-2">{msg}</.input_error>
     </div>
     """
   end

@@ -184,6 +184,20 @@ Hooks.Selector = {
   }
 };
 
+// Pushes an event only when focus leaves the whole hooked element, not when
+// it merely moves between two focusable children inside it (e.g. a filter
+// text input and its listbox) — phx-blur can't express that distinction,
+// since it fires per-element rather than per-container.
+Hooks.FocusOutPush = {
+  mounted() {
+    this.el.addEventListener("focusout", (e) => {
+      if (!this.el.contains(e.relatedTarget)) {
+        this.pushEvent(this.el.dataset.focusoutEvent, {});
+      }
+    });
+  }
+};
+
 Hooks.MeasureImage = {
   mounted() {
     this.el.addEventListener("load", (event) => {

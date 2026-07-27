@@ -1313,9 +1313,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         refute render(view) =~ "Select 2 or more stops"
         refute has_element?(view, "#flash")
 
-        view
-        |> element("#alert_data_stop_names_and_ids")
-        |> render_blur()
+        assert has_element?(
+                 view,
+                 ~s(div#stop_names_and_ids_selector_wrapper[phx-hook="FocusOutPush"][data-focusout-event="stop_selector_blur"])
+               )
+
+        render_hook(view, "stop_selector_blur", %{})
 
         assert has_element?(
                  view,
