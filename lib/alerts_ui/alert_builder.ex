@@ -22,6 +22,7 @@ defmodule AlertsUI.AlertBuilder do
   alias MBTAV3API.Stops.Stop
 
   @green_line_branch_ids Routes.green_line_branch_ids()
+  @special_combo_routes_map Routes.special_combo_routes_map()
 
   @type alert_data_t :: %{
           alert_id: String.t() | nil,
@@ -470,6 +471,7 @@ defmodule AlertsUI.AlertBuilder do
       informed_entities =
         combination
         |> build_informed_entities(entity_data, Map.get(alert_data, :effect_name))
+        |> maybe_add_boat_f1()
         |> Enum.uniq()
 
       %{informed_entity: informed_entities}
@@ -502,23 +504,10 @@ defmodule AlertsUI.AlertBuilder do
     selected_routes ++ combo_routes
   end
 
-  def add_special_combo_routes(route_ids, "Boat-F2H") do
-    # adds Hingham ferry if Hingam/Hull ferry is selected
-    route_ids |> Enum.concat(["Boat-F1"])
+  def add_special_combo_routes(route_ids, route_id) do
+    added_routes = Map.get(@special_combo_routes_map, route_id, [])
+    route_ids |> Enum.concat(added_routes)
   end
-
-  def add_special_combo_routes(route_ids, "746") do
-    # adds other SL routes if SLW is selected
-    route_ids
-    |> Enum.concat(["741", "742", "743"])
-  end
-
-  def add_special_combo_routes(route_ids, route_id) when route_id in ["741", "742", "743"] do
-    # adds SLW if other SL routes are selected
-    route_ids |> Enum.concat(["746"])
-  end
-
-  def add_special_combo_routes(route_ids, _), do: route_ids
 
   defp maybe_remove_green_line_routes(routes, ["Green"], selected_stop_ids, effect)
        when effect in ["Shuttle", "Suspension"] do
@@ -549,6 +538,26 @@ defmodule AlertsUI.AlertBuilder do
 
   defp maybe_remove_green_line_routes(routes, _selected_route_ids, _selected_stop_ids, _effect) do
     routes
+  end
+
+  # Special request that Boat-F1 be added to all Boat-F2H trip entities
+  defp maybe_add_boat_f1(informed_entities) do
+    f2h_entities =
+      Enum.filter(informed_entities, fn entity -> Map.get(entity, :route_id) === "Boat-F2H" end)
+
+    added_f1_entities =
+      Enum.map(f2h_entities, fn entity ->
+        f1_entity = %{entity | route_id: "Boat-F1"}
+        f2h_trip = Map.get(entity, :trip)
+
+        if f2h_trip != nil do
+          %{f1_entity | trip: %{f2h_trip | route_id: "Boat-F1"}}
+        else
+          f1_entity
+        end
+      end)
+
+    informed_entities |> Enum.concat(added_f1_entities)
   end
 
   @spec stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
