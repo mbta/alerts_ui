@@ -11,6 +11,8 @@ defmodule AlertsUI.Jobs.RecurringAlertUpdaterTest do
       insert(:alert, %{
         alert_id: "123",
         recurrence_days: [:monday, :tuesday, :wednesday, :thursday, :friday],
+        recurrence_start_time: ~T[09:00:00],
+        recurrence_end_time: ~T[21:00:00],
         active_period: [
           build(:active_period, %{
             start: ~U[2024-10-22 13:00:00Z],
@@ -32,6 +34,8 @@ defmodule AlertsUI.Jobs.RecurringAlertUpdaterTest do
         insert(:alert, %{
           alert_id: "123",
           recurrence_days: [:monday, :tuesday, :wednesday, :thursday, :friday],
+          recurrence_start_time: ~T[09:00:00],
+          recurrence_end_time: ~T[21:00:00],
           active_period: [
             build(:active_period, %{
               start: ~U[2024-10-22 13:00:00Z],

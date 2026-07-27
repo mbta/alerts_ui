@@ -67,7 +67,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
       end
 
     service_shifted_dt =
-      DTHelpers.new_protecting_gaps!(new_date, DateTime.to_time(dt), "America/New_York")
+      DTHelpers.protect_dst_gap!(new_date, DateTime.to_time(dt), "America/New_York")
 
     Calendar.strftime(service_shifted_dt, format)
   end

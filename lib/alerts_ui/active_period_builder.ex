@@ -111,12 +111,12 @@ defmodule AlertsUI.ActivePeriodBuilder do
         %{
           start:
             date
-            |> DTHelpers.new_round_up_to_gap!(start_time, "America/New_York")
+            |> DTHelpers.round_up_to_gap!(start_time, "America/New_York")
             |> DateTime.shift_zone!("Etc/UTC"),
           end:
             date
             |> Date.add(next_day_modifier)
-            |> DTHelpers.new_round_up_to_gap!(end_time, "America/New_York")
+            |> DTHelpers.round_up_to_gap!(end_time, "America/New_York")
             |> DateTime.shift_zone!("Etc/UTC")
         }
       end)

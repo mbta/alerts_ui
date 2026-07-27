@@ -98,7 +98,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
 
   def get_recurring_start_datetime(start_date, start_time) do
     start_date
-    |> DTHelpers.new_round_up_to_gap!(start_time, "America/New_York")
+    |> DTHelpers.round_up_to_gap!(start_time, "America/New_York")
   end
 
   # one-time end
@@ -262,11 +262,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
   def get_recurring_end_datetime(end_date, end_time) do
     if Time.compare(end_time, ActivePeriod.start_of_service_time()) == :lt do
       end_date
-      |> DTHelpers.new_round_up_to_gap!(end_time, "America/New_York")
+      |> DTHelpers.round_up_to_gap!(end_time, "America/New_York")
       |> DateTime.to_naive()
     else
       end_date
-      |> DTHelpers.new_round_up_to_gap!(end_time, "America/New_York")
+      |> DTHelpers.round_up_to_gap!(end_time, "America/New_York")
       |> DateTime.add(1, :day)
       |> DateTime.to_naive()
     end

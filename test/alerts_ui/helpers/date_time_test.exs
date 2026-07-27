@@ -2,14 +2,14 @@ defmodule AlertsUI.Helpers.DateTimeTest do
   use ExUnit.Case, async: true
   alias AlertsUI.Helpers.DateTime, as: DTHelpers
 
-  describe "new_protecting_gaps!" do
+  describe "protect_dst_gap!" do
     test "with a valid date and time" do
       date = ~D[2026-03-10]
       time = ~T[11:00:00]
       zone = "America/New_York"
       expected = DateTime.new!(date, time, zone)
 
-      output = DTHelpers.new_protecting_gaps!(date, time, zone)
+      output = DTHelpers.protect_dst_gap!(date, time, zone)
 
       assert expected == output
     end
@@ -20,7 +20,7 @@ defmodule AlertsUI.Helpers.DateTimeTest do
       zone = "America/New_York"
       expected = DateTime.new!(date, ~T[03:30:00], zone)
 
-      output = DTHelpers.new_protecting_gaps!(date, time, zone)
+      output = DTHelpers.protect_dst_gap!(date, time, zone)
 
       assert expected == output
     end
@@ -30,18 +30,18 @@ defmodule AlertsUI.Helpers.DateTimeTest do
       time = ~T[02:30:00]
       zone = "LOL/Nowhere"
 
-      assert_raise RuntimeError, fn -> DTHelpers.new_protecting_gaps!(date, time, zone) end
+      assert_raise RuntimeError, fn -> DTHelpers.protect_dst_gap!(date, time, zone) end
     end
   end
 
-  describe "new_round_up_to_gap!" do
+  describe "round_up_to_gap!" do
     test "with a valid date and time" do
       date = ~D[2026-03-10]
       time = ~T[11:00:00]
       zone = "America/New_York"
       expected = DateTime.new!(date, time, zone)
 
-      output = DTHelpers.new_round_up_to_gap!(date, time, zone)
+      output = DTHelpers.round_up_to_gap!(date, time, zone)
 
       assert expected == output
     end
@@ -52,7 +52,7 @@ defmodule AlertsUI.Helpers.DateTimeTest do
       zone = "America/New_York"
       expected = DateTime.new!(date, ~T[03:00:00], zone)
 
-      output = DTHelpers.new_round_up_to_gap!(date, time, zone)
+      output = DTHelpers.round_up_to_gap!(date, time, zone)
 
       assert expected == output
     end
@@ -62,7 +62,7 @@ defmodule AlertsUI.Helpers.DateTimeTest do
       time = ~T[02:30:00]
       zone = "LOL/Nowhere"
 
-      assert_raise RuntimeError, fn -> DTHelpers.new_round_up_to_gap!(date, time, zone) end
+      assert_raise RuntimeError, fn -> DTHelpers.round_up_to_gap!(date, time, zone) end
     end
   end
 end
