@@ -43,5 +43,26 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatterTest do
                {:trip_ids, {"Select trip(s)", []}}
              ]
     end
+
+    test "handles multiple errors on the same field" do
+      changeset =
+        Alert.changeset(%Alert{}, %{
+          user: %{email: "a", first_name: "b", last_name: "c", roles: [:viewer]},
+          active_period_start: DateTime.utc_now(),
+          informed_entity: [%{route_id: "1"}]
+        })
+
+      errors = [
+        active_period_start_date: {"error_1", []},
+        active_period_start_date: {"error_2", []}
+      ]
+
+      result = ErrorFormatter.parse_field_errors(%{changeset | errors: errors}) |> Enum.sort()
+
+      assert result == [
+               {:active_period_start_date, {"error_1", []}},
+               {:active_period_start_date, {"error_2", []}}
+             ]
+    end
   end
 end
