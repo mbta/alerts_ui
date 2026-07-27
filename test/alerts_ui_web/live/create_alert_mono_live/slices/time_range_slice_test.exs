@@ -38,16 +38,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         active_period_start: ap.start,
         active_period_end: opts[:active_period_attrs][:end],
         duration_certainty: Keyword.get(opts, :duration_certainty, :UNKNOWN),
-        effect: Keyword.get(opts, :effect, :OTHER_EFFECT),
         effect_detail: Keyword.get(opts, :effect_detail, "DELAY"),
-        informed_entity: [%{route_type: 3, activities: [:BOARD]}],
-        original_route_selections: Keyword.get(opts, :original_route_selections, nil),
-        reminder_times: [],
-        severity: 4,
-        primary_service_type: "3",
-        # Keep description_text nil so description_sync_toggle stays true, preventing a
-        # crash in AlertDetailsSlice when autotext is built with %{} (pre-existing bug).
-        description_text: nil
+        original_route_selections: Keyword.get(opts, :original_route_selections, nil)
       })
 
     {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
@@ -1079,6 +1071,74 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       refute view |> render() =~ "text-text-error"
       assert view |> render() =~ "alert is manually closed"
+    end
+
+    @tag :logged_in_user
+    test "duplicating 1-time with end in past has correct defaults", %{conn: conn} do
+      params =
+        build(:alert_map, %{
+          alert_id: "123",
+          active_period: [
+            %{start: ~U[2026-06-24 14:30:54Z], end: ~U[2026-06-24 16:30:54Z]}
+          ],
+          active_period_start: ~U[2026-06-24 14:30:54Z],
+          active_period_end: ~U[2026-06-25 16:30:54Z],
+          duration_certainty: :KNOWN,
+          recurring: false,
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY"
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
+
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
+
+      assert view |> element("#alert_data_active_period_start_specifier") |> render() =~ "Now"
+
+      assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
+               "Later today"
+
+      # test that we don't now crash when we go from 1-time to recurring
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "alert_timing" => "recurring"
+        }
+      })
+
+      assert view |> element("#alert_data_active_period_start_time_specifier") |> render() =~
+               "Start of service"
+
+      assert view |> element("#alert_data_active_period_end_time_specifier") |> render() =~
+               "End of service"
+    end
+
+    @tag :logged_in_user
+    test "duplicating recurring with end in past has correct defaults", %{conn: conn} do
+      params =
+        build(:alert_map, %{
+          alert_id: "123",
+          active_period: [
+            %{start: ~U[2026-06-24 14:30:54Z], end: ~U[2026-06-24 16:30:54Z]},
+            %{start: ~U[2026-06-25 14:30:54Z], end: ~U[2026-06-25 16:30:54Z]}
+          ],
+          active_period_start: ~U[2026-06-24 14:30:54Z],
+          active_period_end: ~U[2026-06-25 16:30:54Z],
+          recurrence_days: [:tuesday, :wednesday],
+          recurring: true,
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY"
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
+
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
+
+      assert view |> element("#alert_data_active_period_start_specifier") |> render() =~ "Now"
+
+      assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
+               "When alert is closed"
     end
   end
 
