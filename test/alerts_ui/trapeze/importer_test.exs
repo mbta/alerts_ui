@@ -299,7 +299,8 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           closed_timestamp: nil,
           original_facility_selections: ["stop|123"],
           work_order_id: nil,
-          can_close_automatically: true
+          can_close_automatically: true,
+          created_at: ~U[2026-02-18 08:01:00Z]
         })
 
       result =
@@ -315,6 +316,33 @@ defmodule AlertsUI.Trapeze.ImporterTest do
       alert = Repo.reload!(existing_alert)
       assert alert.closed_timestamp == DateTime.now!("Etc/UTC") |> DateTime.truncate(:second)
       assert result == {:ok, "open -> closed: CLOSE"}
+    end
+
+    test "alert for this facility exists and can close automatically, but alert created after closed timestamp- don't close" do
+      existing_alert =
+        insert(:alert, %{
+          primary_service_type: "access",
+          effect_name: "Elevator Closure",
+          closed_timestamp: nil,
+          original_facility_selections: ["stop|123"],
+          work_order_id: nil,
+          can_close_automatically: true,
+          created_at: ~U[2026-02-20 08:01:00Z]
+        })
+
+      result =
+        Importer.persist(%{
+          primary_service_type: "access",
+          effect_name: "Elevator Closure",
+          facility_ids: ["123"],
+          work_order_id: "TESTORDER1",
+          closed_timestamp: ~U[2026-02-19 08:01:00Z],
+          status: :closed
+        })
+
+      alert = Repo.reload!(existing_alert)
+      assert is_nil(alert.closed_timestamp)
+      assert result == {:ok, "open -> open: IGNORE can't close automatically"}
     end
 
     test "alert for this facility exists but can't close automatically, ignore it" do
@@ -343,12 +371,13 @@ defmodule AlertsUI.Trapeze.ImporterTest do
       assert result == {:ok, "open -> open: IGNORE can't close automatically"}
     end
 
-    test "alert does exist, and closed_timestamp exists, save it" do
+    test "alert does exist, and closed_timestamp exists, close it" do
       existing_alert =
         insert(:alert, %{
           work_order_id: "TESTORDER1",
           closed_timestamp: nil,
-          can_close_automatically: true
+          can_close_automatically: true,
+          created_at: ~U[2026-02-18 08:01:00Z]
         })
 
       result =
@@ -362,8 +391,32 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         })
 
       alert = Repo.reload!(existing_alert)
-      assert alert.closed_timestamp != nil
+      refute is_nil(alert.closed_timestamp)
       assert result == {:ok, "open -> closed: CLOSE"}
+    end
+
+    test "alert does exist, and closed_timestamp exists, but alert was created after closed timestamp- don't close" do
+      existing_alert =
+        insert(:alert, %{
+          work_order_id: "TESTORDER1",
+          closed_timestamp: nil,
+          can_close_automatically: true,
+          created_at: ~U[2026-02-20 08:01:00Z]
+        })
+
+      result =
+        Importer.persist(%{
+          primary_service_type: "access",
+          effect_name: "Elevator Closure",
+          original_facility_selections: ["stop|123"],
+          work_order_id: "TESTORDER1",
+          closed_timestamp: ~U[2026-02-19 08:01:00Z],
+          status: :closed
+        })
+
+      alert = Repo.reload!(existing_alert)
+      assert is_nil(alert.closed_timestamp)
+      assert result == {:ok, "open -> open: IGNORE can't close automatically"}
     end
 
     test "alert does not exist, but closed_timestamp is nil, save it" do
