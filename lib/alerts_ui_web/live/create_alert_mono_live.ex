@@ -251,11 +251,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("review", _params, socket) do
-    # if valid:
-    #   live navigate to `?review=true`, opening the modal
-    # else:
-    #   open error flash
-
+    # starts review process
+    # shows error flash if errors
+    # otherwise shows warning modals
     alert_data = Map.merge(socket.assigns.form.source.data, socket.assigns.form.source.changes)
 
     autotext_data = AlertDetailsSlice.autotext_map(alert_data, socket.assigns)
@@ -269,6 +267,31 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         check_trip_end: false
       })
       |> sync_socket(%{"alert_data" => autotext_data})
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("open_review_modal", _params, %{assigns: assigns} = socket) do
+    # actually opens the review modal
+    effect_name = assigns.form[:effect_name].value
+
+    path_route_type =
+      assigns[:path_route_type] || PathHelper.path_route_type_from_socket(socket)
+
+    path =
+      PathHelper.path_with_route_type_and_effect_name(
+        %{assigns | path_route_type: path_route_type},
+        effect_name
+      ) <> "?review=true"
+
+    socket =
+      socket
+      |> assign(
+        check_predictions: false,
+        check_trip_end: false
+      )
+      |> push_patch(to: path)
 
     {:noreply, socket}
   end
@@ -311,26 +334,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_event("check_predictions", params, socket) do
-    # form data with properly capitalized effect name
-    alert_data =
-      socket.assigns.form.data
-      |> Map.put(:effect_name, PathHelper.effect_from_url_name(socket.assigns.path_effect_name))
-
-    show_prediction_warning? = PredictionSuppressionWarningModal.show_warning?(alert_data)
-
-    if show_prediction_warning? do
-      {:noreply,
-       assign(socket, %{
-         check_predictions: true
-       })}
-    else
-      handle_event("check_for_trip_warnings", params, socket)
-    end
-  end
-
-  @impl true
-  def handle_event("check_for_trip_warnings", params, socket) do
+  def handle_event(
+        "check_for_trip_warnings",
+        _params,
+        %LiveView.Socket{assigns: %{} = assigns} = socket
+      ) do
     alert_data =
       socket.assigns.form.data
 
@@ -354,7 +362,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
          check_trip_end: true
        })}
     else
-      handle_event("review", params, socket)
+      effect_name = assigns.form[:effect_name].value
+
+      path_route_type =
+        assigns[:path_route_type] || PathHelper.path_route_type_from_socket(socket)
+
+      path =
+        PathHelper.path_with_route_type_and_effect_name(
+          %{assigns | path_route_type: path_route_type},
+          effect_name
+        ) <> "?review=true"
+
+      {:noreply,
+       socket
+       |> assign(:submitting?, false)
+       |> push_patch(to: path)}
     end
   end
 
@@ -372,6 +394,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("cancel_review", _params, socket) do
     effect_name = socket.assigns.path_effect_name
     path = PathHelper.path_with_route_type_and_effect_name(socket.assigns, effect_name)
+
+    socket =
+      assign(socket,
+        check_predictions: false,
+        check_trip_end: false
+      )
+
     {:noreply, push_patch(socket, to: path)}
   end
 
@@ -392,6 +421,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_event("cancelled_gtfs_modal", _params, socket) do
     {:noreply, socket |> redirect(to: return_to(socket.assigns.return_to || "/"))}
+  end
+
+  def check_predictions(params, socket) do
+    # form data with properly capitalized effect name
+    alert_data =
+      socket.assigns.form.data
+      |> Map.put(:effect_name, PathHelper.effect_from_url_name(socket.assigns.path_effect_name))
+
+    show_prediction_warning? = PredictionSuppressionWarningModal.show_warning?(alert_data)
+
+    if show_prediction_warning? do
+      assign(socket, %{
+        check_predictions: true
+      })
+    else
+      {_, socket} = handle_event("check_for_trip_warnings", params, socket)
+      socket
+    end
   end
 
   @impl true
@@ -634,26 +681,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   event handler.
   """
   @spec sync_socket(LiveView.Socket.t(), map()) :: LiveView.Socket.t()
-  def sync_socket(socket, params \\ %{})
-
   def sync_socket(%LiveView.Socket{assigns: %{} = assigns} = socket, params) do
     case AlertData.sync(assigns.form.source, socket, params) do
       {:ok, socket} ->
         if assigns.submitting? do
-          effect_name = assigns.form[:effect_name].value
-
-          path_route_type =
-            assigns[:path_route_type] || PathHelper.path_route_type_from_socket(socket)
-
-          path =
-            PathHelper.path_with_route_type_and_effect_name(
-              %{assigns | path_route_type: path_route_type},
-              effect_name
-            ) <> "?review=true"
-
-          socket
-          |> assign(:submitting?, false)
-          |> push_patch(to: path)
+          socket = assign(socket, :submitting?, false)
+          check_predictions(params, socket)
         else
           socket
         end

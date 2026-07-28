@@ -81,7 +81,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
       <TripEndWarningModal.trip_end_warning_modal
         :if={@check_trip_end}
         cancel_event_name="dismiss_trip_end_warning"
-        accept_event_name="review"
+        accept_event_name="open_review_modal"
         target_id="#submit_view"
       />
       <ReviewModal.review_modal
@@ -133,7 +133,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         :if={@progress.name == "details"}
         class="mt-8 ml-2 self-center"
         name="review"
-        phx-click="check_predictions"
+        phx-click="review"
         type="button"
         id="review"
       >
