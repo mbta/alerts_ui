@@ -4,9 +4,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   """
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
   alias AlertsUIWeb.CreateAlertMonoLive.ServiceSliceDispatcher
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.FormComponents.Helpers.AlertData, as: OldAlertData
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AlertDetailsSlice,
@@ -30,12 +31,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   import Component, only: [assign: 3, to_form: 1]
 
-  import AlertsUIWeb.FormComponents.Helpers.AlertData, only: [build_alert_data: 2]
-
   import AlertsUIWeb.FormComponents.Helpers.ErrorFormatter,
     only: [parse_field_errors: 1]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     only: [combination_for: 2, combination_for: 3]
 
   @combination_values [:ACCESS, :R, :RDS, :RDT, :RDTS, :SR]
@@ -246,10 +245,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     base_params =
       alert
       |> Repo.preload([:informed_entity, :reminder_times])
-      |> build_alert_data(form_type)
+      |> OldAlertData.build_alert_data(form_type)
       |> Map.from_struct()
       |> Map.put(:alert_id, alert.alert_id)
-      |> alert_data_v1_to_v2()
+      |> AlertDataHelpers.atomize_fields()
+      |> AlertDataHelpers.normalize_effect_name()
+      |> set_sync_toggles()
 
     base = struct(__MODULE__, base_params)
 
@@ -408,84 +409,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     |> Enum.reject(&(&1 in @uncastable_fields))
   end
 
-  def alert_data_v1_to_v2(v1_alert_data) do
-    v1_alert_data
-    |> atomize_fields()
-    |> normalize_effect_name()
-    |> set_sync_toggles()
-  end
-
-  def alert_data_v2_to_v1(v2_alert_data) do
-    v2_alert_data
-    |> atomize_fields()
-    |> strip_banner_text_unless_enabled()
-    |> strip_recurrence_days_if_one_time()
-  end
-
   defp keep_non_nil(_key, v1, v2), do: if(is_nil(v2), do: v1, else: v2)
-
-  def normalize_effect_name(alert_data) do
-    normalized =
-      case Map.get(alert_data, :effect_name) do
-        nil ->
-          nil
-
-        effect_name ->
-          effect_name
-          |> String.split(" ")
-          |> Enum.map_join("_", &String.downcase(&1))
-      end
-
-    Map.put(alert_data, :effect_name, normalized)
-  end
-
-  @atomized_fields [
-    :active_period_start_specifier,
-    :active_period_start_time_specifier,
-    :active_period_end_specifier,
-    :active_period_end_time_specifier,
-    :notification_specifier,
-    :recurrence_days
-  ]
-
-  defp atomize_fields(%AlertData{} = alert_data) do
-    alert_data
-    |> Map.from_struct()
-    |> atomize_fields()
-  end
-
-  defp atomize_fields(alert_data) when is_map(alert_data) do
-    for {key, value} <- alert_data, into: %{} do
-      value =
-        if Enum.member?(@atomized_fields, key) do
-          atomize_field(value)
-        else
-          value
-        end
-
-      {key, value}
-    end
-  end
-
-  defp atomize_field(value) when is_list(value) do
-    Enum.map(value, &atomize_field/1)
-  end
-
-  defp atomize_field(value) do
-    case value do
-      value when is_binary(value) -> String.to_existing_atom(value)
-      value when is_atom(value) -> value
-    end
-  end
-
-  # I know we have a fix for this in PR but I need it done now
-  defp strip_recurrence_days_if_one_time(alert_data) do
-    if alert_data.alert_timing in [:"one-time", "one-time"] do
-      Map.put(alert_data, :recurrence_days, [])
-    else
-      alert_data
-    end
-  end
 
   defp set_sync_toggles(alert_data) do
     toggle_data =
@@ -522,14 +446,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   defp toggle_text_key(:header), do: :header_text
   defp toggle_text_key(:description), do: :description_text
   defp toggle_text_key(:banner), do: :banner_text
-
-  defp strip_banner_text_unless_enabled(v2_alert_data) do
-    if v2_alert_data.view_banner do
-      v2_alert_data
-    else
-      Map.drop(v2_alert_data, [:banner_text])
-    end
-  end
 
   # When a multiselect field is fully deselected, browsers omit it from form
   # submissions entirely. Ecto's cast then skips the field, leaving the prior

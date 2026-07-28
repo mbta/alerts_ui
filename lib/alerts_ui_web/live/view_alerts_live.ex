@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert}
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData, as: AlertDataMono
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
   alias AlertsUIWeb.FormComponents.Helpers.{AlertData, DateTimeFormatters, DateTimeHelpers}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
   alias AlertsUIWeb.UserHelpers
@@ -324,7 +324,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       alert_id
       |> Integer.to_string()
       |> AlertData.build_alert_data()
-      |> AlertDataMono.normalize_effect_name()
+      |> AlertDataHelpers.normalize_effect_name()
 
     {:noreply,
      assign(socket,

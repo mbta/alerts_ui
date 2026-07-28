@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   alias AlertsUI.Models.ActivePeriod
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     only: [put_over_nil: 3, values_to_options: 1]
 
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText

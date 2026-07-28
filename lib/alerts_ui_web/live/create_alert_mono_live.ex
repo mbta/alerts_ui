@@ -62,7 +62,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   alias Phoenix.LiveView
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
 
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
 
@@ -731,7 +731,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
     alert_params =
       alert_data
-      |> AlertData.alert_data_v2_to_v1()
+      |> AlertDataHelpers.atomize_fields()
+      |> AlertDataHelpers.strip_banner_text_unless_enabled()
+      |> AlertDataHelpers.strip_recurrence_days_if_one_time()
       |> AlertBuilder.build_alert(alert_data.combination)
 
     existing_alert =

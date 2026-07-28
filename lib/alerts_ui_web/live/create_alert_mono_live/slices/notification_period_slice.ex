@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
 
   import Ecto.Changeset
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     only: [put_over_nil: 3, values_to_options: 1]
 
   @notification_values [

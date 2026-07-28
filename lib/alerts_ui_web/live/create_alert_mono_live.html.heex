@@ -11,21 +11,21 @@
     <article class="flex flex-col items-center justify-center w-[100%]">
       <div class="w-full">
         <UrlSlice.render
-          :if={!show_details?(@form)}
+          :if={!AlertDataHelpers.show_details?(@form)}
           alert_id={@alert_id}
           path_route_type={@path_route_type}
           path_effect_name={@path_effect_name}
         />
         <.form
-          :if={show_details?(@form)}
+          :if={AlertDataHelpers.show_details?(@form)}
           for={@form}
           id="alert_form"
           class="form-control flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]"
           phx-change="validate"
         >
           <Title.render
-            route_type_name={humanize_route_type(@form)}
-            effect_name={humanize_effect_name(@form)}
+            route_type_name={AlertDataHelpers.humanize_route_type(@form)}
+            effect_name={AlertDataHelpers.humanize_effect_name(@form)}
             icon_name=""
           />
           <ServiceSliceDispatcher.render

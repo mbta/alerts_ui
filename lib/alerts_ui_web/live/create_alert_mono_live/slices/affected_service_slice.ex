@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   import Phoenix.LiveView, only: [push_event: 3, start_async: 3]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     only: [get_single_route_effect_names: 0, humanize_effect_name: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,

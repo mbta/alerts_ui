@@ -8,7 +8,7 @@ defmodule AlertsUIWeb.ReviewModal do
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     only: [humanize_effect_name: 2, display_alert_timing: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Value,
