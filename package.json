@@ -1,0 +1,18 @@
+{
+  "name": "alerts_ui",
+  "version": "1.0.0",
+  "description": "A UI for creating and modifying alerts",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "@types/node": "^26.1.2"
+  }
+}

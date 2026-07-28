@@ -45,9 +45,24 @@ may need to adjust the username in `.envrc`.
 If not using `direnv`, you can instead `source .envrc` to perform a one-time
 export of the environment variables into your current shell session.
 
-### Running tests
+Install playwright:
+1. `npm install`
+1. `npm playwright install`
+
+When installing playwright and trying to download the browsers, you may run into an error `UNABLE_TO_GET_ISSUER_CERT_LOCALLY` if you are using Zscaler. To work around this, on OSX, you can:
+1. Open the Keychain Access app
+1. At the bottom, you should see `Zscaler Root CA`. 
+1. Right click and export as a `.pem` file and save 
+1. `export NODE_EXTRA_CA_CERTS="/path/to/zscaler.pem"`, then try `npm playwright install` again.
+
+
+### Running unit tests
 
 - `mix test`
+
+### Running playwright tests
+
+- `npx playwright test`
 
 ## Development
 
