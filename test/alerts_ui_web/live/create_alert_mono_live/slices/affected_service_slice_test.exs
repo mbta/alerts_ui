@@ -86,6 +86,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       arrival_time: DateTime.add(@boat_f1_schedule_1.arrival_time, 2, :hour)
   }
 
+  @boat_f2h_schedule_1 %Schedule{
+    stop: %Stop{id: "Boat-George", name: "Georges Island"},
+    departure_time: @two_hours_from_now,
+    arrival_time: DateTime.add(@two_hours_from_now, 30, :minute),
+    trip: %Trip{
+      id: "Boat-F2H-1440-Long-F2H-B-PM-Weekday-GeorgesIsland-Summer-26",
+      name: "",
+      direction_id: 0
+    },
+    route: %Route{id: "Boat-F2H", type: 4, name: "Hingham/Hull Ferry"},
+    added_route_ids: []
+  }
+
+  @boat_f2h_schedule_2 %{
+    @boat_f2h_schedule_1
+    | departure_time: DateTime.add(@boat_f2h_schedule_1.departure_time, 2, :hour),
+      arrival_time: DateTime.add(@boat_f2h_schedule_1.arrival_time, 2, :hour)
+  }
+
   defp base_changeset(attrs) do
     Ecto.Changeset.cast(
       %AlertData{},
@@ -2422,6 +2441,79 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
             trip: %{trip_id: "SWKDYWCPeriod-831443-1775"}
           }
         ] = new_alert.informed_entity
+      end
+    end
+
+    @tag :logged_in_user
+    test "Boat-F2H alerts with trips should include Boat-F1 informed entities", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@boat_f1, @boat_f2h] end,
+           by_type: fn _, _ -> [@boat_f1, @boat_f2h] end,
+           get: fn _, _ -> @boat_f2h end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ -> [@boat_f2h_schedule_1, @boat_f2h_schedule_2] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@boat_f2h_schedule_1.stop] end,
+           all: fn
+             ["filter[id]": ""], _ ->
+               []
+           end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _, _ -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Ferry", "Delay")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@boat_f2h_schedule_1.route.id]}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "trip_ids"],
+          "alert_data" => %{"trip_ids" => [@boat_f2h_schedule_1.trip.id]}
+        })
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        new_alert = parse_alert_created_output(view)
+
+        [
+          %{
+            route_id: "Boat-F2H",
+            stop_id: nil,
+            trip: %{
+              route_id: "Boat-F2H",
+              trip_id: "Boat-F2H-1440-Long-F2H-B-PM-Weekday-GeorgesIsland-Summer-26"
+            }
+          },
+          %{
+            route_id: "Boat-F1",
+            stop_id: nil,
+            trip: %{
+              route_id: "Boat-F1",
+              trip_id: "Boat-F2H-1440-Long-F2H-B-PM-Weekday-GeorgesIsland-Summer-26"
+            }
+          }
+        ] =
+          new_alert.informed_entity
       end
     end
   end
