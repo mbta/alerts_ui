@@ -8,7 +8,7 @@ defmodule AlertsUIWeb.ReviewModal do
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     only: [humanize_effect_name: 2, display_alert_timing: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Value,
@@ -400,7 +400,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <.link
             :if={@alert_id}
             class="text-primary hover:text-primary-hover hover:underline"
-            href={~p"/download_history?alert_id=#{@alert_id}"}
+            href={~p"/download_history/download?alert_id=#{@alert_id}"}
             target="_blank"
           >
             <.icon name="hero-document-arrow-down-solid" class="w-4 h-4" /> Download history

@@ -5,6 +5,7 @@ defmodule AlertsUI.Alerts do
   import Ecto.Changeset
   import Ecto.Query
   alias AlertsUI.DBContexts.Users
+  alias AlertsUI.Helpers.DateTime, as: DTHelpers
   alias AlertsUI.Models.{ActivePeriod, Alert, User}
   alias AlertsUI.Repo
   alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
@@ -125,18 +126,21 @@ defmodule AlertsUI.Alerts do
   def update_recurring_active_periods(alert, current_time \\ DateTime.utc_now())
 
   def update_recurring_active_periods(
-        %{active_period: [_ | _], recurrence_days: [_ | _]} = alert,
+        %{
+          active_period: [_ | _],
+          recurrence_days: [_ | _],
+          recurrence_start_time: recurrence_start_time,
+          recurrence_end_time: recurrence_end_time
+        } = alert,
         current_time
       ) do
-    %{start: last_ap_start, end: last_ap_end} = alert.active_period |> Enum.reverse() |> hd
+    %{start: last_ap_start, end: _last_ap_end} = alert.active_period |> Enum.reverse() |> hd
     weekday_integers = Enum.map(alert.recurrence_days, &Timex.day_to_num/1)
 
     last_ap_start_date = DateTime.to_date(last_ap_start)
 
     next_day_modifier =
-      if Date.compare(DateTime.to_date(last_ap_end), last_ap_start_date) == :gt,
-        do: 1,
-        else: 0
+      if Time.before?(recurrence_start_time, recurrence_end_time), do: 0, else: 1
 
     last_ap_start
     |> DateTime.to_date()
@@ -147,11 +151,19 @@ defmodule AlertsUI.Alerts do
       %{
         start:
           date
-          |> DateTime.new!(DateTime.to_time(last_ap_start)),
+          |> DTHelpers.round_up_to_gap!(
+            recurrence_start_time,
+            "America/New_York"
+          )
+          |> DateTime.shift_zone!("Etc/UTC"),
         end:
           date
           |> Date.add(next_day_modifier)
-          |> DateTime.new!(DateTime.to_time(last_ap_end))
+          |> DTHelpers.round_up_to_gap!(
+            recurrence_end_time,
+            "America/New_York"
+          )
+          |> DateTime.shift_zone!("Etc/UTC")
       }
     end)
     |> Enum.map(fn active_period_params ->
@@ -238,6 +250,24 @@ defmodule AlertsUI.Alerts do
           active_period: ^active_period_preload_query(),
           informed_entity: [:trip]
         ]
+      )
+    )
+  end
+
+  @spec list_a_month_of_commuter_rail(integer(), integer()) :: [Alert.t()]
+  def list_a_month_of_commuter_rail(month, year) when is_integer(month) and is_integer(year) do
+    Repo.all(
+      from(
+        a in Alert,
+        where: a.primary_service_type == "2",
+        where:
+          fragment("date_part(?, ?)", "year", a.created_at) == ^year or
+            fragment("date_part(?, ?)", "year", a.created_timestamp) == ^year,
+        where:
+          fragment("date_part(?, ?)", "month", a.created_at) == ^month or
+            fragment("date_part(?, ?)", "month", a.created_timestamp) == ^month,
+        select: a.alert_id,
+        order_by: a.created_at
       )
     )
   end

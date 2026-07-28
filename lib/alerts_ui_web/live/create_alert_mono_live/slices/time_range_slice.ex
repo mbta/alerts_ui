@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   alias AlertsUI.Models.ActivePeriod
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     only: [put_over_nil: 3, values_to_options: 1]
 
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText
@@ -70,7 +70,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       |> put_over_nil(:active_period_end_specifier, end_specifier)
       |> put_over_nil(:active_period_end_time_specifier, :end_of_service)
       |> put_over_nil(:recurrence_days, [])
-      |> update_times_if_duplicating(slice.form_type, slice.alert_timing, now, alert)
+      |> update_times_if_duplicating(slice.form_type, now, alert)
       |> sync_can_close_automatically()
     end
 
@@ -165,19 +165,35 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
     defp ensure_atom(potential_atom), do: potential_atom
 
-    def update_times_if_duplicating(slice, _, :recurring, _, _), do: slice
-
-    def update_times_if_duplicating(%{active_period_end: nil} = slice, :duplicating, _, _, _) do
+    def update_times_if_duplicating(%{active_period_end: nil} = slice, :duplicating, _, _) do
       slice
     end
 
-    def update_times_if_duplicating(slice, :duplicating, _, now, alert) do
+    def update_times_if_duplicating(
+          %{alert_timing: :recurring} = slice,
+          :duplicating,
+          now,
+          _alert
+        ) do
       if NaiveDateTime.compare(now, slice.active_period_end) in [:eq, :gt] do
         Map.merge(slice, %{
           active_period_start_specifier: :now,
-          active_period_start_time_specifier: :now,
+          active_period_end_specifier: :until_further_notice,
+          active_period_start_time_specifier: :custom,
+          active_period_end_time_specifier: :custom,
+          active_period_start: now,
+          active_period_end: nil
+        })
+      else
+        slice
+      end
+    end
+
+    def update_times_if_duplicating(slice, :duplicating, now, alert) do
+      if NaiveDateTime.compare(now, slice.active_period_end) in [:eq, :gt] do
+        Map.merge(slice, %{
+          active_period_start_specifier: :now,
           active_period_end_specifier: duplicate_end_specifier(alert),
-          active_period_end_time_specifier: :later_today,
           active_period_start: now
         })
       else
@@ -185,7 +201,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       end
     end
 
-    def update_times_if_duplicating(slice, _, _, _, _), do: slice
+    def update_times_if_duplicating(slice, _, _, _), do: slice
 
     # Elevator/escalator alerts close when the work order closes, so duplicating a past
     # one mirrors the create flow's auto-selected end specifier instead of "later today".

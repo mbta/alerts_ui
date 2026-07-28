@@ -20,7 +20,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   import AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect,
     only: [get_value_of_key: 3]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     only: [humanize_effect_name: 2, list_effect_path_names: 1]
 
   defstruct [

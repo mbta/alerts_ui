@@ -65,10 +65,18 @@ defmodule AlertsUIWeb.Router do
   # Viewers
   scope "/", AlertsUIWeb do
     # Authenticated pages
-    pipe_through [:redirect_prod_http, :browser, :require_authenticated_user, :require_viewer]
+    pipe_through [
+      :redirect_prod_http,
+      :browser,
+      :static_layout,
+      :require_authenticated_user,
+      :require_viewer
+    ]
 
     get "/", Redirector, to: "/alerts"
-    get "/download_history", DownloadHistoryController, :export
+    get "/download_history", DownloadHistoryController, :index
+    get "/download_history/download", DownloadHistoryController, :export
+    post "/download_history/download", DownloadHistoryController, :export_bulk
 
     live_session :require_authenticated_user,
       on_mount: [

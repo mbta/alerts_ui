@@ -38,16 +38,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         active_period_start: ap.start,
         active_period_end: opts[:active_period_attrs][:end],
         duration_certainty: Keyword.get(opts, :duration_certainty, :UNKNOWN),
-        effect: Keyword.get(opts, :effect, :OTHER_EFFECT),
         effect_detail: Keyword.get(opts, :effect_detail, "DELAY"),
-        informed_entity: [%{route_type: 3, activities: [:BOARD]}],
-        original_route_selections: Keyword.get(opts, :original_route_selections, nil),
-        reminder_times: [],
-        severity: 4,
-        primary_service_type: "3",
-        # Keep description_text nil so description_sync_toggle stays true, preventing a
-        # crash in AlertDetailsSlice when autotext is built with %{} (pre-existing bug).
-        description_text: nil
+        original_route_selections: Keyword.get(opts, :original_route_selections, nil)
       })
 
     {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
@@ -1080,6 +1072,74 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       refute view |> render() =~ "text-text-error"
       assert view |> render() =~ "alert is manually closed"
     end
+
+    @tag :logged_in_user
+    test "duplicating 1-time with end in past has correct defaults", %{conn: conn} do
+      params =
+        build(:alert_map, %{
+          alert_id: "123",
+          active_period: [
+            %{start: ~U[2026-06-24 14:30:54Z], end: ~U[2026-06-24 16:30:54Z]}
+          ],
+          active_period_start: ~U[2026-06-24 14:30:54Z],
+          active_period_end: ~U[2026-06-25 16:30:54Z],
+          duration_certainty: :KNOWN,
+          recurring: false,
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY"
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
+
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
+
+      assert view |> element("#alert_data_active_period_start_specifier") |> render() =~ "Now"
+
+      assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
+               "Later today"
+
+      # test that we don't now crash when we go from 1-time to recurring
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "alert_timing" => "recurring"
+        }
+      })
+
+      assert view |> element("#alert_data_active_period_start_time_specifier") |> render() =~
+               "Start of service"
+
+      assert view |> element("#alert_data_active_period_end_time_specifier") |> render() =~
+               "End of service"
+    end
+
+    @tag :logged_in_user
+    test "duplicating recurring with end in past has correct defaults", %{conn: conn} do
+      params =
+        build(:alert_map, %{
+          alert_id: "123",
+          active_period: [
+            %{start: ~U[2026-06-24 14:30:54Z], end: ~U[2026-06-24 16:30:54Z]},
+            %{start: ~U[2026-06-25 14:30:54Z], end: ~U[2026-06-25 16:30:54Z]}
+          ],
+          active_period_start: ~U[2026-06-24 14:30:54Z],
+          active_period_end: ~U[2026-06-25 16:30:54Z],
+          recurrence_days: [:tuesday, :wednesday],
+          recurring: true,
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY"
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
+
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
+
+      assert view |> element("#alert_data_active_period_start_specifier") |> render() =~ "Now"
+
+      assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
+               "When alert is closed"
+    end
   end
 
   describe "trip selection" do
@@ -1837,6 +1897,115 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       |> render_change(%{"alert_data" => %{"recurrence_days" => []}})
 
       assert has_element?(view, "input#wednesday[checked]")
+    end
+  end
+
+  describe "form survives deleting time value" do
+    @tag :logged_in_user
+    test "recurring alert, clear custom start time → form must not crash", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+
+      # Navigate to the Alert Details step: Subway / Delay
+      view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
+
+      # Switch to recurring timing
+      view
+      |> element("form")
+      |> render_change(%{
+        "_target" => ["alert_data", "alert_timing"],
+        "alert_data" => %{"alert_timing" => "recurring"}
+      })
+
+      # Set start time specifier to custom (reveals the time input)
+      view
+      |> element("form")
+      |> render_change(%{
+        "_target" => ["alert_data", "active_period_start_time_specifier"],
+        "alert_data" => %{
+          "alert_timing" => "recurring",
+          "active_period_start_time_specifier" => "custom"
+        }
+      })
+
+      # Now clear the time value (simulates the user deleting the minutes component).
+      # Before the fix, this caused a FunctionClauseError crash in the LiveView.
+      html =
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "active_period_start_time"],
+          "alert_data" => %{
+            "alert_timing" => "recurring",
+            "active_period_start_time_specifier" => "custom",
+            "active_period_start_time" => ""
+          }
+        })
+
+      # If render_change raised, the test would already have failed.
+      # The form must still contain alert_data fields (not crashed/replaced with an error page).
+      # render_change returns the partial form HTML; layout flash elements are not included.
+      assert html =~ "alert_data",
+             "form should still be rendered after clearing start time; got: #{String.slice(html, 0, 200)}"
+
+      refute html =~ "Internal Server Error",
+             "form must not show a server error response after clearing start time"
+
+      # Also verify the time range section is still present (form hasn't collapsed)
+      assert html =~ "time_range" or html =~ "active_period",
+             "time range section should still be rendered in the form"
+    end
+
+    @tag :logged_in_user
+    test "one-time alert, clear custom start, switch to recurring → form must not crash",
+         %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+
+      view = get_to_submission_page_refactor(conn, view, "Subway", "Delay")
+
+      # Set one-time start specifier to custom (reveals the datetime-local input)
+      view
+      |> element("form")
+      |> render_change(%{
+        "_target" => ["alert_data", "active_period_start_specifier"],
+        "alert_data" => %{
+          "alert_timing" => "one-time",
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      # Clear the one-time start datetime (simulates deleting the time portion)
+      view
+      |> element("form")
+      |> render_change(%{
+        "_target" => ["alert_data", "active_period_start"],
+        "alert_data" => %{
+          "alert_timing" => "one-time",
+          "active_period_start_specifier" => "custom",
+          "active_period_start" => ""
+        }
+      })
+
+      # Switch to recurring — before the fix, this caused the crash
+      html =
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "alert_timing"],
+          "alert_data" => %{
+            "alert_timing" => "recurring",
+            "active_period_start_specifier" => "custom",
+            "active_period_start" => ""
+          }
+        })
+
+      assert html =~ "alert_data",
+             "form should still be rendered after clearing one-time start then switching to recurring"
+
+      refute html =~ "Internal Server Error",
+             "form must not show a server error response after the timing switch"
+
+      assert html =~ "time_range" or html =~ "active_period",
+             "time range section should still be rendered in the form"
     end
   end
 end

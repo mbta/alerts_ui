@@ -720,6 +720,70 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "it correctly adds combo ids for Boat-F8 alerts" do
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn
+             "Boat-F8", [include: "representative_trip.stops,route"] ->
+               [%APIRoutePattern{id: "1", direction_id: 0, stops: [], route_id: nil}]
+
+             _id, [include: "representative_trip.stops,route"] ->
+               [%APIRoutePattern{id: "1", direction_id: 0, stops: [], route_id: nil}]
+           end
+         ]},
+        {RoutesRepo, [],
+         [
+           get: fn
+             id, _opts ->
+               %Route{
+                 id: id,
+                 type: 4,
+                 name: id
+               }
+           end
+         ]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
+      ]) do
+        alert_data = %{
+          route_type: 4,
+          description_text: "ok",
+          header_text: "hello",
+          effect_name: "Delay",
+          direction: "default",
+          route_ids: ["Boat-F8"],
+          stop_ids: [],
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end_specifier: :until_further_notice,
+          active_period_start_specifier: :custom,
+          cause_detail: ""
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])
+
+        assert result.informed_entity == [
+                 %{
+                   agency_id: "1",
+                   route_id: "Boat-F8",
+                   route_type: 4,
+                   activities: [:BOARD, :EXIT, :RIDE]
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Boat-F6",
+                   route_type: 4,
+                   agency_id: "1"
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   route_id: "Boat-F7",
+                   route_type: 4,
+                   agency_id: "1"
+                 }
+               ]
+      end
+    end
+
     test "it does not add combo IDs for the green line" do
       with_mocks([
         {RoutePatternsRepo, [],

@@ -11,7 +11,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertData,
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     only: [get_single_facility_effect_names: 0, humanize_effect_name: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,

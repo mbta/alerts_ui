@@ -401,6 +401,8 @@ defmodule AlertsUI.AlertsTest do
         insert(:alert, %{
           alert_id: "123",
           recurrence_days: [:monday, :tuesday, :wednesday, :thursday, :friday],
+          recurrence_start_time: ~T[09:00:00],
+          recurrence_end_time: ~T[12:00:00],
           active_period: [
             build(:active_period, %{
               start: ~U[2024-10-21 13:00:00Z],
@@ -427,11 +429,57 @@ defmodule AlertsUI.AlertsTest do
       assert [~U[2024-10-24 13:00:00Z], ~U[2024-10-24 16:00:00Z]] = [ap_4.start, ap_4.end]
     end
 
+    test "handles daylight savings time conversions so times stay the same for eastern timezone" do
+      alert =
+        insert(:alert, %{
+          alert_id: "123",
+          recurrence_days: [:monday, :tuesday, :wednesday, :thursday, :friday, :saturday, :sunday],
+          recurrence_start_time: ~T[08:00:00],
+          recurrence_end_time: ~T[02:30:00],
+          active_period: [
+            build(:active_period, %{
+              start: ~U[2027-03-12 13:00:00Z],
+              end: ~U[2027-03-13 07:30:00Z]
+            })
+          ],
+          active_period_end: nil
+        })
+
+      Alerts.update_recurring_active_periods(alert, ~U[2026-03-14 13:00:00Z])
+
+      [first_ap, second_ap, last_ap] = Alerts.get_by_alert_id("123").active_period
+
+      # this is the original one, hasn't been modified. I have it here to make it easy to compare to the others
+      # dates are in ISO for readability
+      assert first_ap.start |> DateTime.shift_zone!("America/New_York") |> DateTime.to_iso8601() ==
+               "2027-03-12T08:00:00-05:00"
+
+      assert first_ap.end |> DateTime.shift_zone!("America/New_York") |> DateTime.to_iso8601() ==
+               "2027-03-13T02:30:00-05:00"
+
+      # this is the day of daylight savings time. End has been rounded up to the end of the "gap".
+      assert second_ap.start |> DateTime.shift_zone!("America/New_York") |> DateTime.to_iso8601() ==
+               "2027-03-13T08:00:00-05:00"
+
+      assert second_ap.end |> DateTime.shift_zone!("America/New_York") |> DateTime.to_iso8601() ==
+               "2027-03-14T03:00:00-04:00"
+
+      # the time is the same but the timezone has been shifted. still starts at "8am" from the perspective
+      # of someone in the eastern time zone.
+      assert last_ap.start |> DateTime.shift_zone!("America/New_York") |> DateTime.to_iso8601() ==
+               "2027-03-14T08:00:00-04:00"
+
+      assert last_ap.end |> DateTime.shift_zone!("America/New_York") |> DateTime.to_iso8601() ==
+               "2027-03-15T02:30:00-04:00"
+    end
+
     test "adds more active periods to end of recurring alert when start and end are different days" do
       alert =
         insert(:alert, %{
           alert_id: "123",
           recurrence_days: [:monday, :tuesday, :wednesday, :thursday, :friday],
+          recurrence_start_time: ~T[09:00:00],
+          recurrence_end_time: ~T[21:00:00],
           active_period: [
             build(:active_period, %{
               start: ~U[2024-10-22 13:00:00Z],
@@ -521,6 +569,8 @@ defmodule AlertsUI.AlertsTest do
         insert(:alert, %{
           alert_id: "123",
           recurrence_days: [:monday, :tuesday, :wednesday],
+          recurrence_start_time: ~T[09:00:00],
+          recurrence_end_time: ~T[21:00:00],
           active_period: [
             build(:active_period, %{
               start: ~U[2024-10-22 13:00:00Z],
@@ -1031,6 +1081,42 @@ defmodule AlertsUI.AlertsTest do
       [active_period_result_1, active_period_result_2] = alert_1.active_period
       assert active_period_result_1.start == ~U[2023-10-10 00:01:00Z]
       assert active_period_result_2.start == ~U[2023-10-12 00:01:00Z]
+    end
+  end
+
+  describe "list_a_month_of_commuter_rail/1" do
+    test "lists all commuter rail alerts created in most recent calendar month" do
+      insert(:alert, %{
+        alert_id: "123",
+        created_at: ~U[2025-11-30 00:01:00Z],
+        primary_service_type: "2"
+      })
+
+      insert(:alert, %{
+        alert_id: "234",
+        created_at: ~U[2025-12-10 00:01:00Z],
+        primary_service_type: "2"
+      })
+
+      insert(:alert, %{
+        alert_id: "345",
+        created_at: ~U[2025-12-10 00:01:00Z],
+        primary_service_type: "3"
+      })
+
+      insert(:alert, %{
+        alert_id: "456",
+        created_at: ~U[2025-12-30 00:01:00Z],
+        primary_service_type: "2"
+      })
+
+      insert(:alert, %{
+        alert_id: "567",
+        created_at: ~U[2026-01-02 00:01:00Z],
+        primary_service_type: "2"
+      })
+
+      ["234", "456"] = Alerts.list_a_month_of_commuter_rail(12, 2025)
     end
   end
 
