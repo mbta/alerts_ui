@@ -64,6 +64,12 @@ When installing playwright and trying to download the browsers, you may run into
 
 - `npx playwright test`
 
+There are some useful flags you can add at the end of that command:
+* `--ui` to run with the UI (good for debugging)
+* `--grep @mutating` to run the tests tagged with `@mutating` (meaning they will persist something to the database)
+* `--grep-invert @mutating` to run the tests _not_ tagged with `@mutating`
+
+
 ## Development
 
 To start your Phoenix server:
