@@ -295,7 +295,6 @@ defmodule AlertsUIWeb.CoreComponents do
       <select
         id={@id}
         name={@name}
-        class={["select select-bordered", @errors != [] && "border-rose-400 focus:border-rose-400"]}
         multiple={@multiple}
         {@rest}
       >

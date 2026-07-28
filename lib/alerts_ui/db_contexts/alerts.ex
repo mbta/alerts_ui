@@ -243,6 +243,24 @@ defmodule AlertsUI.Alerts do
     )
   end
 
+  @spec list_a_month_of_commuter_rail(integer(), integer()) :: [Alert.t()]
+  def list_a_month_of_commuter_rail(month, year) when is_integer(month) and is_integer(year) do
+    Repo.all(
+      from(
+        a in Alert,
+        where: a.primary_service_type == "2",
+        where:
+          fragment("date_part(?, ?)", "year", a.created_at) == ^year or
+            fragment("date_part(?, ?)", "year", a.created_timestamp) == ^year,
+        where:
+          fragment("date_part(?, ?)", "month", a.created_at) == ^month or
+            fragment("date_part(?, ?)", "month", a.created_timestamp) == ^month,
+        select: a.alert_id,
+        order_by: a.created_at
+      )
+    )
+  end
+
   @spec get_by_alert_id(String.t() | integer()) :: Alert.t()
   def get_by_alert_id(alert_id) when is_integer(alert_id) do
     alert_id

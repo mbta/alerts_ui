@@ -391,7 +391,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <.link
             :if={@alert_id}
             class="text-primary hover:text-primary-hover hover:underline"
-            href={~p"/download_history?alert_id=#{@alert_id}"}
+            href={~p"/download_history/download?alert_id=#{@alert_id}"}
             target="_blank"
           >
             <.icon name="hero-document-arrow-down-solid" class="w-4 h-4" /> Download history
