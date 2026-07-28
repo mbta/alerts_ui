@@ -204,7 +204,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
     |> Map.new()
   end
 
-  # I know we have a fix for this in PR but I need it done now
   def strip_recurrence_days_if_one_time(alert_data) do
     if alert_data.alert_timing in [:"one-time", "one-time"] do
       Map.put(alert_data, :recurrence_days, [])
