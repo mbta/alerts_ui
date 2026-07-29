@@ -45,12 +45,11 @@ may need to adjust the username in `.envrc`.
 If not using `direnv`, you can instead `source .envrc` to perform a one-time
 export of the environment variables into your current shell session.
 
-Install playwright:
-1. `npm install`
-1. `npm playwright install`
+Install playwright browsers:
+1. `npx --prefix assets playwright install`
 
-When installing playwright and trying to download the browsers, you may run into an error `UNABLE_TO_GET_ISSUER_CERT_LOCALLY` if you are using Zscaler. To work around this, on OSX, you can:
-1. Open the Keychain Access app
+When installing browsers for playwright, you may run into an error `UNABLE_TO_GET_ISSUER_CERT_LOCALLY` if you are using Zscaler. To work around this, on OSX, you can:
+1. Open the Keychain Access app (NOT the Password app)
 1. At the bottom, you should see `Zscaler Root CA`. 
 1. Right click and export as a `.pem` file and save 
 1. `export NODE_EXTRA_CA_CERTS="/path/to/zscaler.pem"`, then try `npm playwright install` again.
@@ -62,12 +61,14 @@ When installing playwright and trying to download the browsers, you may run into
 
 ### Running playwright tests
 
-- `npx playwright test`
+In the `assets` directory:
+
+- `npx playwright test` 
 
 There are some useful flags you can add at the end of that command:
-* `--ui` to run with the UI (good for debugging)
 * `--grep @mutating` to run the tests tagged with `@mutating` (meaning they will persist something to the database)
 * `--grep-invert @mutating` to run the tests _not_ tagged with `@mutating`
+* `--ui` to run with the UI (good for debugging)
 
 
 ## Development

@@ -36,7 +36,6 @@ export class CreateAlertPage {
         await this.page.getByLabel('Routes').getByRole('option', { name, exact: true }).click(opts)
     }
 
-    /** Stops render as a role=listbox "Stops" with role=option children. */
     async selectStop(name: string, opts?: ClickOptions) {
         await this.page.locator('#alert_data_stop_names_and_ids').
             getByRole('option', { name, exact: true }).click(opts);

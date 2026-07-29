@@ -72,9 +72,9 @@ assets/outputs/alerts_feed*.pb
 .worktrees/
 
 # Playwright
-node_modules/
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
+
+/assets/test-results/
+/assets/playwright-report/
+/assets/blob-report/
+/assets/playwright/.cache/
+/assets/playwright/.auth/
