@@ -10,32 +10,29 @@ test.describe('Create a one-time Subway alert', () => {
       // Subway -> Station Issue details form
       await create.gotoNew();
       await create.chooseServiceType('subway');
-      await create.chooseEffect('station_issue');
-
-      // Selecting a stop drives the autotext main message.
-      await create.selectStop('Alewife');
-      // Autotext incorporates the chosen stop.
-      await expect(create.mainMessage()).toHaveValue(/Station issue at Alewife\./);
+      await create.chooseEffect('delay');
+      await create.selectLine('Red Line');
+      await expect(create.mainMessage()).toHaveValue(/Red Line: delays of about 10 minutes\./);
 
       // Review shows the selections (modal open is a server round-trip).
       await create.reviewAndSubmit();
-      await expect(create.reviewModal()).toBeVisible({ timeout: 20000 });
-      await expect(create.reviewModal()).toContainText('Station issue at Alewife.');
+      await expect(create.reviewModal()).toBeVisible();
+      await expect(create.reviewModal()).toContainText('Red Line: delays of about 10 minutes.');
 
       // Keep editing returns to the form with state preserved.
       await create.keepEditing();
       await expect(create.reviewModal()).toBeHidden();
-      await expect(create.mainMessage()).toHaveValue(/Station issue at Alewife\./);
+      await expect(create.mainMessage()).toHaveValue(/Red Line: delays of about 10 minutes\./);
 
       // Review again and submit for real.
       await create.reviewAndSubmit();
-      await expect(create.reviewModal()).toBeVisible({ timeout: 20000 });
+      await expect(create.reviewModal()).toBeVisible();
       await create.submit();
 
       // Lands back on the alerts list with the newly created alert present.
       await expect(page).toHaveURL(/\/alerts(\?|$)/);
       await expect(
-        page.locator('tbody tr', { hasText: 'Station issue at Alewife.' }).first(),
+        page.locator('tbody tr', { hasText: 'Red Line: delays of about 10 minutes.' }).first(),
       ).toBeVisible();
     });
 });
@@ -116,5 +113,20 @@ test.describe("create alert form interactions", () => {
     await page.getByRole('button', { name: 'Copy text', description: 'Copy supporting information to Clipboard' }).click()
     const supportingMessageClipboardText = await page.evaluate(() => navigator.clipboard.readText());
     expect(supportingMessageClipboardText).toBe('Affected outbound stops:\nSouth Station');
+  })
+
+  // Test case for https://app.asana.com/1/15492006741476/project/1167196461144361/task/1216277744230058?focus=true
+  test("Prediction suppression and review modals cooperate", async ({ page }) => {
+    const create = new CreateAlertPage(page);
+    await create.gotoEffect("ferry", "cancellation")
+    await create.selectRoute("East Boston Ferry")
+    await create.reviewAndSubmit()
+    await create.predictionSuppressionModal().getByRole('button', { name: 'Yes, continue' }).click();
+    await expect(create.predictionSuppressionModal()).not.toBeVisible();
+    await expect(create.reviewModal()).toBeVisible();
+    await create.keepEditing()
+    await expect(create.reviewModal()).not.toBeVisible();
+    await create.reviewAndSubmit()
+    await expect(create.predictionSuppressionModal()).toBeVisible();
   })
 })

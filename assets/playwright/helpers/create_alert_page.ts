@@ -32,6 +32,10 @@ export class CreateAlertPage {
         await expect(this.page).toHaveURL(new RegExp(`/alerts/new/.+/${effectSlug}`));
     }
 
+    async selectLine(name: string, opts?: ClickOptions) {
+        await this.page.getByLabel('Lines').getByRole('option', { name, exact: true }).click(opts)
+    }
+
     async selectRoute(name: string, opts?: ClickOptions) {
         await this.page.getByLabel('Routes').getByRole('option', { name, exact: true }).click(opts)
     }
@@ -71,6 +75,10 @@ export class CreateAlertPage {
 
     reviewModal(): Locator {
         return this.page.locator('#review-modal');
+    }
+
+    predictionSuppressionModal(): Locator {
+        return this.page.locator('#check_predictions_modal')
     }
 
     async keepEditing() {
