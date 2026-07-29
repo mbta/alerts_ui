@@ -58,6 +58,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
+    test "does not crash if you navigate right to the review modal", %{conn: conn} do
+      {:ok, _view, html} = live(conn, "/alerts/new/bus/delay?review=true")
+
+      assert html =~ ~r/Create Alert/
+    end
+
+    @tag :logged_in_user
     test "submitting first part of form unhides second part", %{conn: conn} do
       with_mocks([
         {RoutePatternsRepo, [],

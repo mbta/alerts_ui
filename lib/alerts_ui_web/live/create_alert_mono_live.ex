@@ -129,8 +129,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
+  def handle_params(
+        %{"review" => "true"} = params,
+        _url,
+        %{assigns: %{submitted?: false}} = socket
+      ) do
+    # handles the case where someone hits reload on the review modal
+    {:noreply, sync_socket(socket, Map.drop(params, ["review"]))}
+  end
+
+  @impl true
   def handle_params(params, _url, socket) do
-    # accept changes to url params
     {:noreply, sync_socket(socket, params)}
   end
 
