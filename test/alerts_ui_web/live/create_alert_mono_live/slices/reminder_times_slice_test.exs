@@ -443,6 +443,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       assert render(view) =~ ~s(Reminder time must be after notification period starts)
       assert render(view) =~ ~s(Select reminder time)
 
+      render_async(view, 1000)
+
       view
       |> element("button#review", "Review and submit")
       |> render_click()

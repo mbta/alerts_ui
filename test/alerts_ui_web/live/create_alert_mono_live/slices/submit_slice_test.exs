@@ -40,7 +40,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
       {:ok, view, _html} = live(conn, "/alerts/new/")
 
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
-
+      render_async(view, 1000)
       open_review_modal(view)
       assert view |> element("#flash") |> render() =~ "Please fix the following errors"
     end

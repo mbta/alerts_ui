@@ -1606,4 +1606,32 @@ defmodule AlertsUIWeb.SharedComponents do
     </span>
     """
   end
+
+  @doc """
+  Renders a "loading" component.
+
+  ## Examples
+      <.loading loading={true} button_text="Click here!" />
+  """
+  attr :loading, :boolean, doc: "state of whether loading is happening"
+  attr :loading_text, :string, default: "Loading", doc: "Text to display while loading"
+  attr :button_text, :string, doc: "Text to display when not loading"
+  slot :inner_block, required: true
+
+  def loading(assigns) do
+    ~H"""
+    <%= if @loading do %>
+      <div class="flex space-x-1 items-baseline">
+        <p class="mr-[1.5px]">{@loading_text}</p>
+        <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce [animation-delay:-0.3s]">
+        </div>
+        <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce [animation-delay:-0.15s]">
+        </div>
+        <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce"></div>
+      </div>
+    <% else %>
+      {@button_text}
+    <% end %>
+    """
+  end
 end
