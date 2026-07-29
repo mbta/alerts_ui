@@ -38,6 +38,20 @@ jobs:
           mix local.rebar --force
           mix local.hex --force
 
+      # - name: Mix cache
+      #   id: deps-cache
+      #   uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      #   with:
+      #     path: |
+      #       deps
+      #       _build
+      # - name: Install and compile Mix dependencies
+      #   if: steps.deps-cache.outputs.cache-hit != 'true'
+      #   run: |
+      #     mix deps.get
+      #     mix deps.compile
+      #     MIX_ENV=test mix deps.compile
+
   build:
     name: Build and test
     runs-on: ubuntu-latest
@@ -143,7 +157,9 @@ jobs:
         id: deps-cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
-          path: deps
+          path: |
+            deps
+            _build
           key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: ${{ runner.os }}-mix-
       - name: Install dependencies (if needed)
