@@ -96,6 +96,25 @@ test.describe("create alert form interactions", () => {
     await create.selectStop("South Station (outbound)", { modifiers: ["Meta"] })
     await expect(create.supportingMessage()).toHaveValue("Affected outbound stops:\nSouth Station")
     await expect(page.locator('#alert_data_stop_names_and_ids')).toHaveValues(["South Station (outbound)|place-sstat"])
+  })
 
+  test("Copy button works", async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const create = new CreateAlertPage(page);
+    await create.gotoEffect("bus", "delay")
+    await create.selectRoute("SL1")
+    await create.selectStop("South Station (outbound)")
+
+    // Click main message copy button
+    await page.getByRole('button', { name: 'Copy text', description: 'Copy main message to Clipboard' }).click()
+
+    // Check the clipboard
+    const mainMessageClipboardText = await page.evaluate(() => navigator.clipboard.readText());
+    expect(mainMessageClipboardText).toBe('SL1 is experiencing delays of about 15 minutes.');
+
+    // Now same thing for supporting message
+    await page.getByRole('button', { name: 'Copy text', description: 'Copy supporting information to Clipboard' }).click()
+    const supportingMessageClipboardText = await page.evaluate(() => navigator.clipboard.readText());
+    expect(supportingMessageClipboardText).toBe('Affected outbound stops:\nSouth Station');
   })
 })

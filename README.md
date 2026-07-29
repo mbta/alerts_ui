@@ -68,7 +68,7 @@ In the `assets` directory:
 There are some useful flags you can add at the end of that command:
 * `--grep @mutating` to run the tests tagged with `@mutating` (meaning they will persist something to the database)
 * `--grep-invert @mutating` to run the tests _not_ tagged with `@mutating`
-* `--ui` to run with the UI (good for debugging)
+* `--ui` to run with the UI (good for debugging and developing tests)
 
 
 ## Development
