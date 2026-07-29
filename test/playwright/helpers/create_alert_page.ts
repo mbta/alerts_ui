@@ -37,13 +37,17 @@ export class CreateAlertPage {
     }
 
     /** Stops render as a role=listbox "Stops" with role=option children. */
-    async selectStop(name: string) {
+    async selectStop(name: string, opts?: ClickOptions) {
         await this.page.locator('#alert_data_stop_names_and_ids').
-            getByRole('option', { name }).click();
+            getByRole('option', { name, exact: true }).click(opts);
     }
 
     mainMessage(): Locator {
         return this.page.locator('#alert_data_header_text');
+    }
+
+    supportingMessage(): Locator {
+        return this.page.getByRole('textbox', { name: 'Supporting information' })
     }
 
     flashMessage(): Locator {

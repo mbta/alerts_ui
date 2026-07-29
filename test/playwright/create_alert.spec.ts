@@ -71,4 +71,31 @@ test.describe("create alert form interactions", () => {
     await navigationPromise;
     await expect(page).toHaveURL('/alerts/new/bus/delay');
   })
+
+  test("Should not be able to select All Stops AND other stops", async ({ page }) => {
+    const create = new CreateAlertPage(page);
+    await create.gotoEffect("bus", "delay")
+    await expect(page).toHaveURL('/alerts/new/bus/delay');
+    await create.selectRoute("SL1")
+
+    await create.selectStop("South Station (outbound)")
+    await create.selectStop("Silver Line Way (outbound)", { modifiers: ["Shift"] })
+    await expect(create.supportingMessage()).toHaveValue("Affected outbound stops:\nSouth Station\nCourthouse\nWorld Trade Center\nSilver Line Way")
+
+    // Try to also click 'All Stops', should only keep South Station selected
+    await create.selectStop("All Stops", { modifiers: ["Shift"] })
+    await expect(create.supportingMessage()).toHaveValue("Affected outbound stops:\nSouth Station")
+    await expect(page.locator('#alert_data_stop_names_and_ids')).toHaveValues(["South Station (outbound)|place-sstat"])
+
+    // Now only select 'All Stops'
+    await create.selectStop("All Stops")
+    await expect(create.supportingMessage()).toHaveValue("")
+    await expect(page.locator('#alert_data_stop_names_and_ids')).toHaveValues(["default"])
+
+    // Try to mod+select one other stop. Only the other stop should get selected
+    await create.selectStop("South Station (outbound)", { modifiers: ["Meta"] })
+    await expect(create.supportingMessage()).toHaveValue("Affected outbound stops:\nSouth Station")
+    await expect(page.locator('#alert_data_stop_names_and_ids')).toHaveValues(["South Station (outbound)|place-sstat"])
+
+  })
 })
