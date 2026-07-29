@@ -101,3 +101,66 @@ jobs:
           name: elixir-lcov
           path: cover/
       - uses: mbta/actions/dialyzer@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+
+  playwright:
+    name: Playwright tests
+    runs-on: ubuntu-latest
+    needs: asdf
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: alerts_ui_test
+        # Wait until the server is accepting connections
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    permissions: {
+      contents: read # To check out the repo
+    }
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: ASDF cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-asdf-v2-${{ hashFiles('.tool-versions') }}
+        id: asdf-cache
+      - uses: mbta/actions/reshim-asdf@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+      # The asdf job should have prepared the cache. exit if it didn't for some reason
+      - run: exit 1
+        if: steps.asdf-cache.outputs.cache-hit != 'true'
+      - name: Restore dependencies cache
+        id: deps-cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+      - name: Install dependencies (if needed)
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: mix deps.get
+      - name: Install npm dependencies
+        run: npm --prefix assets ci
+      - name: Install Playwright Browsers
+        run: npx --prefix assets playwright install --with-deps
+      - name: Run playwright tests
+        working-directory: ./assets
+        run: npx playwright test
+      - name: Upload playwright report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
