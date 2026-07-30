@@ -124,6 +124,12 @@ jobs:
     permissions: {
       contents: read # To check out the repo
     }
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/alerts_ui_test
+      API_URL: https://api-dev.mbtace.com
+      DEV_API_URL: https://api-dev.mbtace.com
+      DEV_API_KEY: ${{ secrets.DEV_API_KEY }}
+      API_KEY: ${{ secrets.DEV_API_KEY }}
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -151,6 +157,8 @@ jobs:
         run: mix deps.get
       - name: Compile
         run: mix compile
+      - name: Setup the app
+        run: mix ecto.setup
       - name: Install npm dependencies
         run: npm --prefix assets ci
       - name: Install Playwright Browsers
@@ -158,12 +166,6 @@ jobs:
       - name: Run playwright tests
         working-directory: ./assets
         run:  DEBUG=pw:webserver npx playwright test
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/alerts_ui_test
-          API_URL: https://api-dev.mbtace.com
-          DEV_API_URL: https://api-dev.mbtace.com
-          DEV_API_KEY: ${{ secrets.DEV_API_KEY }}
-          API_KEY: ${{ secrets.DEV_API_KEY }}
       - name: Upload playwright report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
