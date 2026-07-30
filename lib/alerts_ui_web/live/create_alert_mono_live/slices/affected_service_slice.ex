@@ -10,6 +10,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   alias Ecto.Changeset
@@ -17,10 +18,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   import Phoenix.LiveView, only: [push_event: 3, start_async: 3]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
-    only: [get_single_route_effect_names: 0, humanize_effect_name: 1]
+    only: [get_single_route_effect_names: 0, humanize_effect_name: 1, humanize_effect_name: 2]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
+
+  @min_stops_message "Select 2 or more stops between which service is not running"
 
   defstruct [
     :direction,
@@ -85,15 +88,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def validate(_service_data, changeset, _params, socket) do
-      if socket.assigns.submitted? do
-        AffectedServiceSlice.validate_changeset(changeset)
-      else
-        changeset
+      cond do
+        socket.assigns.submitted? ->
+          AffectedServiceSlice.validate_changeset(changeset)
+
+        Map.get(socket.assigns, :stops_touched?, false) ->
+          AffectedServiceSlice.validate_min_stops(changeset)
+
+        true ->
+          changeset
       end
     end
 
     def assigns(_service_data, socket, params) do
-      socket = AffectedServiceSlice.async_assign_selections(socket, params)
+      socket =
+        socket
+        |> AffectedServiceSlice.clear_stops_touched_on_route_change(params)
+        |> AffectedServiceSlice.async_assign_selections(params)
 
       # We do not want to let the user select both "All trips" and an individual trip
       # We push the data to the client (hooks.js) to filter for us
@@ -173,6 +184,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def validate_changeset(changeset) do
+    changeset
+    |> validate_route_required()
+    |> validate_min_stops()
+  end
+
+  defp validate_route_required(changeset) do
     normalized_single_route_effects =
       Enum.map(get_single_route_effect_names(), fn name ->
         name |> String.split(" ") |> Enum.map_join("_", &String.downcase/1)
@@ -184,6 +201,35 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       always_validate_required(changeset, :route_ids, "You must select a route")
     end
   end
+
+  def validate_min_stops(changeset) do
+    route_type = Changeset.get_field(changeset, :route_type)
+    effect_name = Changeset.get_field(changeset, :effect_name)
+    humanized_effect_name = humanize_effect_name(route_type, effect_name)
+
+    min_stops =
+      GetKeyForModeEffect.get_value_of_key(:min_stops, route_type, humanized_effect_name) || 1
+
+    stop_count = changeset |> Changeset.get_field(:stop_names_and_ids, []) |> length()
+
+    if min_stops > 1 and stop_count == 1 do
+      Changeset.add_error(changeset, :stop_names_and_ids, @min_stops_message)
+    else
+      changeset
+    end
+  end
+
+  @route_fields ["route_ids", "single_route_id"]
+
+  # Changing the route clears the stop selection (see clear_selections_on_change/2),
+  # so a prior blur on the old selection shouldn't keep validating the new one live —
+  # require a fresh blur before showing the min-stops error again.
+  def clear_stops_touched_on_route_change(socket, %{"_target" => ["alert_data", field]})
+      when field in @route_fields do
+    assign(socket, :stops_touched?, false)
+  end
+
+  def clear_stops_touched_on_route_change(socket, _params), do: socket
 
   def async_assign_selections(%{assigns: %{} = assigns} = socket, params) do
     if update_selections?(params) do
@@ -560,28 +606,36 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def render(assigns) do
+    single_route_effect? = humanize_effect_name(assigns.form) in get_single_route_effect_names()
+
+    route_field =
+      if single_route_effect?, do: assigns.form[:single_route_id], else: assigns.form[:route_ids]
+
+    assigns =
+      assign(assigns,
+        single_route_effect?: single_route_effect?,
+        route_field: route_field
+      )
+
     ~H"""
     <div class="min-w-full self-start flex flex-col" id="service_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Affected service
       </.h5>
       <div class="flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]">
-        <div class="mb-4 md:mb-0 w-full md:w-[25%] md:mr-8">
+        <div class={[
+          "mb-4 md:mb-0 w-full md:w-[25%] md:mr-8",
+          @route_field.errors != [] && "pb-14"
+        ]}>
           <.filtered_select
             label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
-            field={
-              if humanize_effect_name(@form) in get_single_route_effect_names(),
-                do: @form[:single_route_id],
-                else: @form[:route_ids]
-            }
+            field={@route_field}
             filter_field={@form[:route_search_term]}
             loading={@selections.loading && @first_async_load}
             no_results={Enum.empty?(@selections.route_id_options)}
             options={@selections.route_id_options}
             class="h-full"
-            multiple={
-              if humanize_effect_name(@form) in get_single_route_effect_names(), do: false, else: true
-            }
+            multiple={!@single_route_effect?}
           />
         </div>
 
@@ -649,7 +703,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
           />
         </div>
-        <div class="flex flex-col justify-start w-full md:w-[25%]">
+        <div class={[
+          "flex flex-col justify-start w-full md:w-[25%]",
+          @form[:stop_names_and_ids].errors != [] && "pb-14"
+        ]}>
           <.select
             :if={
               show_directions_input?(@form[:combination].value) &&
@@ -661,26 +718,33 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             disabled={disable_stop_input?(@form[:route_ids].value)}
             prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
           />
-          <.filtered_select
+          <div
             :if={show_stops_input?(@form[:combination].value)}
-            label={if show_trips_input?(@form[:combination].value), do: "Stops", else: nil}
-            field={@form[:stop_names_and_ids]}
-            selected={@form[:stop_names_and_ids].value}
-            filter_field={@form[:stop_search_term]}
-            options={if @selections.loading, do: [], else: @selections.stop_id_options}
-            loading={@selections.loading}
-            no_results={
-              Enum.empty?(@selections.stop_id_options) &&
-                !disable_stop_input?(@form[:route_ids].value)
-            }
-            class="min-w-full h-full"
-            disabled={disable_stop_input?(@form[:route_ids].value)}
-            prompt={
-              if disable_stop_input?(@form[:route_ids].value),
-                do: nil,
-                else: "All Stops"
-            }
-          />
+            id="stop_names_and_ids_selector_wrapper"
+            class="contents"
+            phx-hook="FocusOutPush"
+            data-focusout-event="stop_selector_blur"
+          >
+            <.filtered_select
+              label={if show_trips_input?(@form[:combination].value), do: "Stops", else: nil}
+              field={@form[:stop_names_and_ids]}
+              selected={@form[:stop_names_and_ids].value}
+              filter_field={@form[:stop_search_term]}
+              options={if @selections.loading, do: [], else: @selections.stop_id_options}
+              loading={@selections.loading}
+              no_results={
+                Enum.empty?(@selections.stop_id_options) &&
+                  !disable_stop_input?(@form[:route_ids].value)
+              }
+              class="min-w-full h-full"
+              disabled={disable_stop_input?(@form[:route_ids].value)}
+              prompt={
+                if disable_stop_input?(@form[:route_ids].value),
+                  do: nil,
+                  else: "All Stops"
+              }
+            />
+          </div>
         </div>
       </div>
       <p :if={@show_stop_ids}>

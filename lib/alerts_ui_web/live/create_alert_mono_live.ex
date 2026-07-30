@@ -103,6 +103,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         obsolete_ids: nil,
         submitting?: false,
         submitted?: false,
+        stops_touched?: false,
         image_preview_size: nil,
         first_async_load: true,
         steps: @steps
@@ -147,6 +148,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("validate", params, socket) do
     # accept changes to form params
     {:noreply, sync_socket(socket, params)}
+  end
+
+  @impl true
+  def handle_event("stop_selector_blur", _params, socket) do
+    {:noreply, socket |> assign(:stops_touched?, true) |> sync_socket(%{})}
   end
 
   @impl true
