@@ -159,7 +159,7 @@ jobs:
         working-directory: ./assets
         run:  DEBUG=pw:webserver npx playwright test
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/alerts_ui
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/alerts_ui_dev
           API_URL: https://api-dev.mbtace.com
           DEV_API_URL: https://api-dev.mbtace.com
           DEV_API_KEY: ${{ secrets.DEV_API_KEY }}
