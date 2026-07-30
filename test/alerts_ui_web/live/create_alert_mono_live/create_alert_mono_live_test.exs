@@ -15,7 +15,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
-  alias MBTAV3API.Schedules.{Schedule, Trip}
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
@@ -481,82 +480,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
                  "South Station|place-sstat"
                ]
       end
-    end
-  end
-
-  describe "filter_out_old_trips/2" do
-    test "properly filters out trips whose arrival time for the last trip is in the past" do
-      current_time = ~U[2024-11-15 14:06:43Z]
-
-      schedules = [
-        %Schedule{
-          trip: %Trip{
-            id: "FRMLThuFri-709657-400",
-            name: "400"
-          },
-          stop: %MBTAV3API.Stops.Stop{
-            id: "place-sstat",
-            name: "South Station"
-          },
-          arrival_time: nil,
-          departure_time: ~U[2024-11-15 10:01:43Z]
-        },
-        %Schedule{
-          trip: %Trip{
-            id: "FRMLThuFri-709657-400",
-            name: "400"
-          },
-          stop: %Stop{id: "place-WML-0214", name: "Framingham"},
-          arrival_time: ~U[2024-11-15 12:01:00Z],
-          departure_time: nil
-        },
-        %Schedule{
-          trip: %Trip{
-            id: "FRMLThuFri-709637-485",
-            name: "485"
-          },
-          stop: %Stop{
-            id: "place-sstat",
-            name: "South Station"
-          },
-          arrival_time: nil,
-          departure_time: ~U[2024-11-15 14:30:00Z]
-        },
-        %Schedule{
-          trip: %Trip{
-            id: "FRMLThuFri-709637-485",
-            name: "485"
-          },
-          stop: %Stop{id: "place-WML-0214", name: "Framingham"},
-          arrival_time: ~U[2024-11-15 15:25:00Z],
-          departure_time: nil
-        },
-        %Schedule{
-          trip: %Trip{
-            id: "FRMLThuFri-709631-494",
-            name: "494"
-          },
-          stop: %Stop{
-            id: "place-sstat",
-            name: "South Station"
-          },
-          arrival_time: nil,
-          departure_time: ~U[2024-11-15 20:25:00Z]
-        },
-        %Schedule{
-          trip: %Trip{
-            id: "FRMLThuFri-709631-494",
-            name: "494"
-          },
-          stop: %Stop{id: "place-WML-0214", name: "Framingham"},
-          arrival_time: ~U[2024-11-15 23:30:00Z],
-          departure_time: nil
-        }
-      ]
-
-      [trip1, trip2] = CreateAlertMonoLive.filter_out_old_trips(schedules, current_time)
-      assert trip1.departure_time == ~U[2024-11-15 14:30:00Z]
-      assert trip2.departure_time == ~U[2024-11-15 20:25:00Z]
     end
   end
 

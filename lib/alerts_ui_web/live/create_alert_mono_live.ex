@@ -685,22 +685,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     end
   end
 
-  def filter_out_old_trips(schedules, current_time \\ DateTime.utc_now()) do
-    schedules
-    |> Enum.group_by(& &1.trip.id)
-    |> Enum.reduce([], fn {_k, [first_schedule, last_schedule]}, acc ->
-      one_hour_from_arrival = Timex.shift(last_schedule.arrival_time, hours: 1)
-
-      if DateTime.compare(one_hour_from_arrival, current_time) in [:gt, :eq] do
-        [update_schedule(first_schedule, last_schedule) | acc]
-      else
-        acc
-      end
-    end)
-    |> Enum.reverse()
-    |> Enum.sort_by(& &1.departure_time, DateTime)
-  end
-
   def update_schedule(first_schedule, last_schedule) do
     # updates first schedule with arrival time from last schedule, which is otherwise discarded
     # last stop name is needed for ferry trip names
