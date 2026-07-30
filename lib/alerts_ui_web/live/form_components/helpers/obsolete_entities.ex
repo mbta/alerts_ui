@@ -94,7 +94,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ObsoleteEntities do
     end)
     |> filter_out_empty_values
     |> Enum.into(%{})
-    |> Map.put(:stop_names_and_ids, ["South Station|place-sstat"])
   end
 
   defp reject_strings_with_obsolete_ids(names_and_ids, obsolete_ids) do
