@@ -157,7 +157,7 @@ jobs:
         run: npx --prefix assets playwright install --with-deps
       - name: Run playwright tests
         working-directory: ./assets
-        run: npx playwright test
+        run:  DEBUG=pw:webserver npx playwright test
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/alerts_ui
           API_URL: https://api-dev.mbtace.com
