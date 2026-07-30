@@ -48,7 +48,7 @@ test.describe("create alert form interactions", () => {
     await expect(create.mainMessage()).toHaveValue(/SL1 is experiencing delays of about 15 minutes\./)
 
     // Unselect SL1
-    await create.selectRoute("SL1", { modifiers: ["Meta"] })
+    await create.selectRoute("SL1", { modifiers: ["ControlOrMeta"] })
     await expect(create.mainMessage()).toHaveValue(/experiencing delays of about 15 minutes\./)
 
     // Submitting should show error since route was unselected
