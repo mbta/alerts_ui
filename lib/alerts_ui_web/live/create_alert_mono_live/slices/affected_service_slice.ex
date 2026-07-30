@@ -70,8 +70,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def extract(service_data, _alert_data, _params) do
-      if service_data.form_type == :editing do
-        # When editing, we want to force the trip filter to "All Future Trips"
+      # When editing or duplicating, we want to force the trip filter to "All Future Trips"
+      if service_data.form_type in [:editing, :duplicating] do
         %{service_data | modal_date: nil}
       else
         service_data
