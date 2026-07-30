@@ -1345,6 +1345,49 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "renders with 'All Future Trips' selected while duplicating an existing commuter rail alert",
+         %{conn: conn} do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-cr-edit",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY",
+          primary_service_type: "2",
+          informed_entity: [
+            %{route_type: 2, route_id: "CR-Worcester", direction_id: 0}
+          ],
+          original_route_selections: ["Framingham/Worcester Line|CR-Worcester"]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route] end,
+           get: fn _ -> @route end,
+           get: fn _, _ -> @route end,
+           all: fn _ -> [@route] end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end, get_parent: fn _ -> nil end]},
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/duplicate/test-cr-edit")
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"CR-Worcester\"][selected]"
+               )
+
+        assert render(view) =~ "Filter: All future trips"
+      end
+    end
+
+    @tag :logged_in_user
     test "does not query schedules if not a trip based alert",
          %{conn: conn} do
       alert_params =
