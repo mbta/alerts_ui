@@ -167,7 +167,7 @@ jobs:
       - name: Install npm dependencies
         run: npm --prefix assets ci
       - name: Install Playwright Browsers
-        run: npx --prefix assets playwright install --with-deps
+        run: npx --prefix assets playwright install chromium --with-deps
       - name: Run playwright tests
         working-directory: ./assets
         run:  npx playwright test

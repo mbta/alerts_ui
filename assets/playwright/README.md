@@ -12,6 +12,8 @@ We currently only really have Playwright tests of type 1, as we haven't discusse
 Some docs on tools that are really useful for developing Playwright tests:
 - [UI Mode](https://playwright.dev/docs/test-ui-mode) lets you step through a step and see what it is doing in a 'browser'. There is also a handy button that lets you click on an element and it'll tell you how to hit that element via a selector.
 - [VS Code extension](https://playwright.dev/docs/getting-started-vscode) lets you run individual tests from within VS Code. You can also use it to find selectors, and even record yourself clicking through your site and it will generate selectors to use.
+- [Page object model](https://playwright.dev/docs/pom) for structuring test logic
+- [Fixtures](https://playwright.dev/docs/test-fixtures) for providing reusable data to tests
 
 ## In CI
 If a Playwright test fails in CI, it will upload an artifact under the task "Upload playwright report". The task will give you an "Artifact download URL" which is a zip file. You can download this file, then open the `index.html` and see where your test went wrong.
@@ -19,6 +21,11 @@ If a Playwright test fails in CI, it will upload an artifact under the task "Upl
 You can even view a trace for a failed tests, which is essentially a visual replay of what happened in the test. 
 
 ## Caveats
+### API
 Currently, we are hitting the real MBTA API in our Playwright tests, which isn't ideal. Not only because we are hitting an external API, but also because the API data itself changes at least each rating. So we try to write our tests to not be trip ID specific, or to use Subway data which is more stable.
 
 More investigation is needed to see if we can mock out our API calls. Playwright offers great support for mocking client side HTTP calls, but since these calls are all made on the server side (and there are a lot of them), it is more difficult.
+
+### Browsers
+
+We currently are only testing against Chrome. If we'd like to also cross browser test, Playwright makes it easy to also test against Firefox and Safari (webkit) just by modifying our `playwright.config.ts`. There would be some overhead in our test logic, as each browser has its own quirks (for example, permissions around the clipboard, or how `select`s work behind the scenes) but it could certainly be done, along with mobile browsers. For now, that is all commented out.
