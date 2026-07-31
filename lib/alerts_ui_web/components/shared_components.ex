@@ -242,13 +242,14 @@ defmodule AlertsUIWeb.SharedComponents do
     include:
       ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
 
+  attr :method, :string, default: "get"
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :href, :string, default: nil, doc: "additional link"
   slot :inner_block, required: true
 
   def button_primary_link(assigns) do
     ~H"""
-    <.link href={@href} class={"
+    <.link href={@href} method={@method} class={"
       #{primary_button_classes()}
       #{@class}
     "} {@rest}>

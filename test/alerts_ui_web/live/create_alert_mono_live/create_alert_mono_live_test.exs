@@ -7,7 +7,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
   import Test.Support.Helpers
 
   alias AlertsUI.Alerts
-  alias AlertsUIWeb.CreateAlertMonoLive
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo

@@ -74,9 +74,8 @@ defmodule AlertsUIWeb.Router do
     ]
 
     get "/", Redirector, to: "/alerts"
-    get "/download_history", DownloadHistoryController, :index
     get "/download_history/download", DownloadHistoryController, :export
-    post "/download_history/download", DownloadHistoryController, :export_bulk
+    post "/download_history/download_bulk", DownloadHistoryController, :export_bulk
 
     live_session :require_authenticated_user,
       on_mount: [
@@ -88,6 +87,7 @@ defmodule AlertsUIWeb.Router do
       live("/components", ComponentsLive)
       live("/help", HelpPageLive)
       live("/sftp_demo", SFTPDemoLive)
+      live("/download_history", DownloadHistoryLive)
     end
   end
 

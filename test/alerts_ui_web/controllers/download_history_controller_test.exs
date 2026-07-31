@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.DownloadHistoryControllerTest do
       conn =
         conn
         |> Conn.put_req_header("authorization", "Bearer FAKE_TOKEN")
-        |> post("/download_history/download?month=6&year=2026")
+        |> post("/download_history/download_bulk?month=6&year=2026")
 
       assert conn.status == 200
       assert is_binary(conn.resp_body)
