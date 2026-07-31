@@ -75,7 +75,7 @@ defmodule AlertsUIWeb.Router do
 
     get "/", Redirector, to: "/alerts"
     get "/download_history/download", DownloadHistoryController, :export
-    post "/download_history/download_bulk", DownloadHistoryController, :export_bulk
+    get "/download_history/download_bulk", DownloadHistoryController, :export_bulk
 
     live_session :require_authenticated_user,
       on_mount: [
