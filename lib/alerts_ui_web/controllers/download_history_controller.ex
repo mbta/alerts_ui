@@ -23,8 +23,6 @@ defmodule AlertsUIWeb.DownloadHistoryController do
   def export_bulk(conn, %{"month" => month, "year" => year}) do
     with {month, _} <- Integer.parse(month),
          {year, _} <- Integer.parse(year) do
-      start_time = System.system_time(:millisecond)
-
       Phoenix.PubSub.broadcast(
         AlertsUI.PubSub,
         "file_downloading",
