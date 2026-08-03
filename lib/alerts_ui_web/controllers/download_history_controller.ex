@@ -6,6 +6,8 @@ defmodule AlertsUIWeb.DownloadHistoryController do
   alias AlertsUI.Alerts
   alias NimbleCSV.Spreadsheet, as: CSV
 
+  require Logger
+
   def export(conn, %{"alert_id" => alert_id}) do
     file =
       alert_id
@@ -23,18 +25,37 @@ defmodule AlertsUIWeb.DownloadHistoryController do
   def export_bulk(conn, %{"month" => month, "year" => year}) do
     with {month, _} <- Integer.parse(month),
          {year, _} <- Integer.parse(year) do
+      start_time = System.system_time(:millisecond)
+      Logger.info("Start time: #{start_time}")
+
       Phoenix.PubSub.broadcast(
         AlertsUI.PubSub,
         "file_downloading",
         {:download_started}
       )
 
+      alert_ids = Alerts.list_a_month_of_commuter_rail(month, year)
+      done_time = System.system_time(:millisecond)
+      Logger.info("Got alert ids. Elapsed time: #{done_time - start_time}")
+      start_time = done_time
+
+      histories = alert_ids |> Enum.map(&AlertHistory.alert_history/1)
+      done_time = System.system_time(:millisecond)
+      Logger.info("Got histories. Elapsed time: #{done_time - start_time}")
+      start_time = done_time
+
       file =
-        Alerts.list_a_month_of_commuter_rail(month, year)
-        |> Enum.map(&AlertHistory.alert_history/1)
-        |> List.flatten()
-        |> AlertHistory.build_history_csv()
-        |> CSV.dump_to_iodata()
+        histories |> List.flatten() |> AlertHistory.build_history_csv() |> CSV.dump_to_iodata()
+
+      done_time = System.system_time(:millisecond)
+      Logger.info("Made CSV file. Elapsed time: #{done_time - start_time}")
+
+      # file =
+      #   Alerts.list_a_month_of_commuter_rail(month, year)
+      #   |> Enum.map(&AlertHistory.alert_history/1)
+      #   |> List.flatten()
+      #   |> AlertHistory.build_history_csv()
+      #   |> CSV.dump_to_iodata()
 
       Phoenix.PubSub.broadcast(
         AlertsUI.PubSub,
