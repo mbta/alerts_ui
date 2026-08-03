@@ -565,7 +565,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     # form data with properly capitalized effect name
     alert_data =
       socket.assigns.form.data
-      |> Map.put(:effect_name, PathHelper.effect_from_url_name(socket.assigns.path_effect_name))
+      |> Map.update!(:effect_name, &PathHelper.effect_from_url_name/1)
 
     show_prediction_warning? = PredictionSuppressionWarningModal.show_warning?(alert_data)
 
