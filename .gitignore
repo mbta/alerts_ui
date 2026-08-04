@@ -70,3 +70,11 @@ assets/outputs/alerts_feed*.pb
 
 # Git worktrees
 .worktrees/
+
+# Playwright
+
+/assets/test-results/
+/assets/playwright-report/
+/assets/blob-report/
+/assets/playwright/.cache/
+/assets/playwright/.auth/
