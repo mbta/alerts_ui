@@ -1567,14 +1567,16 @@ defmodule AlertsUI.AlertBuilderTest do
                  stops: child_stops_0,
                  route_id: "Red",
                  listed_route: true,
-                 id: "Red-1"
+                 id: "Red-1",
+                 typicality: 1
                },
                %APIRoutePattern{
                  direction_id: 1,
                  stops: child_stops_1,
                  route_id: "Red",
                  listed_route: true,
-                 id: "Red-2"
+                 id: "Red-2",
+                 typicality: 1
                }
              ]
            end,
@@ -1847,28 +1849,32 @@ defmodule AlertsUI.AlertBuilderTest do
                    stops: [jfk_child, ashmont_child],
                    route_id: "Red",
                    listed_route: true,
-                   id: "Red-1"
+                   id: "Red-1",
+                   typicality: 1
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [ashmont_child, jfk_child],
                    route_id: "Red",
                    listed_route: true,
-                   id: "Red-2"
+                   id: "Red-2",
+                   typicality: 1
                  },
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [jfk_child, braintree_child],
                    route_id: "Red",
                    listed_route: true,
-                   id: "Red-3"
+                   id: "Red-3",
+                   typicality: 1
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [braintree_child, jfk_child],
                    route_id: "Red",
                    listed_route: true,
-                   id: "Red-4"
+                   id: "Red-4",
+                   typicality: 1
                  }
                ]
            end,
@@ -2020,28 +2026,32 @@ defmodule AlertsUI.AlertBuilderTest do
                    stops: [jfk_child, ashmont_child],
                    route_id: "Red",
                    listed_route: true,
-                   id: "Red-1"
+                   id: "Red-1",
+                   typicality: 1
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [ashmont_child, jfk_child],
                    route_id: "Red",
                    listed_route: true,
-                   id: "Red-2"
+                   id: "Red-2",
+                   typicality: 1
                  },
                  %APIRoutePattern{
                    direction_id: 0,
                    stops: [jfk_child, braintree_child],
                    route_id: "Red",
                    listed_route: true,
-                   id: "Red-3"
+                   id: "Red-3",
+                   typicality: 1
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [braintree_child, jfk_child],
                    route_id: "Red",
                    listed_route: true,
-                   id: "Red-4"
+                   id: "Red-4",
+                   typicality: 1
                  }
                ]
            end,
@@ -2398,14 +2408,16 @@ defmodule AlertsUI.AlertBuilderTest do
                    stops: [hynes_child, kenmore_child],
                    route_id: "Green-B",
                    listed_route: true,
-                   id: "green-b-1"
+                   id: "green-b-1",
+                   typicality: 1
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [kenmore_child, hynes_child],
                    route_id: "Green-B",
                    listed_route: true,
-                   id: "green-b-2"
+                   id: "green-b-2",
+                   typicality: 1
                  }
                ]
 
@@ -2416,14 +2428,16 @@ defmodule AlertsUI.AlertBuilderTest do
                    stops: [kenmore_child, hynes_child],
                    route_id: "Green-C",
                    listed_route: true,
-                   id: "green-c-1"
+                   id: "green-c-1",
+                   typicality: 1
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [hynes_child, kenmore_child],
                    route_id: "Green-C",
                    listed_route: true,
-                   id: "green-c-2"
+                   id: "green-c-2",
+                   typicality: 1
                  }
                ]
 
@@ -2434,14 +2448,16 @@ defmodule AlertsUI.AlertBuilderTest do
                    stops: [fenway_child, kenmore_child, hynes_child],
                    route_id: "Green-D",
                    listed_route: true,
-                   id: "green-d-1"
+                   id: "green-d-1",
+                   typicality: 1
                  },
                  %APIRoutePattern{
                    direction_id: 1,
                    stops: [hynes_child, kenmore_child, fenway_child],
                    route_id: "Green-D",
                    listed_route: true,
-                   id: "green-d-2"
+                   id: "green-d-2",
+                   typicality: 1
                  }
                ]
 
@@ -3851,7 +3867,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  stops: child_stops,
                  route_id: route_id,
                  listed_route: true,
-                 id: "rp_1"
+                 id: "rp_1",
+                 typicality: 1
                }
              ]
            end,
@@ -4128,7 +4145,8 @@ defmodule AlertsUI.AlertBuilderTest do
                  stops: child_stops,
                  route_id: route_id,
                  listed_route: true,
-                 id: "rp_1"
+                 id: "rp_1",
+                 typicality: 1
                }
              ]
            end,
