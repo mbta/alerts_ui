@@ -1,0 +1,132 @@
+
+import { CreateAlertPage } from "./helpers/create_alert_page";
+import { test, expect } from "@playwright/test"
+
+test.describe('Create a one-time Subway alert', () => {
+  test('fills the form, reviews, and submits, landing back on the list with the new alert @mutating',
+    async ({ page }) => {
+      const create = new CreateAlertPage(page);
+
+      // Subway -> Station Issue details form
+      await create.gotoNew();
+      await create.chooseServiceType('subway');
+      await create.chooseEffect('delay');
+      await create.selectLine('Red Line');
+      await expect(create.mainMessage()).toHaveValue(/Red Line: delays of about 10 minutes\./);
+
+      // Review shows the selections (modal open is a server round-trip).
+      await create.reviewAndSubmit();
+      await expect(create.reviewModal()).toBeVisible();
+      await expect(create.reviewModal()).toContainText('Red Line: delays of about 10 minutes.');
+
+      // Keep editing returns to the form with state preserved.
+      await create.keepEditing();
+      await expect(create.reviewModal()).toBeHidden();
+      await expect(create.mainMessage()).toHaveValue(/Red Line: delays of about 10 minutes\./);
+
+      // Review again and submit for real.
+      await create.reviewAndSubmit();
+      await expect(create.reviewModal()).toBeVisible();
+      await create.submit();
+
+      // Lands back on the alerts list with the newly created alert present.
+      await expect(page).toHaveURL(/\/alerts(\?|$)/);
+      await expect(
+        page.locator('tbody tr', { hasText: 'Red Line: delays of about 10 minutes.' }).first(),
+      ).toBeVisible();
+    });
+});
+
+// These are tests that are generally difficult to test in elixir
+test.describe("create alert form interactions", () => {
+  test("Should be able to unselect the last item on a multiselect", async ({ page }) => {
+    const create = new CreateAlertPage(page);
+
+    await create.gotoEffect("bus", "delay")
+    await create.selectRoute("SL1")
+
+    await expect(create.mainMessage()).toHaveValue(/SL1 is experiencing delays of about 15 minutes\./)
+
+    // Unselect SL1
+    await create.selectRoute("SL1", { modifiers: ["ControlOrMeta"] })
+    await expect(create.mainMessage()).toHaveValue(/experiencing delays of about 15 minutes\./)
+
+    // Submitting should show error since route was unselected
+    await create.reviewAndSubmit();
+    await expect(create.flashMessage()).toContainText("Select route(s)", { timeout: 15000 })
+  })
+
+  test("Hitting esc should not take user back to the home page", async ({ page }) => {
+    const create = new CreateAlertPage(page);
+    await create.gotoEffect("bus", "delay")
+    await expect(page).toHaveURL('/alerts/new/bus/delay');
+    const navigationPromise = page.waitForURL("/alerts", { timeout: 2000 }).catch(() => null);
+    page.keyboard.press('Escape')
+
+    // Await the navigation promise, otherwise asserting on the current URL will always pass
+    // because playwright checks immediately before navigation
+    await navigationPromise;
+    await expect(page).toHaveURL('/alerts/new/bus/delay');
+  })
+
+  test("Should not be able to select All Stops AND other stops", async ({ page }) => {
+    const create = new CreateAlertPage(page);
+    await create.gotoEffect("bus", "delay")
+    await expect(page).toHaveURL('/alerts/new/bus/delay');
+    await create.selectRoute("SL1")
+
+    await create.selectStop("South Station (outbound)")
+    await create.selectStop("Silver Line Way (outbound)", { modifiers: ["Shift"] })
+    await expect(create.supportingMessage()).toHaveValue("Affected outbound stops:\nSouth Station\nCourthouse\nWorld Trade Center\nSilver Line Way")
+
+    // Try to also click 'All Stops', should only keep South Station selected
+    await create.selectStop("All Stops", { modifiers: ["Shift"] })
+    await expect(create.supportingMessage()).toHaveValue("Affected outbound stops:\nSouth Station")
+    await expect(page.locator('#alert_data_stop_names_and_ids')).toHaveValues(["South Station (outbound)|place-sstat"])
+
+    // Now only select 'All Stops'
+    await create.selectStop("All Stops")
+    await expect(create.supportingMessage()).toHaveValue("")
+    await expect(page.locator('#alert_data_stop_names_and_ids')).toHaveValues(["default"])
+
+    // Try to mod+select one other stop. Only the other stop should get selected
+    await create.selectStop("South Station (outbound)", { modifiers: ["Meta"] })
+    await expect(create.supportingMessage()).toHaveValue("Affected outbound stops:\nSouth Station")
+    await expect(page.locator('#alert_data_stop_names_and_ids')).toHaveValues(["South Station (outbound)|place-sstat"])
+  })
+
+  test("Copy button works", async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    const create = new CreateAlertPage(page);
+    await create.gotoEffect("bus", "delay")
+    await create.selectRoute("SL1")
+    await create.selectStop("South Station (outbound)")
+
+    // Click main message copy button
+    await page.getByRole('button', { name: 'Copy text', description: 'Copy main message to Clipboard' }).click()
+
+    // Check the clipboard
+    const mainMessageClipboardText = await page.evaluate(() => navigator.clipboard.readText());
+    expect(mainMessageClipboardText).toBe('SL1 is experiencing delays of about 15 minutes.');
+
+    // Now same thing for supporting message
+    await page.getByRole('button', { name: 'Copy text', description: 'Copy supporting information to Clipboard' }).click()
+    const supportingMessageClipboardText = await page.evaluate(() => navigator.clipboard.readText());
+    expect(supportingMessageClipboardText).toBe('Affected outbound stops:\nSouth Station');
+  })
+
+  // Test case for https://app.asana.com/1/15492006741476/project/1167196461144361/task/1216277744230058?focus=true
+  test("Prediction suppression and review modals cooperate", async ({ page }) => {
+    const create = new CreateAlertPage(page);
+    await create.gotoEffect("ferry", "cancellation")
+    await create.selectRoute("East Boston Ferry")
+    await create.reviewAndSubmit()
+    await create.predictionSuppressionModal().getByRole('button', { name: 'Yes, continue' }).click();
+    await expect(create.predictionSuppressionModal()).not.toBeVisible();
+    await expect(create.reviewModal()).toBeVisible();
+    await create.keepEditing()
+    await expect(create.reviewModal()).not.toBeVisible();
+    await create.reviewAndSubmit()
+    await expect(create.predictionSuppressionModal()).toBeVisible();
+  })
+})
