@@ -905,6 +905,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :disabled, :boolean, default: false, doc: "whether the element is disabled"
 
+  attr :warning, :boolean, default: false, doc: "if true, element gains a yellow border"
+
   attr :modal_filter_disabled, :boolean,
     default: false,
     doc: "whether the modal filter link element is disabled"
@@ -972,7 +974,8 @@ defmodule AlertsUIWeb.SharedComponents do
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate",
           @select_class,
-          @errors != [] && "border-danger focus:border-danger"
+          @errors != [] && "border-danger focus:border-danger",
+          @warning && "border-warning focus:border-warning"
         ]}
         multiple={@multiple}
         phx-hook="Selector"
@@ -1449,6 +1452,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :type, :string, default: "datetime-local"
 
+  attr :warning, :boolean, default: false, doc: "if true the element will gain a yellow border"
+
   attr :field, FormField,
     required: true,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -1487,7 +1492,8 @@ defmodule AlertsUIWeb.SharedComponents do
               rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
               disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
               focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) appearance-auto dark:text-white dark:[color-scheme:dark]",
-            @errors != [] && "border-danger focus:border-danger"
+            @errors != [] && "border-danger focus:border-danger",
+            @warning && "border-warning focus:border-warning"
           ]}
           type={@type}
           {@rest}

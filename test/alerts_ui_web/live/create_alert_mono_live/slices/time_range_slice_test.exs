@@ -451,6 +451,65 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
+    test "Correctly displays warning border on active period start if trip arrival time is before start",
+         %{conn: conn} do
+      route = %Route{
+        direction_names: %{0 => "Westbound", 1 => "Eastbound"},
+        sort_order: 3,
+        id: "CR-Worcester",
+        type: 2,
+        name: "Framingham/Worcester Line"
+      }
+
+      schedule = %EnhancedSchedule{
+        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+        stop: %Stop{id: "place-sstat", name: "South Station"},
+        arrival_time: nil,
+        departure_time: Date.utc_today() |> DateTime.new!(~T[22:00:00], "America/New_York")
+      }
+
+      schedule_2 = %EnhancedSchedule{
+        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+        stop: %Stop{id: "place-sstat", name: "South Station"},
+        arrival_time: Date.utc_today() |> DateTime.new!(~T[22:00:00], "America/New_York"),
+        departure_time: nil
+      }
+
+      with_mocks([
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [schedule, schedule_2] end},
+        {StopsRepo, [], by_route: fn _, _, _opts -> [] end},
+        {RoutesRepo, [], [by_type: fn _type -> [route] end, get: fn _id, _opts -> route end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "route_ids" => [route.id],
+            "trip_ids" => ["CR-683322-595"],
+            "active_period_start_specifier" => :custom
+          }
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_start" => Date.utc_today() |> NaiveDateTime.new!(~T[23:00:00])
+          }
+        })
+
+        assert view |> element("#alert_data_active_period_start") |> render() =~
+                 "border-warning"
+      end
+    end
+
+    @tag :logged_in_user
     test "displays error if end before start", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")

@@ -7,6 +7,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
   import Test.Support.Helpers
 
   alias AlertsUI.Alerts
+  alias AlertsUI.Models.EnhancedSchedule
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
@@ -14,6 +15,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
+  alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
@@ -26,6 +28,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
   }
 
   @stop %Stop{id: "place-sstat", name: "South Station"}
+
+  @schedule %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: nil,
+    departure_time: Date.utc_today() |> DateTime.new!(~T[22:00:00], "America/New_York")
+  }
+  @schedule_2 %EnhancedSchedule{
+    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
+    stop: %Stop{id: "place-sstat", name: "South Station"},
+    arrival_time: Date.utc_today() |> DateTime.new!(~T[22:00:00], "America/New_York"),
+    departure_time: nil
+  }
 
   @route_pattern %RoutePattern{
     direction_id: 0,
@@ -164,6 +181,94 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         assert view |> element("#check_predictions_modal-container") |> render() =~
                  ~s(Warning: Predictions will be suppressed)
+      end
+    end
+
+    @tag :logged_in_user
+    test "Correctly displays trip end warning modal", %{conn: conn} do
+      with_mocks([
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end},
+        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "route_ids" => [@route.id],
+            "stop_ids" => [@stop.id],
+            "trip_ids" => ["CR-683322-595"],
+            "active_period_start_specifier" => :custom
+          }
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_start" => Date.utc_today() |> NaiveDateTime.new!(~T[23:00:00])
+          }
+        })
+
+        open_review_modal(view)
+
+        assert view |> element("#trip_end_warning_modal-container") |> render() =~
+                 "Warning: Alert starts after end of trip(s)"
+      end
+    end
+
+    @tag :logged_in_user
+    test "Works with both modals", %{conn: conn} do
+      with_mocks([
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end},
+        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "route_ids" => [@route.id],
+            "trip_ids" => ["CR-683322-595"],
+            "active_period_start_specifier" => :custom
+          }
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_start" => Date.utc_today() |> NaiveDateTime.new!(~T[23:00:00])
+          }
+        })
+
+        open_review_modal(view)
+
+        assert view |> element("#check_predictions_modal-container") |> render() =~
+                 ~s(Warning: Predictions will be suppressed)
+
+        view
+        |> element("#check_predictions_modal-container button", "Yes, continue")
+        |> render_click()
+
+        assert view |> element("#trip_end_warning_modal-container") |> render() =~
+                 "Warning: Alert starts after end of trip(s)"
+
+        view
+        |> element("#trip_end_warning_modal-container button", "Yes, continue")
+        |> render_click()
+
+        assert view
+               |> element("#review-modal-container", "Commuter Rail • Suspension")
+               |> has_element?
       end
     end
 
