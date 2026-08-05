@@ -10,6 +10,8 @@
     <thead>
       <tr>
         <th class="border p-3">Alert ID</th>
+        <th class="border p-3">Created at</th>
+        <th class="border p-3">Created timestamp</th>
         <th class="border p-3">Notification start</th>
         <th class="border p-3">Notification end</th>
         <th class="border p-3">Active period start</th>
@@ -26,6 +28,8 @@
 
     <tbody>
       <%= for %{
+        created_at: created_at,
+        created_timestamp: created_timestamp,
         active_period_end: active_period_end,
         active_period_start: active_period_start,
         alert_id: alert_id,
@@ -40,6 +44,8 @@
       } <- @alerts do %>
         <tr>
           <td class="border p-3">{alert_id}</td>
+          <td class="border p-3">{created_at}</td>
+          <td class="border p-3">{created_timestamp}</td>
           <td class="border p-3">{notification_period_start}</td>
           <td class="border p-3">{notification_period_end}</td>
           <td class="border p-3">{active_period_start}</td>
