@@ -581,7 +581,7 @@ defmodule AlertsUI.AlertBuilder do
       child_stops_context =
         route_patterns
         # remove route patterns for branches we don't want
-        |> filtered_route_patterns(parent_stop_ids)
+        |> filtered_route_patterns(parent_stop_ids, route.type)
         |> Enum.flat_map(fn route_pattern ->
           route_pattern_stops_with_context_for_parents(
             # build list of stops we want to include
@@ -668,7 +668,10 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.map(&{&1, direction})
   end
 
-  defp filtered_route_patterns(route_patterns, parent_stop_ids) do
+  @spec filtered_route_patterns([APIRoutePattern.t()], [Stop.id_t()], Route.type_int()) :: [
+          APIRoutePattern.t()
+        ]
+  defp filtered_route_patterns(route_patterns, parent_stop_ids, route_type) do
     # determines which route patterns to use in the case of a route with
     # multiple branches and thus multiple patterns (eg red line)
     # Uses 1 route pattern if only one has all the stops on it,
@@ -689,6 +692,14 @@ defmodule AlertsUI.AlertBuilder do
     else
       route_pattern_match
     end
+    # For subway, we only want to base informed entities on patterns with typicality = 1
+    |> Enum.filter(fn pattern ->
+      if route_type === 0 or route_type === 1 do
+        pattern.typicality === 1
+      else
+        true
+      end
+    end)
   end
 
   @spec get_route_patterns(Route.id_t(), String.t(), integer()) :: [APIRoutePattern.t()]
