@@ -37,6 +37,7 @@
           <TimeRangeSlice.render
             form={@form}
             current_time={@current_time}
+            trip_arrival_time={@trip_arrival_time}
             previous_start_specifier={@previous_start_specifier}
             previous_end_specifier={@previous_end_specifier}
             previous_start_time_specifier={@previous_start_time_specifier}
@@ -68,6 +69,7 @@
             show={@show}
             image_preview_size={@image_preview_size}
             check_predictions={@check_predictions}
+            check_trip_end={@check_trip_end}
           />
           <.modal
             :if={obsolete_ids_found?(@obsolete_ids)}
