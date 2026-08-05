@@ -289,6 +289,8 @@ defmodule AlertsUI.TimeframeText do
          recurring,
          duration_certainty
        ) do
+    IO.puts("already started")
+
     cond do
       within_x_days?(start_date, current_datetime, 7) and not recurring ->
         started_recently(current_time_tuple, end_time_tuple)
@@ -322,12 +324,12 @@ defmodule AlertsUI.TimeframeText do
   defp started_a_while_ago(_current_date, nil, _duration_certainty), do: "ongoing"
 
   defp started_a_while_ago(current_time_tuple, end_time_tuple, duration_certainty) do
-    later_today? = same_day?(current_time_tuple, end_time_tuple) and duration_certainty == :KNOWN
+    ends_later_today? = same_day?(current_time_tuple, end_time_tuple)
 
-    if later_today? do
-      "last day"
-    else
-      "ongoing"
+    cond do
+      ends_later_today? and duration_certainty == :KNOWN -> "last day"
+      ends_later_today? and duration_certainty == :ESTIMATED -> "ongoing"
+      true -> text_based_on_end(current_time_tuple, end_time_tuple)
     end
   end
 
