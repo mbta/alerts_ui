@@ -129,11 +129,11 @@ defmodule AlertsUI.TimeframeText do
   @spec starts_in_future(datetime_tuple(), datetime_tuple(), datetime_tuple()) :: String.t() | nil
   defp starts_in_future(
          {start_datetime, _, _} = start_time_tuple,
-         {current_datetime, current_date, _} = current_time_tuple,
+         {_, current_date, _} = current_time_tuple,
          end_time_tuple
        ) do
     cond do
-      starts_today?(start_datetime, current_datetime) ->
+      starts_today?(start_time_tuple, current_time_tuple) ->
         starts_later_today(current_time_tuple, end_time_tuple)
 
       starts_tomorrow?(start_datetime, current_date) ->
@@ -144,13 +144,19 @@ defmodule AlertsUI.TimeframeText do
 
       more_than_x_days?(current_date, start_datetime, 7, true) ->
         starts_a_while_later(start_time_tuple, end_time_tuple)
+
+      true ->
+        nil
     end
   end
 
-  @spec starts_today?(DateTime.t(), DateTime.t()) :: boolean()
-  defp starts_today?(start_datetime, current_datetime) do
+  @spec starts_today?(datetime_tuple(), datetime_tuple()) :: boolean()
+  defp starts_today?(
+         {start_datetime, _, _} = start_time_tuple,
+         {current_datetime, _, _} = current_time_tuple
+       ) do
     starts_in_future?(start_datetime, current_datetime) &&
-      DateTime.to_date(start_datetime) == DateTime.to_date(current_datetime)
+      same_day?(start_time_tuple, current_time_tuple)
   end
 
   @spec starts_tomorrow?(DateTime.t(), Date.t()) :: boolean()
@@ -262,7 +268,7 @@ defmodule AlertsUI.TimeframeText do
         "#{get_human_readable_start_date(start_date)}"
 
       start_end_same_month ->
-        "#{get_human_readable_start_date(start_date)}-#{end_date.day}"
+        "#{get_human_readable_start_date(start_date)}-#{get_service_date(end_time_tuple).day}"
 
       true ->
         "starting #{get_human_readable_start_date(start_date)}"
@@ -289,8 +295,6 @@ defmodule AlertsUI.TimeframeText do
          recurring,
          duration_certainty
        ) do
-    IO.puts("already started")
-
     cond do
       within_x_days?(start_date, current_datetime, 7) and not recurring ->
         started_recently(current_time_tuple, end_time_tuple)
@@ -421,8 +425,13 @@ defmodule AlertsUI.TimeframeText do
   end
 
   @spec same_day?(datetime_tuple(), datetime_tuple()) :: boolean()
-  defp same_day?(start_time_tuple, end_time_tuple) do
-    get_service_date(end_time_tuple) == get_service_date(start_time_tuple)
+  defp same_day?({_, start_date, start_time} = start_time_tuple, end_time_tuple) do
+    start_service_date =
+      if start_time == ActivePeriod.start_of_service_time(),
+        do: start_date,
+        else: get_service_date(start_time_tuple)
+
+    get_service_date(end_time_tuple) == start_service_date
   end
 
   @spec get_day_name_for_end(datetime_tuple()) :: String.t()
@@ -450,16 +459,10 @@ defmodule AlertsUI.TimeframeText do
     "#{Timex.month_name(date.month)} #{date.day}"
   end
 
-  @spec get_human_readable_end_date(datetime_tuple(), format_t | nil) :: String.t()
-  defp get_human_readable_end_date({_, end_date, end_time}, format \\ nil) do
+  @spec get_human_readable_end_date(datetime_tuple(), format_t() | nil) :: String.t()
+  defp get_human_readable_end_date(end_time_tuple, format \\ nil) do
     # moves end date up 1 day if end time is before start of service
-
-    end_date =
-      if Time.compare(end_time, ActivePeriod.start_of_service_time()) in [:lt, :eq] do
-        Date.add(end_date, -1)
-      else
-        end_date
-      end
+    end_date = get_service_date(end_time_tuple)
 
     case format do
       :month ->
