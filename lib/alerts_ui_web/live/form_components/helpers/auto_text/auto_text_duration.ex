@@ -233,7 +233,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         within_same_service_day?: false,
         end_datetime: end_datetime
       }) do
-    formatted_end = end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
+    formatted_end = service_date_to_formatted_date(end_datetime)
     "through #{formatted_end}"
   end
 
@@ -254,7 +254,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         ends_today?: false,
         end_datetime: end_datetime
       }) do
-    formatted_end = end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
+    formatted_end = service_date_to_formatted_date(end_datetime)
     "through #{formatted_end}"
   end
 
@@ -324,7 +324,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         within_same_service_day?: false,
         end_datetime: end_datetime
       }) do
-    formatted_end = end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
+    formatted_end = service_date_to_formatted_date(end_datetime)
     "from #{datetime_to_formatted_time(start_datetime)} today through #{formatted_end}"
   end
 
@@ -371,8 +371,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_datetime: start_datetime,
         end_datetime: end_datetime
       }) do
-    formatted_end_date =
-      end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
+    formatted_end_date = service_date_to_formatted_date(end_datetime)
 
     "from #{datetime_to_formatted_date(start_datetime)} at #{datetime_to_formatted_time(start_datetime)} through #{formatted_end_date}"
   end
@@ -458,7 +457,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         ends_today?: false,
         end_datetime: end_datetime
       }) do
-    formatted_end = end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
+    formatted_end = service_date_to_formatted_date(end_datetime)
     "through #{formatted_end}"
   end
 
@@ -496,8 +495,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     end_weekday =
       end_datetime |> ActivePeriod.datetime_to_service_date() |> Calendar.strftime("%A")
 
-    formatted_end_date =
-      end_datetime |> ActivePeriod.datetime_to_service_date() |> format_date
+    formatted_end_date = service_date_to_formatted_date(end_datetime)
 
     if {start_weekday, end_weekday} == {"Saturday", "Sunday"} do
       "the weekend of #{datetime_to_formatted_date(start_datetime)} and #{formatted_end_date}"
@@ -746,6 +744,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
   end
 
   defp change_end_specifier(_, end_specifier), do: end_specifier
+
+  defp service_date_to_formatted_date(nil) do
+    ""
+  end
+
+  defp service_date_to_formatted_date(datetime) do
+    datetime |> ActivePeriod.datetime_to_service_date() |> format_date
+  end
 
   defp datetime_to_formatted_time(datetime) do
     datetime |> NaiveDateTime.to_time() |> format_time

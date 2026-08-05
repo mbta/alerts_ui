@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
         if is_nil(active_period_start_date) do
           current_time
         else
-          NaiveDateTime.new!(active_period_start_date, ActivePeriod.start_of_service_time())
+          safe_new_datetime(active_period_start_date, ActivePeriod.start_of_service_time())
         end
 
       :custom ->
@@ -37,14 +37,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
             current_time
 
           previous_state == :start_of_service ->
-            active_period_start_date
-            |> NaiveDateTime.new!(ActivePeriod.start_of_service_time())
+            safe_new_datetime(active_period_start_date, ActivePeriod.start_of_service_time())
 
           true ->
             active_period_start
         end
     end
   end
+
+  defp safe_new_datetime(%Date{} = date, %Time{} = time) do
+    NaiveDateTime.new!(date, time)
+  end
+
+  defp safe_new_datetime(_, _), do: nil
 
   # recurring start
 
@@ -197,8 +202,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
         active_period_end
 
       previous_state !== :custom ->
-        active_period_end_date
-        |> NaiveDateTime.new!(~T[23:59:00])
+        safe_new_datetime(active_period_end_date, ~T[23:59:00])
 
       true ->
         active_period_end
