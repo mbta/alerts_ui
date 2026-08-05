@@ -692,14 +692,6 @@ defmodule AlertsUI.AlertBuilder do
     else
       route_pattern_match
     end
-    # For subway, we only want to base informed entities on patterns with typicality = 1
-    |> Enum.filter(fn pattern ->
-      if route_type === 0 or route_type === 1 do
-        pattern.typicality === 1
-      else
-        true
-      end
-    end)
   end
 
   @spec get_route_patterns(Route.id_t(), String.t(), integer()) :: [APIRoutePattern.t()]
@@ -709,6 +701,17 @@ defmodule AlertsUI.AlertBuilder do
       |> route_pattern_direction_opts(direction)
 
     RoutePatterns.by_route_id(route_id, opts)
+  end
+
+  # For subway, we only want canonical routes
+  defp get_route_patterns(route_id, direction, route_type) when route_type in [0, 1] do
+    opts =
+      [include: "representative_trip.stops,route", "filter[canonical]": true]
+      |> route_pattern_direction_opts(direction)
+
+    route_id
+    |> RoutePatterns.by_route_id(opts)
+    |> Enum.reject(&String.contains?(&1.id, "Shuttle"))
   end
 
   defp get_route_patterns(route_id, direction, _route_type) do
