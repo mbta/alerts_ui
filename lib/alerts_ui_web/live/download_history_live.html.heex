@@ -1,0 +1,65 @@
+<div class="m-6" id="download-history-live-view">
+  <.h1>Download Bulk Commuter Rail Alerts</.h1>
+
+  <.form
+    :let={f}
+    for={%{}}
+    class="w-[20%]"
+  >
+    <.input
+      class={[
+        "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
+        rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
+        disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
+        focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate"
+      ]}
+      id="month"
+      name="month"
+      label="Select month"
+      type="select"
+      options={@months}
+      value={@selected_month}
+      field={f[:month]}
+      phx-change="get_month"
+    />
+
+    <.input
+      class={[
+        "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
+        rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
+        disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
+        focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate"
+      ]}
+      id="year"
+      name="year"
+      label="Select year"
+      type="select"
+      options={@years}
+      value={@selected_year}
+      field={f[:year]}
+      phx-change="get_year"
+    />
+
+    <.button_primary_link
+      id="download-history-button"
+      class={"mt-6" <> if @loading, do: " pointer-events-none bg-primary-disabled", else: ""}
+      href={~p"/download_history/download_bulk?month=#{@selected_month}&year=#{@selected_year}"}
+      target="_blank"
+      disabled={@loading}
+    >
+      <div :if={@loading}>
+        <div class="flex space-x-1 items-baseline">
+          <p class="mr-[1.5px]">Downloading</p>
+          <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce [animation-delay:-0.3s]">
+          </div>
+          <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce [animation-delay:-0.15s]">
+          </div>
+          <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce"></div>
+        </div>
+      </div>
+      <div :if={!@loading}>
+        Download
+      </div>
+    </.button_primary_link>
+  </.form>
+</div>
