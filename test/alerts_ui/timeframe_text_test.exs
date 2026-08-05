@@ -216,6 +216,23 @@ defmodule AlertsUI.TimeframeTextTest do
                "through Friday"
     end
 
+    test "effect end - 6 days from today at end of service", %{
+      now: now,
+      start_now: start_now,
+      start_in_30: start_in_30,
+      recurring: recurring
+    } do
+      # 6 days from now is 3/2, but make it 3/3 since end of service is 3AM
+      ending = utc_datetime_from_local(~D[2024-03-03], ActivePeriod.end_of_service_time())
+      duration_certainty = :KNOWN
+
+      assert TimeframeText.timeframe_text(start_now, ending, recurring, duration_certainty, now) ==
+               "through Saturday"
+
+      assert TimeframeText.timeframe_text(start_in_30, ending, recurring, duration_certainty, now) ==
+               "through Saturday"
+    end
+
     test "effect end - 7 to 90 days from today", %{
       now: now,
       start_now: start_now,
