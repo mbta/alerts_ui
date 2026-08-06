@@ -581,7 +581,7 @@ defmodule AlertsUI.AlertBuilder do
       child_stops_context =
         route_patterns
         # remove route patterns for branches we don't want
-        |> filtered_route_patterns(parent_stop_ids, route.type)
+        |> filtered_route_patterns(parent_stop_ids)
         |> Enum.flat_map(fn route_pattern ->
           route_pattern_stops_with_context_for_parents(
             # build list of stops we want to include
@@ -668,10 +668,10 @@ defmodule AlertsUI.AlertBuilder do
     |> Enum.map(&{&1, direction})
   end
 
-  @spec filtered_route_patterns([APIRoutePattern.t()], [Stop.id_t()], Route.type_int()) :: [
+  @spec filtered_route_patterns([APIRoutePattern.t()], [Stop.id_t()]) :: [
           APIRoutePattern.t()
         ]
-  defp filtered_route_patterns(route_patterns, parent_stop_ids, route_type) do
+  defp filtered_route_patterns(route_patterns, parent_stop_ids) do
     # determines which route patterns to use in the case of a route with
     # multiple branches and thus multiple patterns (eg red line)
     # Uses 1 route pattern if only one has all the stops on it,
@@ -692,14 +692,6 @@ defmodule AlertsUI.AlertBuilder do
     else
       route_pattern_match
     end
-    # For subway, we only want to base informed entities on patterns with typicality = 1
-    |> Enum.filter(fn pattern ->
-      if route_type === 0 or route_type === 1 do
-        pattern.typicality === 1
-      else
-        true
-      end
-    end)
   end
 
   @spec get_route_patterns(Route.id_t(), String.t(), integer()) :: [APIRoutePattern.t()]
@@ -709,6 +701,17 @@ defmodule AlertsUI.AlertBuilder do
       |> route_pattern_direction_opts(direction)
 
     RoutePatterns.by_route_id(route_id, opts)
+  end
+
+  # For subway, we only want canonical routes
+  defp get_route_patterns(route_id, direction, route_type) when route_type in [0, 1] do
+    opts =
+      [include: "representative_trip.stops,route", "filter[canonical]": true]
+      |> route_pattern_direction_opts(direction)
+
+    route_id
+    |> RoutePatterns.by_route_id(opts)
+    |> Enum.reject(&String.contains?(&1.id, "Shuttle"))
   end
 
   defp get_route_patterns(route_id, direction, _route_type) do
