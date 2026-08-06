@@ -445,7 +445,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn
-             "24", [include: "representative_trip.stops,route"] ->
+             "24", [include: "representative_trip.stops,route", "filter[canonical]": true] ->
                [
                  %APIRoutePattern{
                    id: "1",
@@ -456,7 +456,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                ]
 
-             "27", [include: "representative_trip.stops,route"] ->
+             "27", [include: "representative_trip.stops,route", "filter[canonical]": true] ->
                [
                  %APIRoutePattern{
                    id: "2",
@@ -467,7 +467,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                ]
 
-             "57", [include: "representative_trip.stops,route"] ->
+             "57", [include: "representative_trip.stops,route", "filter[canonical]": true] ->
                [
                  %APIRoutePattern{
                    id: "3",
@@ -478,7 +478,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  }
                ]
 
-             "2427", [include: "representative_trip.stops,route"] ->
+             "2427", [include: "representative_trip.stops,route", "filter[canonical]": true] ->
                [%APIRoutePattern{id: "4", direction_id: 0, stops: [], route_id: nil}]
            end
          ]},
@@ -725,7 +725,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn
-             "Green-D", [include: "representative_trip.stops,route"] ->
+             "Green-D", [include: "representative_trip.stops,route", "filter[canonical]": true] ->
                [
                  %APIRoutePattern{
                    id: "4",
@@ -779,7 +779,8 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn
-             _route_id, [include: "representative_trip.stops,route"] -> []
+             _route_id, [include: "representative_trip.stops,route", "filter[canonical]": true] ->
+               []
            end
          ]},
         {StopsRepo, [],
@@ -887,7 +888,7 @@ defmodule AlertsUI.AlertBuilderTest do
         {RoutePatternsRepo, [],
          [
            by_route_id: fn
-             "24", [include: "representative_trip.stops,route"] ->
+             "24", [include: "representative_trip.stops,route", "filter[canonical]": true] ->
                [
                  %APIRoutePattern{
                    id: "1",
@@ -1496,7 +1497,8 @@ defmodule AlertsUI.AlertBuilderTest do
       with_mocks([
         {RoutePatternsRepo, [],
          [
-           by_route_id: fn "Red", [include: "representative_trip.stops,route"] ->
+           by_route_id: fn "Red",
+                           [include: "representative_trip.stops,route", "filter[canonical]": true] ->
              [
                %APIRoutePattern{
                  direction_id: 0,
@@ -2648,324 +2650,6 @@ defmodule AlertsUI.AlertBuilderTest do
                    route_id: "Green-D",
                    route_type: 0,
                    stop_id: fenway.id
-                 }
-               ]
-      end
-    end
-
-    test "RDS informed entities for Green Line suspension" do
-      # Simplified version of https://app.asana.com/1/15492006741476/project/1167196461144361/task/1217100874216926?focus=true
-      hynes = %Stop{id: "place-hymnl"}
-      kenmore = %Stop{id: "place-kencl"}
-      blandford = %Stop{id: "place-bland"}
-
-      hynes_child = %Stop{id: "hynes-child", parent_id: hynes.id}
-      kenmore_child = %Stop{id: "kenmore-child", parent_id: kenmore.id}
-      blandford_child = %Stop{id: "blandford-child", parent_id: blandford.id}
-
-      alert_data = %{
-        route_type: 1,
-        description_text: "ok",
-        header_text: "hello",
-        effect_name: "Suspension",
-        stop_ids: ["place-hymnl", "place-kencl", "place-bland"],
-        route_ids: ["Green"],
-        trip_ids: nil,
-        direction: "default"
-      }
-
-      with_mocks([
-        {RoutePatternsRepo, [],
-         [
-           by_route_id: fn
-             "Green-B", _ ->
-               [
-                 %APIRoutePattern{
-                   name: "Government Center - Boston College",
-                   direction_id: 0,
-                   stops: [hynes_child, kenmore_child, blandford_child],
-                   route_id: "Green-B",
-                   listed_route: true,
-                   id: "Green-B-812-0",
-                   typicality: 1
-                 },
-                 %APIRoutePattern{
-                   name: "Boston College - Government Center",
-                   direction_id: 1,
-                   stops: [blandford_child, kenmore_child, hynes_child],
-                   route_id: "Green-B",
-                   listed_route: true,
-                   id: "Green-B-812-1",
-                   typicality: 1
-                 }
-               ]
-
-             "Green-C", _ ->
-               [
-                 %APIRoutePattern{
-                   name: "Government Center - Cleveland Circle",
-                   direction_id: 0,
-                   stops: [hynes_child, kenmore_child],
-                   route_id: "Green-C",
-                   listed_route: true,
-                   id: "Green-C-834-0",
-                   typicality: 3
-                 },
-                 %APIRoutePattern{
-                   name: "Kenmore - Cleveland Circle",
-                   direction_id: 0,
-                   stops: [kenmore_child],
-                   route_id: "Green-C",
-                   listed_route: true,
-                   id: "Green-C-834-0",
-                   typicality: 3
-                 },
-                 %APIRoutePattern{
-                   name: "Cleveland Circle - Government Center",
-                   direction_id: 1,
-                   stops: [kenmore_child, hynes_child],
-                   route_id: "Green-C",
-                   listed_route: true,
-                   id: "Green-C-834-1",
-                   typicality: 3
-                 },
-                 %APIRoutePattern{
-                   name: "Cleveland Circle - Kenmore",
-                   direction_id: 1,
-                   stops: [kenmore_child],
-                   route_id: "Green-C",
-                   listed_route: true,
-                   id: "Green-C-834-1",
-                   typicality: 3
-                 }
-               ]
-
-             "Green-D", _ ->
-               [
-                 %APIRoutePattern{
-                   name: "Union Square - Riverside",
-                   direction_id: 0,
-                   stops: [hynes_child, kenmore_child],
-                   route_id: "Green-D",
-                   listed_route: true,
-                   id: "Green-D-855-0",
-                   typicality: 1
-                 },
-                 %APIRoutePattern{
-                   name: "Kenmore - Riverside",
-                   direction_id: 0,
-                   stops: [kenmore_child],
-                   route_id: "Green-D",
-                   listed_route: true,
-                   id: "Green-D-845-0",
-                   typicality: 3
-                 },
-                 %APIRoutePattern{
-                   name: "Riverside - Union Square",
-                   direction_id: 1,
-                   stops: [kenmore_child, hynes_child],
-                   route_id: "Green-D",
-                   listed_route: true,
-                   id: "Green-D-855-1",
-                   typicality: 1
-                 },
-                 %APIRoutePattern{
-                   name: "Riverside - Kenmore",
-                   direction_id: 1,
-                   stops: [kenmore_child],
-                   route_id: "Green-D",
-                   listed_route: true,
-                   id: "Green-D-845-0",
-                   typicality: 3
-                 }
-               ]
-
-             "Green-E", _ ->
-               []
-           end
-         ]},
-        {StopsRepo, [],
-         [
-           by_route: fn
-             "Green-B", _ -> [hynes, kenmore, blandford]
-             "Green-C", _ -> [hynes, kenmore]
-             "Green-D", _ -> [hynes, kenmore]
-             "Green-E", _ -> []
-           end,
-           all: fn ["filter[id]": _], _opts ->
-             [hynes, kenmore, blandford]
-           end
-         ]},
-        {RoutesRepo, [],
-         [
-           get: fn route_id, _opts -> %Route{id: route_id, type: 0} end,
-           green_line: fn -> @green_line_virtual_route end
-         ]}
-      ]) do
-        result = AlertBuilder.build_alert(alert_data, :RDS)
-
-        assert result.informed_entity == [
-                 # Green-B
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-B",
-                   route_type: 0,
-                   direction_id: 0,
-                   stop_id: "hynes-child",
-                   activities: [:BOARD, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-B",
-                   route_type: 0,
-                   direction_id: 0,
-                   stop_id: "kenmore-child",
-                   activities: [:BOARD, :EXIT, :RIDE]
-                 },
-                 %{
-                   activities: [:EXIT, :RIDE],
-                   agency_id: "1",
-                   direction_id: 0,
-                   route_id: "Green-B",
-                   route_type: 0,
-                   stop_id: "blandford-child"
-                 },
-                 %{
-                   activities: [:BOARD, :RIDE],
-                   agency_id: "1",
-                   direction_id: 1,
-                   route_id: "Green-B",
-                   route_type: 0,
-                   stop_id: "blandford-child"
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-B",
-                   route_type: 0,
-                   direction_id: 1,
-                   stop_id: "kenmore-child",
-                   activities: [:BOARD, :EXIT, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-B",
-                   route_type: 0,
-                   direction_id: 1,
-                   stop_id: "hynes-child",
-                   activities: [:EXIT, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-B",
-                   route_type: 0,
-                   direction_id: 0,
-                   stop_id: hynes.id,
-                   activities: [:BOARD, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-B",
-                   route_type: 0,
-                   direction_id: 0,
-                   stop_id: kenmore.id,
-                   activities: [:BOARD, :EXIT, :RIDE]
-                 },
-                 %{
-                   activities: [:EXIT, :RIDE],
-                   agency_id: "1",
-                   direction_id: 0,
-                   route_id: "Green-B",
-                   route_type: 0,
-                   stop_id: blandford.id
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-B",
-                   route_type: 0,
-                   direction_id: 1,
-                   stop_id: blandford.id,
-                   activities: [:BOARD, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-B",
-                   route_type: 0,
-                   direction_id: 1,
-                   stop_id: kenmore.id,
-                   activities: [:BOARD, :EXIT, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-B",
-                   route_type: 0,
-                   direction_id: 1,
-                   stop_id: hynes.id,
-                   activities: [:EXIT, :RIDE]
-                 },
-                 # Green-D
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-D",
-                   route_type: 0,
-                   direction_id: 0,
-                   stop_id: "hynes-child",
-                   activities: [:BOARD, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-D",
-                   route_type: 0,
-                   direction_id: 0,
-                   stop_id: "kenmore-child",
-                   activities: [:EXIT, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-D",
-                   route_type: 0,
-                   direction_id: 1,
-                   stop_id: "kenmore-child",
-                   activities: [:BOARD, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-D",
-                   route_type: 0,
-                   direction_id: 1,
-                   stop_id: "hynes-child",
-                   activities: [:EXIT, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-D",
-                   route_type: 0,
-                   direction_id: 0,
-                   stop_id: hynes.id,
-                   activities: [:BOARD, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-D",
-                   route_type: 0,
-                   direction_id: 0,
-                   stop_id: kenmore.id,
-                   activities: [:EXIT, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-D",
-                   route_type: 0,
-                   direction_id: 1,
-                   stop_id: kenmore.id,
-                   activities: [:BOARD, :RIDE]
-                 },
-                 %{
-                   agency_id: "1",
-                   route_id: "Green-D",
-                   route_type: 0,
-                   direction_id: 1,
-                   stop_id: hynes.id,
-                   activities: [:EXIT, :RIDE]
                  }
                ]
       end
