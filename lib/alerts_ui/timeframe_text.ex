@@ -309,6 +309,9 @@ defmodule AlertsUI.TimeframeText do
       more_than_x_days?(start_date, current_datetime, 30, true) and
           recurring ->
         started_a_while_ago(current_time_tuple, end_time_tuple, duration_certainty)
+
+      true ->
+        nil
     end
   end
 
@@ -346,31 +349,27 @@ defmodule AlertsUI.TimeframeText do
   end
 
   @spec ends_tomorrow?(datetime_tuple(), datetime_tuple()) :: boolean()
-  defp ends_tomorrow?(current_time_tuple, end_time_tuple) do
-    current_service_date = get_service_date(current_time_tuple)
+  defp ends_tomorrow?({_, current_date, _}, end_time_tuple) do
     end_service_date = get_service_date(end_time_tuple)
 
-    current_service_date |> Date.add(1) == end_service_date
+    current_date |> Date.add(1) == end_service_date
   end
 
   @spec ends_this_year?(datetime_tuple(), DateTime.t()) :: boolean()
-  defp ends_this_year?(current_time_tuple, end_datetime) do
-    service_date = get_service_date(current_time_tuple)
+  defp ends_this_year?({_, current_date, _}, end_datetime) do
     # Before the start of service on January 1st of the following year
     last_datetime_of_year =
-      %{service_date | month: 1, day: 1, year: service_date.year + 1}
+      %{current_date | month: 1, day: 1, year: current_date.year + 1}
       |> DateTime.new!(ActivePeriod.start_of_service_time(), @timezone)
 
     DateTime.compare(end_datetime, last_datetime_of_year) in [:lt, :eq]
   end
 
   @spec ends_after_this_year?(datetime_tuple(), DateTime.t()) :: boolean()
-  defp ends_after_this_year?(current_time_tuple, end_datetime) do
-    service_date = get_service_date(current_time_tuple)
-
+  defp ends_after_this_year?({_, current_date, _}, end_datetime) do
     # After the start of service on on January 1st of the following year
     last_datetime_of_year =
-      %{service_date | month: 1, day: 1, year: service_date.year + 1}
+      %{current_date | month: 1, day: 1, year: current_date.year + 1}
       |> DateTime.new!(ActivePeriod.start_of_service_time(), @timezone)
 
     DateTime.compare(end_datetime, last_datetime_of_year) == :gt
