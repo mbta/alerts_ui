@@ -179,22 +179,39 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
              "2", [], [base_url: _, api_key: _] -> %Facility{id: "2"}
              "3", [], [base_url: _, api_key: _] -> nil
            end
+         ]},
+        {StopsRepo, [],
+         [
+           all: fn _, _ -> [] end
+         ]},
+        {RoutesRepo, [],
+         [
+           all: fn _, _ ->
+             []
+           end
          ]}
       ]) do
         insert(:alert, %{
           alert_id: "456",
-          informed_entity: [%{facility_id: "1"}, %{facility_id: "2"}]
+          informed_entity: [%{facility_id: "1"}, %{facility_id: "2"}],
+          primary_service_type: "access"
         })
 
         insert(:alert, %{
           alert_id: "234",
           closed_timestamp: ~U[2023-10-14 00:01:00Z],
-          informed_entity: [%{facility_id: "1"}]
+          informed_entity: [%{facility_id: "1"}],
+          primary_service_type: "access"
         })
 
         insert(:alert, %{
           alert_id: "123",
-          informed_entity: [%{facility_id: "1"}, %{facility_id: "2"}, %{facility_id: "3"}]
+          informed_entity: [
+            %{facility_id: "1", route_id: "100", stop_id: "200"},
+            %{facility_id: "2", route_id: "300", stop_id: "400"},
+            %{facility_id: "3", route_id: "100", stop_id: "200"}
+          ],
+          primary_service_type: "access"
         })
 
         assert AlertValidator.validate_alerts() == [
