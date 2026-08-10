@@ -292,22 +292,33 @@ defmodule AlertsUI.TimeframeText do
          {_, start_date, _},
          {current_datetime, _, _} = current_time_tuple,
          end_time_tuple,
-         recurring,
+         true,
          duration_certainty
        ) do
     cond do
-      within_x_days?(start_date, current_datetime, 7) and not recurring ->
+      within_x_days?(start_date, current_datetime, 30) ->
         started_recently(current_time_tuple, end_time_tuple)
 
-      within_x_days?(start_date, current_datetime, 30) and recurring ->
-        started_recently(current_time_tuple, end_time_tuple)
-
-      more_than_x_days?(start_date, current_datetime, 7, true) and
-          not recurring ->
+      more_than_x_days?(start_date, current_datetime, 30, true) ->
         started_a_while_ago(current_time_tuple, end_time_tuple, duration_certainty)
 
-      more_than_x_days?(start_date, current_datetime, 30, true) and
-          recurring ->
+      true ->
+        nil
+    end
+  end
+
+  defp already_started(
+         {_, start_date, _},
+         {current_datetime, _, _} = current_time_tuple,
+         end_time_tuple,
+         false,
+         duration_certainty
+       ) do
+    cond do
+      within_x_days?(start_date, current_datetime, 7) ->
+        started_recently(current_time_tuple, end_time_tuple)
+
+      more_than_x_days?(start_date, current_datetime, 7, true) ->
         started_a_while_ago(current_time_tuple, end_time_tuple, duration_certainty)
 
       true ->
