@@ -346,7 +346,7 @@ defmodule AlertsUI.TimeframeText do
 
     cond do
       ends_later_today? and duration_certainty == :KNOWN -> "last day"
-      ends_later_today? and duration_certainty == :ESTIMATED -> "ongoing"
+      ends_later_today? and duration_certainty in [:ESTIMATED, :UNKNOWN] -> "ongoing"
       true -> text_based_on_end(current_time_tuple, end_time_tuple)
     end
   end
