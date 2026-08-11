@@ -14,6 +14,9 @@ defmodule AlertsUI.Jobs.FeedWriter do
 
     :timer.tc(&WriteFeed.write_feed/1, [opts])
     |> log_results()
+  rescue
+    e ->
+      Logger.error("Error writing to file: #{Exception.format(:error, e, __STACKTRACE__)}")
   end
 
   @spec log_results({integer(), {:ok, binary()}} | {integer(), {:error, String.t()}}) :: :ok
