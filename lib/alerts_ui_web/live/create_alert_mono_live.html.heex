@@ -22,6 +22,7 @@
           id="alert_form"
           class="form-control flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]"
           phx-change="validate"
+          phx-auto-recover="recover_form"
         >
           <Title.render
             route_type_name={AlertDataHelpers.humanize_route_type(@form)}
