@@ -411,6 +411,11 @@ defmodule AlertsUI.Models.Alert do
 
   # nearly all alerts should go through the "original selections" route
   # but as a fallback we can look at the informed entities instead.
+  # facility alerts have route and stop ids in their informed entities
+  # but we do not collect them
+
+  def gather_route_ids(%__MODULE__{primary_service_type: "access"}), do: []
+
   def gather_route_ids(%__MODULE__{original_route_selections: nil} = alert) do
     gather_route_ids_from_informed_entities(alert.informed_entity)
   end
@@ -426,6 +431,8 @@ defmodule AlertsUI.Models.Alert do
   def gather_facility_ids(%__MODULE__{} = alert) do
     gather_facility_ids_from_original_selections(alert)
   end
+
+  def gather_stop_ids(%__MODULE__{primary_service_type: "access"}), do: []
 
   def gather_stop_ids(%__MODULE__{original_stop_selections: nil} = alert) do
     gather_stop_ids_from_informed_entities(alert.informed_entity)
