@@ -41,6 +41,7 @@ defmodule AlertsUI.Jobs.DelayedJob do
     job = Map.put(job, :args, Map.get(args, "args", nil))
     module.perform(job, opts)
   rescue
-    e -> Logger.warning("Error delaying job. args=#{inspect(args)}: #{inspect(e)}")
+    e ->
+      Logger.error("Error delaying job. #{Exception.format(:error, e, __STACKTRACE__)}")
   end
 end

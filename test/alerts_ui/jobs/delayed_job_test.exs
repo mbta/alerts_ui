@@ -27,7 +27,7 @@ defmodule AlertsUI.Jobs.DelayedJobTest do
       end
     end
 
-    test "logs errors to warning" do
+    test "logs errors" do
       with_mock(Process, [:passthrough], sleep: fn ms -> ms end) do
         {_, log} =
           with_log(fn ->
@@ -35,7 +35,7 @@ defmodule AlertsUI.Jobs.DelayedJobTest do
           end)
 
         assert_called(Process.sleep(1))
-        assert log =~ ~r/\[warning\] Error delaying job\. args=.*:.*"Error".*/
+        assert log =~ ~r/\[error\] Error delaying job\. .*RuntimeError.*/
       end
     end
   end
