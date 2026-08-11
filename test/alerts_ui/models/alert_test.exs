@@ -416,6 +416,17 @@ defmodule AlertsUI.Models.AlertTest do
              ]
     end
 
+    test "does not list route ids for facility alerts" do
+      informed_entity = [
+        %InformedEntity{activities: [:exit], route_id: "28", facility_id: "1"},
+        %InformedEntity{activities: [:exit], route_id: "29", facility_id: "2"}
+      ]
+
+      assert Alert.gather_route_ids(
+               build(:alert, %{informed_entity: informed_entity, primary_service_type: "access"})
+             ) == []
+    end
+
     test "lists unique route ids from original selection if present" do
       alert =
         build(
@@ -441,6 +452,17 @@ defmodule AlertsUI.Models.AlertTest do
                "28",
                "29"
              ]
+    end
+
+    test "does not list stops for facility alerts" do
+      informed_entity = [
+        %InformedEntity{stop_id: "27", facility_id: "1"},
+        %InformedEntity{stop_id: "28", facility_id: "2"}
+      ]
+
+      assert Alert.gather_stop_ids(
+               build(:alert, %{informed_entity: informed_entity, primary_service_type: "access"})
+             ) == []
     end
 
     test "lists unique stop ids from original selection if present" do
