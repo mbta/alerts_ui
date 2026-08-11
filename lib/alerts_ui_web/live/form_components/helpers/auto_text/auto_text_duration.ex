@@ -490,10 +490,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
         start_datetime: start_datetime,
         end_datetime: end_datetime
       }) do
-    start_weekday = start_datetime |> NaiveDateTime.to_date() |> Calendar.strftime("%A")
+    start_weekday =
+      if is_nil(start_datetime) do
+        ""
+      else
+        start_datetime |> NaiveDateTime.to_date() |> Calendar.strftime("%A")
+      end
 
     end_weekday =
-      end_datetime |> ActivePeriod.datetime_to_service_date() |> Calendar.strftime("%A")
+      if is_nil(end_datetime) do
+        ""
+      else
+        end_datetime |> ActivePeriod.datetime_to_service_date() |> Calendar.strftime("%A")
+      end
 
     formatted_end_date = service_date_to_formatted_date(end_datetime)
 
