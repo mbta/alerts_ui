@@ -1611,7 +1611,7 @@ defmodule AlertsUIWeb.SharedComponents do
   Renders a "loading" component.
 
   ## Examples
-      <.loading loading={true} button_text="Click here!" />
+      <.loading loading={true} loading_text="Now loading" />Click here!</.loading>
   """
   attr :loading, :boolean, doc: "state of whether loading is happening"
   attr :loading_text, :string, default: "Loading", doc: "Text to display while loading"
@@ -1630,7 +1630,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce"></div>
       </div>
     <% else %>
-      {@button_text}
+      {render_slot(@inner_block)}
     <% end %>
     """
   end

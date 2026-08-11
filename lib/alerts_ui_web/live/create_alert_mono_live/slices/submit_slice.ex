@@ -141,10 +141,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         id="review"
         disabled={@loading}
       >
-        <.loading
-          loading={@loading}
-          button_text="Review and submit"
-        >
+        <.loading loading={@loading}>
+          Review and submit
         </.loading>
       </.button_primary>
     </div>
