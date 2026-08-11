@@ -39,6 +39,19 @@ defmodule AlertsUI.TimeframeTextTest do
                nil
     end
 
+    test "effect end - later today at end of service", %{
+      recurring: recurring,
+      now: now,
+      start: start
+    } do
+      duration_certainty = :KNOWN
+
+      ending = utc_datetime_from_local(~D[2024-02-26], ActivePeriod.end_of_service_time())
+
+      assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
+               nil
+    end
+
     test "effect end - tomorrow", %{recurring: recurring, now: now, start: start} do
       duration_certainty = :KNOWN
       ending = DateTime.add(now, 1, :day)
@@ -82,6 +95,14 @@ defmodule AlertsUI.TimeframeTextTest do
       assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
                "last day"
     end
+
+    test "effect end - today at end of service", %{recurring: recurring, now: now, start: start} do
+      ending = utc_datetime_from_local(~D[2024-02-26], ActivePeriod.end_of_service_time())
+      duration_certainty = :KNOWN
+
+      assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
+               "last day"
+    end
   end
 
   describe "recurring alerts - start within past 30 days ago" do
@@ -113,6 +134,14 @@ defmodule AlertsUI.TimeframeTextTest do
 
     test "effect end - today", %{recurring: recurring, now: now, start: start} do
       ending = DateTime.add(now, 2, :hour)
+      duration_certainty = :KNOWN
+
+      assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
+               nil
+    end
+
+    test "effect end - today at end of service", %{recurring: recurring, now: now, start: start} do
+      ending = utc_datetime_from_local(~D[2024-02-26], ActivePeriod.end_of_service_time())
       duration_certainty = :KNOWN
 
       assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
@@ -154,6 +183,14 @@ defmodule AlertsUI.TimeframeTextTest do
       assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
                "last day"
     end
+
+    test "effect end - today at end of service", %{recurring: recurring, now: now, start: start} do
+      ending = utc_datetime_from_local(~D[2024-02-26], ActivePeriod.end_of_service_time())
+      duration_certainty = :KNOWN
+
+      assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
+               "last day"
+    end
   end
 
   test "recurring - starts now or within 30 minutes" do
@@ -171,64 +208,98 @@ defmodule AlertsUI.TimeframeTextTest do
              "starting today"
   end
 
-  describe "starts now or within 30 minutes" do
+  describe "known end, one-time, effect start agnostic" do
     setup do
       now = utc_datetime_from_local(~D[2024-02-25], ~T[22:00:00])
 
+      starts = [
+        %{name: "now", datetime: now},
+        %{name: "in 30 minutes", datetime: DateTime.add(now, 30, :minute)},
+        %{name: "recently", datetime: DateTime.add(now, -5, :day)},
+        %{name: "a while ago", datetime: DateTime.add(now, -20, :day)}
+      ]
+
       %{
         now: now,
-        start_now: now,
-        start_in_30: DateTime.add(now, 30, :minute),
+        starts: starts,
         recurring: false
       }
     end
 
     test "effect end - tomorrow (at end of service)", %{
       now: now,
-      start_now: start_now,
-      start_in_30: start_in_30,
+      starts: starts,
       recurring: recurring
     } do
       ending = utc_datetime_from_local(~D[2024-02-27], ActivePeriod.end_of_service_time())
       duration_certainty = :KNOWN
 
-      assert TimeframeText.timeframe_text(start_now, ending, recurring, duration_certainty, now) ==
-               "through tomorrow"
-
-      assert TimeframeText.timeframe_text(start_in_30, ending, recurring, duration_certainty, now) ==
-               "through tomorrow"
+      Enum.each(starts, fn %{name: name, datetime: start} ->
+        assert TimeframeText.timeframe_text(
+                 start,
+                 ending,
+                 recurring,
+                 duration_certainty,
+                 now
+               ) ==
+                 "through tomorrow",
+               "starts #{name} and ends tomorrow"
+      end)
     end
 
     test "effect end - 2 to 6 days from today", %{
       now: now,
-      start_now: start_now,
-      start_in_30: start_in_30,
+      starts: starts,
       recurring: recurring
     } do
       # Friday, March 1st 2024
       ending = DateTime.add(now, 5, :day)
       duration_certainty = :KNOWN
 
-      assert TimeframeText.timeframe_text(start_now, ending, recurring, duration_certainty, now) ==
-               "through Friday"
+      Enum.each(starts, fn %{name: name, datetime: start} ->
+        assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
+                 "through Friday",
+               "starts #{name} and ends 2-6 days from today"
+      end)
+    end
 
-      assert TimeframeText.timeframe_text(start_in_30, ending, recurring, duration_certainty, now) ==
-               "through Friday"
+    test "effect end - 6 days from today at end of service", %{
+      now: now,
+      starts: starts,
+      recurring: recurring
+    } do
+      # 6 days from now is 3/2, but make it 3/3 since end of service is 3AM
+      ending = utc_datetime_from_local(~D[2024-03-03], ActivePeriod.end_of_service_time())
+      duration_certainty = :KNOWN
+
+      Enum.each(starts, fn %{name: name, datetime: start} ->
+        assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
+                 "through Saturday",
+               "starts #{name} and ends 6 days from today end of service"
+      end)
     end
 
     test "effect end - 7 to 90 days from today", %{
       now: now,
-      start_now: start_now,
-      start_in_30: start_in_30,
+      starts: starts,
       recurring: recurring
     } do
       # Sunday, March 3rd 2024
       ending_7 = DateTime.add(now, 7, :day)
       # Saturday, May 25th 2024
-      ending_90 = DateTime.add(now, 90, :day)
+      # bump it to 3am, end of service
+      ninety_days_later = DateTime.add(now, 90, :day)
+
+      ending_90 =
+        DateTime.new!(
+          DateTime.to_date(ninety_days_later),
+          ActivePeriod.end_of_service_time(),
+          ninety_days_later.time_zone
+        )
+
       duration_certainty = :KNOWN
 
-      Enum.each([start_now, start_in_30], fn start ->
+      Enum.each(starts, fn %{name: name, datetime: start} ->
         assert TimeframeText.timeframe_text(
                  start,
                  ending_7,
@@ -236,7 +307,8 @@ defmodule AlertsUI.TimeframeTextTest do
                  duration_certainty,
                  now
                ) ==
-                 "through March 3"
+                 "through March 3",
+               "starts #{name}, ends in 7 days"
 
         assert TimeframeText.timeframe_text(
                  start,
@@ -246,132 +318,115 @@ defmodule AlertsUI.TimeframeTextTest do
                  now
                ) ==
                  "through May 25"
+
+        "starts #{name}, ends in 90 days"
       end)
     end
 
     test "effect end - >90 days but still this year", %{
       now: now,
-      start_now: start_now,
-      start_in_30: start_in_30,
+      starts: starts,
       recurring: recurring
     } do
       # Saturday, May 25th 2024
       ending_90 = DateTime.add(now, 120, :day)
       duration_certainty = :KNOWN
 
-      assert TimeframeText.timeframe_text(
-               start_now,
-               ending_90,
-               recurring,
-               duration_certainty,
-               now
-             ) == "until June"
-
-      assert TimeframeText.timeframe_text(
-               start_in_30,
-               ending_90,
-               recurring,
-               duration_certainty,
-               now
-             ) == "until June"
+      Enum.each(starts, fn %{name: name, datetime: start} ->
+        assert TimeframeText.timeframe_text(
+                 start,
+                 ending_90,
+                 recurring,
+                 duration_certainty,
+                 now
+               ) == "until June",
+               "starts #{name}, ends >90 days but still this year"
+      end)
     end
 
     test "effect end - >90 days but still this year (until Dec end of service)", %{
       now: now,
-      start_now: start_now,
-      start_in_30: start_in_30,
+      starts: starts,
       recurring: recurring
     } do
       ending = utc_datetime_from_local(~D[2024-12-31], ActivePeriod.end_of_service_time())
       duration_certainty = :KNOWN
 
-      assert TimeframeText.timeframe_text(
-               start_now,
-               ending,
-               recurring,
-               duration_certainty,
-               now
-             ) == "until December"
-
-      assert TimeframeText.timeframe_text(
-               start_in_30,
-               ending,
-               recurring,
-               duration_certainty,
-               now
-             ) == "until December"
+      Enum.each(starts, fn %{name: name, datetime: start} ->
+        assert TimeframeText.timeframe_text(
+                 start,
+                 ending,
+                 recurring,
+                 duration_certainty,
+                 now
+               ) == "until December",
+               "starts #{name}, ends Dec end of service"
+      end)
     end
 
     test "effect end - >90 days but next year or beyond", %{
       now: now,
-      start_now: start_now,
-      start_in_30: start_in_30,
+      starts: starts,
       recurring: recurring
     } do
       # Saturday, May 25th 2024
       ending_90 = DateTime.add(now, 320, :day)
       duration_certainty = :KNOWN
 
-      assert TimeframeText.timeframe_text(
-               start_now,
-               ending_90,
-               recurring,
-               duration_certainty,
-               now
-             ) ==
-               "until January 2025"
-
-      assert TimeframeText.timeframe_text(
-               start_in_30,
-               ending_90,
-               recurring,
-               duration_certainty,
-               now
-             ) ==
-               "until January 2025"
+      Enum.each(starts, fn %{name: name, datetime: start} ->
+        assert TimeframeText.timeframe_text(
+                 start,
+                 ending_90,
+                 recurring,
+                 duration_certainty,
+                 now
+               ) ==
+                 "until January 2025",
+               "starts #{name} and ends next year"
+      end)
     end
 
     test "effect end - >90 days but on Jan 1 start of service", %{
       now: now,
-      start_now: start_now,
-      start_in_30: start_in_30,
+      starts: starts,
       recurring: recurring
     } do
       start_of_service = Time.add(ActivePeriod.start_of_service_time(), 1, :second)
       ending = utc_datetime_from_local(~D[2025-01-01], start_of_service)
       duration_certainty = :KNOWN
 
-      assert TimeframeText.timeframe_text(
-               start_now,
-               ending,
-               recurring,
-               duration_certainty,
-               now
-             ) ==
-               "until January 2025"
-
-      assert TimeframeText.timeframe_text(
-               start_in_30,
-               ending,
-               recurring,
-               duration_certainty,
-               now
-             ) ==
-               "until January 2025"
+      Enum.each(starts, fn %{name: name, datetime: start} ->
+        assert TimeframeText.timeframe_text(
+                 start,
+                 ending,
+                 recurring,
+                 duration_certainty,
+                 now
+               ) ==
+                 "until January 2025",
+               "starts #{name} ends on Jan 1 start of service"
+      end)
     end
 
     test "effect end - within 90 days but at the end of the year" do
       now = utc_datetime_from_local(~D[2024-12-25], ~T[22:00:00])
-      start_now = now
-      start_in_30 = DateTime.add(now, 30, :minute)
+
+      starts = [
+        %{name: "now", datetime: now},
+        %{name: "in 30 minutes", datetime: DateTime.add(now, 30, :minute)},
+        %{name: "recently", datetime: DateTime.add(now, -5, :day)},
+        %{name: "a while ago", datetime: DateTime.add(now, -20, :day)}
+      ]
+
       duration_certainty = :KNOWN
       recurring = false
 
       ending = DateTime.add(now, 20, :day)
 
-      Enum.each([start_now, start_in_30], fn start ->
+      Enum.each(starts, fn %{name: name, datetime: start} ->
         assert TimeframeText.timeframe_text(start, ending, recurring, duration_certainty, now) ==
-                 "through January 14"
+                 "through January 14",
+               "starts #{name} and ends within 90 days in same year"
       end)
     end
   end
@@ -387,6 +442,23 @@ defmodule AlertsUI.TimeframeTextTest do
     end
 
     test "effect end - today (at end of service)", %{now: now, start: start} do
+      ending = utc_datetime_from_local(~D[2024-02-26], ActivePeriod.end_of_service_time())
+
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "later today"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "later today"
+    end
+
+    test "effect end - today (at end of service) but starts after midnight", %{now: now} do
+      start = utc_datetime_from_local(~D[2024-02-26], ~T[01:00:00])
+      ending = utc_datetime_from_local(~D[2024-02-26], ActivePeriod.end_of_service_time())
+
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "later today"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "later today"
+    end
+
+    test "effect end - today (at end of service) but starts after midnight and it is currently after midnight" do
+      now = utc_datetime_from_local(~D[2024-02-26], ~T[00:01:00])
+      start = utc_datetime_from_local(~D[2024-02-26], ~T[01:00:00])
       ending = utc_datetime_from_local(~D[2024-02-26], ActivePeriod.end_of_service_time())
 
       assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "later today"
@@ -426,6 +498,13 @@ defmodule AlertsUI.TimeframeTextTest do
 
     test "ends tomorrow", %{now: now, start: start} do
       ending = DateTime.add(now, 1, :day) |> DateTime.add(1, :hour)
+
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "tomorrow"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "tomorrow"
+    end
+
+    test "ends tomorrow at end of service", %{now: now, start: start} do
+      ending = utc_datetime_from_local(~D[2024-02-27], ActivePeriod.end_of_service_time())
 
       assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "tomorrow"
       assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "tomorrow"
@@ -478,6 +557,14 @@ defmodule AlertsUI.TimeframeTextTest do
       assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "Friday"
     end
 
+    test "starts at start of service and ends at end of service", %{now: now} do
+      start = utc_datetime_from_local(~D[2024-03-01], ActivePeriod.start_of_service_time())
+      # ends at 3am the same "day"
+      ending = utc_datetime_from_local(~D[2024-03-02], ActivePeriod.end_of_service_time())
+
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "Friday"
+    end
+
     test "ends <= 7 days from now", %{now: now, start: start} do
       ending = DateTime.add(now, 7, :day)
 
@@ -505,16 +592,30 @@ defmodule AlertsUI.TimeframeTextTest do
     end
   end
 
-  test "starts on a Saturday within 6 days and ends the Sunday directly after" do
-    # Saturday, Feb 24th
-    start = utc_datetime_from_local(~D[2024-02-24], ~T[22:00:00])
-    # Currently 5 days before Saturday
-    now = DateTime.add(start, -5, :day)
-    # Sunday, Feb 25th
-    ending = utc_datetime_from_local(~D[2024-02-25], ~T[21:00:00])
+  describe "weekend work" do
+    test "starts on a Saturday within 6 days and ends the Sunday directly after" do
+      # Saturday, Feb 24th
+      start = utc_datetime_from_local(~D[2024-02-24], ~T[22:00:00])
+      # Currently 5 days before Saturday
+      now = DateTime.add(start, -5, :day)
+      # Sunday, Feb 25th
+      ending = utc_datetime_from_local(~D[2024-02-25], ~T[21:00:00])
 
-    assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "this weekend"
-    assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "this weekend"
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "this weekend"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "this weekend"
+    end
+
+    test "starts on a Saturday start of service and ends the Sunday directly after at end of service" do
+      # Saturday, Feb 24th
+      start = utc_datetime_from_local(~D[2024-02-24], ActivePeriod.start_of_service_time())
+      # Currently 5 days before Saturday
+      now = DateTime.add(start, -5, :day)
+      # Sunday, Feb 25th
+      ending = utc_datetime_from_local(~D[2024-02-26], ActivePeriod.end_of_service_time())
+
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "this weekend"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "this weekend"
+    end
   end
 
   describe "starts >= 7 days from now" do
@@ -535,11 +636,33 @@ defmodule AlertsUI.TimeframeTextTest do
       assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 3"
     end
 
+    test "ends same day as start date, start to end of service", %{now: now} do
+      start = utc_datetime_from_local(~D[2024-03-25], ActivePeriod.start_of_service_time())
+      ending = utc_datetime_from_local(~D[2024-03-26], ActivePeriod.end_of_service_time())
+
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "March 25"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 25"
+    end
+
     test "ends same month as start date", %{now: now, start: start} do
       ending = utc_datetime_from_local(~D[2024-03-31], ~T[22:00:00])
 
       assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "March 3-31"
       assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 3-31"
+    end
+
+    test "ends same month as start date, but at 1am", %{now: now, start: start} do
+      ending = utc_datetime_from_local(~D[2024-03-31], ~T[01:00:00])
+
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "March 3-30"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 3-30"
+    end
+
+    test "ends same month as start date, but at end of service", %{now: now, start: start} do
+      ending = utc_datetime_from_local(~D[2024-03-31], ActivePeriod.end_of_service_time())
+
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "March 3-30"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 3-30"
     end
 
     test "ends different month from start date", %{now: now, start: start} do
