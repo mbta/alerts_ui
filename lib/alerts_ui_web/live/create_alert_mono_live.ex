@@ -152,6 +152,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     {:noreply, sync_socket(socket, params)}
   end
 
+  def handle_event("recover_form", params, socket) do
+    # fires if the socket disconnects and reconnects
+    # resync the socket with the current form data and no target
+    params = Map.drop(params, ["_target"])
+    {:noreply, sync_socket(socket, params)}
+  end
+
   @impl true
   def handle_event("push_route_type", params, socket) do
     route_type = Map.get(params, "value")
