@@ -46,6 +46,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
     end
   end
 
+  @spec render(any()) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     alert_data = Map.merge(assigns.form.source.data, assigns.form.source.changes)
 
@@ -61,10 +62,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
           )
       end
 
+    loading = Map.get(assigns.selections, :loading, false)
+
     assigns =
       assign(
         assigns,
-        %{alert_data: alert_data, selected_routes: selected_routes}
+        %{alert_data: alert_data, selected_routes: selected_routes, loading: loading}
       )
 
     ~H"""
@@ -131,13 +134,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
       </.button_secondary>
       <.button_primary
         :if={@progress.name == "details"}
-        class="mt-8 ml-2 self-center"
+        class="mt-8 ml-2 self-center min-w-[10.5rem] justify-center"
         name="review"
         phx-click="review"
         type="button"
         id="review"
+        disabled={@loading}
       >
-        Review and submit
+        <.loading loading={@loading}>
+          Review and submit
+        </.loading>
       </.button_primary>
     </div>
     """

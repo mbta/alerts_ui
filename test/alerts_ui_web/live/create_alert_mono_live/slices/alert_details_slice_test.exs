@@ -350,6 +350,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         }
       })
 
+      render_async(view, 1000)
       view |> element("button#review", "Review and submit") |> render_click()
 
       assert view
