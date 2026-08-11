@@ -770,6 +770,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
     Calendar.strftime(time, "%-I:%M %p")
   end
 
+  defp datetime_to_formatted_date(nil), do: ""
+
   defp datetime_to_formatted_date(datetime) do
     datetime |> NaiveDateTime.to_date() |> format_date
   end
