@@ -42,24 +42,17 @@
 
     <.button_primary_link
       id="download-history-button"
-      class={"mt-6" <> if @loading, do: " pointer-events-none bg-primary-disabled", else: ""}
+      class={"mt-6 justify-center min-w-[11rem]" <> if @loading, do: "pointer-events-none bg-primary-disabled", else: ""}
       href={~p"/download_history/download_bulk?month=#{@selected_month}&year=#{@selected_year}"}
       target="_blank"
       disabled={@loading}
     >
-      <div :if={@loading}>
-        <div class="flex space-x-1 items-baseline">
-          <p class="mr-[1.5px]">Downloading</p>
-          <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce [animation-delay:-0.3s]">
-          </div>
-          <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce [animation-delay:-0.15s]">
-          </div>
-          <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce"></div>
-        </div>
-      </div>
-      <div :if={!@loading}>
+      <.loading
+        loading={@loading}
+        loading_text="Downloading"
+      >
         Download
-      </div>
+      </.loading>
     </.button_primary_link>
   </.form>
 </div>
