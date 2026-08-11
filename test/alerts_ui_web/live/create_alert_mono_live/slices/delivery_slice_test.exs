@@ -196,6 +196,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySliceTest do
         }
       })
 
+      render_async(view, 1000)
+
       view
       |> element("button#review", "Review and submit")
       |> render_click()
