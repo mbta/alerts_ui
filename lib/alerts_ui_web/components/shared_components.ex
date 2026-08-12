@@ -920,6 +920,16 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :hook, :string, default: nil, doc: "a JS hook to be attached to the element"
   attr :selected, :list, default: nil
 
+  attr :show_errors, :boolean,
+    default: true,
+    doc:
+      "whether to render the built-in error message below the select (border highlighting is unaffected)"
+
+  attr :fill, :boolean,
+    default: false,
+    doc:
+      "size the select via flex-1/min-h-0 instead of a percentage height, so it can participate correctly in an align-self:start layout without a stretch-derived ancestor height. When true, omit `h-full` from `class`/`select_class` — this replaces it."
+
   attr :rest, :global, include: ~w(disabled size phx-debounce)
 
   def select(%{field: %FormField{} = field} = assigns) do
@@ -933,7 +943,10 @@ defmodule AlertsUIWeb.SharedComponents do
       end)
 
     ~H"""
-    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
+    <div
+      phx-feedback-for={@name}
+      class={["#{@class}", @hidden && "hidden", @fill && "flex flex-1 flex-col min-h-0"]}
+    >
       <div :if={@modal_filter_id || @label} class="flex flex-row justify-between">
         <.label for={@id} class={"block #{if @disabled, do: "text-text-disabled", else: ""}"}>
           {@label}
@@ -975,7 +988,8 @@ defmodule AlertsUIWeb.SharedComponents do
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate",
           @select_class,
           @errors != [] && "border-danger focus:border-danger",
-          @warning && "border-warning focus:border-warning"
+          @warning && "border-warning focus:border-warning",
+          @fill && "flex-1 min-h-0"
         ]}
         multiple={@multiple}
         phx-hook="Selector"
@@ -1006,7 +1020,7 @@ defmodule AlertsUIWeb.SharedComponents do
         </option>
         {Form.options_for_select(@options, @value)}
       </select>
-      <.input_error :for={msg <- @errors} class="mt-2">{msg}</.input_error>
+      <.input_error :for={msg <- @errors} :if={@show_errors} class="mt-2">{msg}</.input_error>
     </div>
     """
   end
@@ -1072,6 +1086,16 @@ defmodule AlertsUIWeb.SharedComponents do
     default: nil,
     doc: "a separate list of selected items that overrides the field's value"
 
+  attr :show_errors, :boolean,
+    default: true,
+    doc:
+      "whether to render the built-in error message below the select (border highlighting is unaffected)"
+
+  attr :fill, :boolean,
+    default: false,
+    doc:
+      "size the inner select via flex-1/min-h-0 instead of a percentage height, so it can participate correctly in an align-self:start layout without a stretch-derived ancestor height"
+
   attr :rest, :global, include: ~w(disabled phx-debounce hook)
 
   def filtered_select(
@@ -1116,7 +1140,7 @@ defmodule AlertsUIWeb.SharedComponents do
       </div>
       <div
         class={[
-          "flex flex-col rounded border grow w-[100%]
+          "flex flex-col rounded border flex-1 min-h-0 w-[100%]
           border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
           focus-within:ring-1 focus-within:border-border-focus",
@@ -1155,10 +1179,12 @@ defmodule AlertsUIWeb.SharedComponents do
           }
           disabled={@disabled}
           loading={@loading}
-          class="m-0 h-full"
-          select_class="min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
-            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full"
+          class={"m-0 #{if @fill, do: "", else: "h-full"}"}
+          select_class={"min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
+            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] #{if @fill, do: "", else: "h-full"}"}
           selected={@selected}
+          show_errors={@show_errors}
+          fill={@fill}
           {@rest}
         />
       </div>

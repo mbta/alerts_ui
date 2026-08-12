@@ -605,6 +605,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     |> elem(0)
   end
 
+  # Rendered as a plain sibling below the (fixed-height) select box, instead of
+  # relying on the select's own built-in error message — that lives inside a
+  # percentage-height box that can't grow, so overflow content there overlaps
+  # the following <hr> rather than pushing it down.
+  def field_errors(form_field) do
+    Enum.map(form_field.errors, &translate_error/1)
+  end
+
   def render(assigns) do
     single_route_effect? = humanize_effect_name(assigns.form) in get_single_route_effect_names()
 
@@ -624,8 +632,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       </.h5>
       <div class="flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]">
         <div class={[
-          "mb-4 md:mb-0 w-full md:w-[25%] md:mr-8",
-          @route_field.errors != [] && "pb-14"
+          "mb-4 md:mb-0 w-full md:w-[25%] md:mr-8 md:self-start",
+          if(@route_field.errors != [],
+            do: "md:min-h-[36rem]",
+            else: "md:min-h-[32rem]"
+          )
         ]}>
           <.filtered_select
             label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
@@ -634,9 +645,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             loading={@selections.loading && @first_async_load}
             no_results={Enum.empty?(@selections.route_id_options)}
             options={@selections.route_id_options}
-            class="h-full"
+            class="flex-1 min-h-0"
             multiple={!@single_route_effect?}
+            show_errors={false}
+            fill={true}
           />
+          <.input_error :for={msg <- field_errors(@route_field)} class="mt-2">{msg}</.input_error>
         </div>
 
         <.modal
@@ -668,7 +682,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         </.modal>
         <div
           :if={show_trips_input?(@form[:combination].value)}
-          class="flex flex-col justify-start md:w-[25%] md:mr-8"
+          class="flex flex-col justify-start md:w-[25%] md:mr-8 md:self-start md:min-h-[32rem]"
         >
           <.select
             :if={show_directions_input?(@form[:combination].value)}
@@ -698,14 +712,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               Enum.empty?(@selections.trip_id_options) &&
                 !disable_trip_input?(@form[:route_ids].value)
             }
-            class="min-w-full h-full"
+            class="min-w-full flex-1 min-h-0"
             disabled={disable_trip_input?(@form[:route_ids].value)}
             prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
+            fill={true}
           />
         </div>
         <div class={[
-          "flex flex-col justify-start w-full md:w-[25%]",
-          @form[:stop_names_and_ids].errors != [] && "pb-14"
+          "flex flex-col justify-start w-full md:w-[25%] md:self-start",
+          if(@form[:stop_names_and_ids].errors != [],
+            do: "md:min-h-[36rem]",
+            else: "md:min-h-[32rem]"
+          )
         ]}>
           <.select
             :if={
@@ -736,15 +754,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
                 Enum.empty?(@selections.stop_id_options) &&
                   !disable_stop_input?(@form[:route_ids].value)
               }
-              class="min-w-full h-full"
+              class="min-w-full flex-1 min-h-0"
               disabled={disable_stop_input?(@form[:route_ids].value)}
               prompt={
                 if disable_stop_input?(@form[:route_ids].value),
                   do: nil,
                   else: "All Stops"
               }
+              show_errors={false}
+              fill={true}
             />
           </div>
+          <.input_error :for={msg <- field_errors(@form[:stop_names_and_ids])} class="mt-2">
+            {msg}
+          </.input_error>
         </div>
       </div>
       <p :if={@show_stop_ids}>
