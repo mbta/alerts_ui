@@ -351,6 +351,36 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     Enum.join(routes, ", ")
   end
 
+  # being verbs
+  @spec being_verb_singular(__MODULE__.t()) :: String.t()
+  def being_verb_singular(%{start_datetime: nil}), do: ""
+
+  def being_verb_singular(%{start_specifier: :now}), do: "is"
+
+  def being_verb_singular(%{start_datetime: start_datetime}) do
+    current_time = DateTimeHelpers.current_time()
+
+    if DateTimeHelpers.time_is_in_future?(start_datetime, current_time) do
+      "will be"
+    else
+      "is"
+    end
+  end
+
+  @spec being_verb_plural(__MODULE__.t()) :: String.t()
+  def being_verb_plural(%{start_datetime: nil}), do: ""
+  def being_verb_plural(%{start_specifier: :now}), do: "are"
+
+  def being_verb_plural(%{start_datetime: start_datetime}) do
+    current_time = DateTimeHelpers.current_time()
+
+    if DateTimeHelpers.time_is_in_future?(start_datetime, current_time) do
+      "will be"
+    else
+      "are"
+    end
+  end
+
   # formatters
 
   def join_facilities([first, second | rest] = facilities) when length(facilities) > 3 do
