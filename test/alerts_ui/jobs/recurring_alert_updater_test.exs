@@ -59,7 +59,7 @@ defmodule AlertsUI.Jobs.RecurringAlertUpdaterTest do
             RecurringAlertUpdater.perform(%Job{args: %{}})
           end)
 
-        assert result == :ok
+        assert result == {:error, "failed to update"}
         assert log =~ "failed to update"
       end
     end
