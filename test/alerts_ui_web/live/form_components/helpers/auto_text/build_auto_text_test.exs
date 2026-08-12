@@ -801,46 +801,46 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
   end
 
-  describe "being_verb_singular/1" do
+  describe "singular_copula/1" do
     test "start datetime is nil" do
-      assert BuildAutoText.being_verb_singular(%{start_datetime: nil}) == ""
+      assert BuildAutoText.singular_copula(%{start_datetime: nil}) == ""
     end
 
     test "starts in future" do
-      assert BuildAutoText.being_verb_singular(%{
+      assert BuildAutoText.singular_copula(%{
                start_datetime: @one_hour_from_now
              }) == "will be"
     end
 
     test "starts now" do
-      assert BuildAutoText.being_verb_singular(%{start_datetime: @now}) == "is"
+      assert BuildAutoText.singular_copula(%{start_datetime: @now}) == "is"
     end
 
     test "start_specifier :now overrides future start_datetime" do
-      assert BuildAutoText.being_verb_singular(%{
+      assert BuildAutoText.singular_copula(%{
                start_datetime: @one_hour_from_now,
                start_specifier: :now
              }) == "is"
     end
   end
 
-  describe "being_verb_plural/1" do
+  describe "plural_copula/1" do
     test "start datetime is nil" do
-      assert BuildAutoText.being_verb_plural(%{start_datetime: nil}) == ""
+      assert BuildAutoText.plural_copula(%{start_datetime: nil}) == ""
     end
 
     test "starts in future" do
-      assert BuildAutoText.being_verb_plural(%{
+      assert BuildAutoText.plural_copula(%{
                start_datetime: @one_hour_from_now
              }) == "will be"
     end
 
     test "starts now" do
-      assert BuildAutoText.being_verb_plural(%{start_datetime: @now}) == "are"
+      assert BuildAutoText.plural_copula(%{start_datetime: @now}) == "are"
     end
 
     test "start_specifier :now overrides future start_datetime" do
-      assert BuildAutoText.being_verb_plural(%{
+      assert BuildAutoText.plural_copula(%{
                start_datetime: @one_hour_from_now,
                start_specifier: :now
              }) == "are"

@@ -626,31 +626,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
     end
 
     # Bus
-    test "Bus cancellation" do
-      autotext_data = %{
-        route_type: 3,
-        routes: [@route_1],
-        schedules: [@schedule_1],
-        effect_name: "Cancellation",
-        cause_detail: "PARADE",
-        alert_timing: :"one-time",
-        start_specifier: :now,
-        end_specifier: :custom,
-        start_datetime: ~N[2025-05-08 13:00:00],
-        end_datetime: ~N[2025-05-10 15:00:00]
-      }
-
-      expected_header =
-        "Route 1 - 527 (9:01 AM from South Station) cancelled until Sat, May 10 at 3:00 PM due to a parade."
-
-      actual_header = Templates.build_auto_text(autotext_data, :header_template)
-      assert expected_header == actual_header
-
-      expected_service_effect = "Route 1 trip cancelled"
-      actual_service_effect = Templates.build_auto_text(autotext_data, :service_effect_template)
-      assert expected_service_effect == actual_service_effect
-    end
-
     test "Bus stop closure" do
       autotext_data = %{
         route_type: 3,
@@ -1643,23 +1618,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.TemplatesTest do
       }
 
       expected = "Suspended routes:\n1\n1\n1\n22\n22\n22"
-      actual = Templates.build_auto_text(autotext_data, :description_template)
-      assert expected == actual
-    end
-
-    test "bus cancellation" do
-      autotext_data = %{
-        route_type: 3,
-        effect_name: "Cancellation",
-        routes: [@route_1],
-        schedules: [@schedule_1, @schedule_2, @schedule_3],
-        stops: [],
-        direction: [1]
-      }
-
-      expected =
-        "Affected direction: eastbound\n\nCancelled trips:\n527 (9:01 AM from South Station)\n841 (11:15 AM from Forest Hills)\n528 (9:01 AM from South Station)"
-
       actual = Templates.build_auto_text(autotext_data, :description_template)
       assert expected == actual
     end

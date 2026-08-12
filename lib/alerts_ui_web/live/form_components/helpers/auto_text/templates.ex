@@ -67,7 +67,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     },
     %{
       pattern: {nil, "Suspension"},
-      header_template: "?impacted_modes service ?being_verb_singular suspended ?alert_duration ?due_to_cause|.",
+      header_template:
+        "?impacted_modes service ?singular_copula suspended ?alert_duration ?due_to_cause|.",
       service_effect_template: "?impacted_modes service suspension"
     },
     %{
@@ -134,7 +135,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {4, "Suspension"},
       header_template:
-        "?route_names ?direction_name ?trip_names|: service ?being_verb_singular suspended ?stop_range_between ?alert_duration ?due_to_cause|.",
+        "?route_names ?direction_name ?trip_names|: service ?singular_copula suspended ?stop_range_between ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -179,8 +180,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
       },
       service_effect_template: "?route_names_short shuttle"
     },
-        %{
-    pattern: {4, "Dock Issue"},
+    %{
+      pattern: {4, "Dock Issue"},
       header_template: "Dock issue at ?stop_names ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 0,
@@ -218,7 +219,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {3, "Suspension"},
       header_template:
-        "?route_names ?direction_name service ?being_verb_singular suspended ?stop_range_between ?alert_duration ?due_to_cause|.",
+        "?route_names ?direction_name service ?singular_copula suspended ?stop_range_between ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -278,7 +279,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {1, "Suspension"},
       header_template:
-        "?route_names|: ?direction_name service ?being_verb_singular suspended ?stop_range_between ?alert_duration ?due_to_cause|.",
+        "?route_names|: ?direction_name service ?singular_copula suspended ?stop_range_between ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -323,7 +324,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {1, "Shuttle"},
       header_template:
-        "?route_names|: Shuttle buses ?being_verb_plural replacing ?direction_name service ?stop_range_between ?alert_duration ?due_to_cause|.",
+        "?route_names|: Shuttle buses ?plural_copula replacing ?direction_name service ?stop_range_between ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -408,7 +409,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {2, "Suspension"},
       header_template:
-        "?route_names ?direction_name ?trip_names|: service ?being_verb_singular suspended ?stop_range_between ?alert_duration ?due_to_cause|.",
+        "?route_names ?direction_name ?trip_names|: service ?singular_copula suspended ?stop_range_between ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,
@@ -433,7 +434,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     %{
       pattern: {"Shuttle"},
       header_template:
-        "Shuttle buses ?being_verb_plural replacing ?route_names ?direction_name service ?stop_range_between ?alert_duration ?due_to_cause|.",
+        "Shuttle buses ?plural_copula replacing ?route_names ?direction_name service ?stop_range_between ?alert_duration ?due_to_cause|.",
       description_template: %{
         route_count: 5,
         stop_count: 0,

@@ -352,12 +352,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   # being verbs
-  @spec being_verb_singular(__MODULE__.t()) :: String.t()
-  def being_verb_singular(%{start_datetime: nil}), do: ""
+  @spec singular_copula(__MODULE__.t()) :: String.t()
+  def singular_copula(%{start_datetime: nil}), do: ""
 
-  def being_verb_singular(%{start_specifier: :now}), do: "is"
+  def singular_copula(%{start_specifier: :now}), do: "is"
 
-  def being_verb_singular(%{start_datetime: start_datetime}) do
+  def singular_copula(%{start_datetime: start_datetime}) do
     current_time = DateTimeHelpers.current_time()
 
     if DateTimeHelpers.time_is_in_future?(start_datetime, current_time) do
@@ -367,11 +367,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     end
   end
 
-  @spec being_verb_plural(__MODULE__.t()) :: String.t()
-  def being_verb_plural(%{start_datetime: nil}), do: ""
-  def being_verb_plural(%{start_specifier: :now}), do: "are"
+  @spec plural_copula(__MODULE__.t()) :: String.t()
+  def plural_copula(%{start_datetime: nil}), do: ""
+  def plural_copula(%{start_specifier: :now}), do: "are"
 
-  def being_verb_plural(%{start_datetime: start_datetime}) do
+  def plural_copula(%{start_datetime: start_datetime}) do
     current_time = DateTimeHelpers.current_time()
 
     if DateTimeHelpers.time_is_in_future?(start_datetime, current_time) do
