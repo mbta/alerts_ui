@@ -757,7 +757,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   defp format_errors(errors) do
     errors
-    |> Enum.uniq()
+    |> Enum.uniq_by(fn {_k, {message, _}} -> message end)
     |> Enum.map_join("; ", &format_error/1)
   end
 
