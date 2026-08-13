@@ -145,10 +145,19 @@
             class="inline-flex rounded !px-2 !py-[3px]"
             title="Close alert"
             phx-click={
-              JS.push("opening_close_modal",
-                value: %{send_all_clear?: !is_nil(alert.last_push_notification_timestamp)}
-              )
-              |> show_modal("close-alert-modal-#{alert.alert_id}")
+              checked? = !is_nil(alert.last_push_notification_timestamp)
+
+              js =
+                JS.push("opening_close_modal", value: %{send_all_clear?: checked?})
+                |> show_modal("close-alert-modal-#{alert.alert_id}")
+
+              checkbox_selector = "#all-clear-checkbox-close-alert-modal-#{alert.alert_id}"
+
+              if checked? do
+                JS.set_attribute(js, {"checked", "checked"}, to: checkbox_selector)
+              else
+                JS.remove_attribute(js, "checked", to: checkbox_selector)
+              end
             }
           >
             <.icon name="hero-x-mark-solid" class="w-4 h-4" />
