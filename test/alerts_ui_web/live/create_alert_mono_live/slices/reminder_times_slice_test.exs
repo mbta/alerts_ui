@@ -3,9 +3,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
   import AlertsUI.Support.Factory
-  alias AlertsUI.Alerts
   import Test.Support.Helpers
+  import Mock
+
+  alias AlertsUI.Alerts
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   describe "component" do
     @tag :logged_in_user
@@ -476,13 +480,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       {:ok, _} =
         Alerts.create_or_update_alert(alert_params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/edit/123")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           by_route_type: fn _route_type, _ -> [] end,
+           get_parent: fn _ -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
 
-      rendered_view = render(view)
+        rendered_view = render(view)
 
-      # reminder_times are stored as UTC and shifted to America/New_York on load
-      assert rendered_view =~ ~s(value="2024-04-30T07:54")
-      assert rendered_view =~ ~s(value="2024-04-30T08:54")
+        # reminder_times are stored as UTC and shifted to America/New_York on load
+        assert rendered_view =~ ~s(value="2024-04-30T07:54")
+        assert rendered_view =~ ~s(value="2024-04-30T08:54")
+      end
     end
 
     @tag :logged_in_user
@@ -506,37 +520,47 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       {:ok, _} =
         Alerts.create_or_update_alert(alert_params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/edit/123")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           by_route_type: fn _route_type, _ -> [] end,
+           get_parent: fn _ -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
 
-      render(view)
+        render(view)
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{"reminder_sort" => ["0", "1", "new"]}
-      })
-
-      rendered_view =
         view
         |> element("form")
         |> render_change(%{
-          "alert_data" => %{
-            "reminder_sort" => ["0", "1", "2"],
-            "reminder_times" => %{
-              "2" => %{
-                "_persistent_id" => "2",
-                "reminder_time" => "2025-06-01T12:12:12",
-                "reminder_time_specifier" => "custom"
-              }
-            }
-          }
+          "alert_data" => %{"reminder_sort" => ["0", "1", "new"]}
         })
 
-      # reminder_times are stored as UTC and shifted to America/New_York on load
-      assert rendered_view =~ ~s(value="2024-04-30T07:54")
-      assert rendered_view =~ ~s(value="2024-04-30T08:54")
-      # But this one was typed in, so we check for that value.
-      assert rendered_view =~ ~s(value="2025-06-01T12:12")
+        rendered_view =
+          view
+          |> element("form")
+          |> render_change(%{
+            "alert_data" => %{
+              "reminder_sort" => ["0", "1", "2"],
+              "reminder_times" => %{
+                "2" => %{
+                  "_persistent_id" => "2",
+                  "reminder_time" => "2025-06-01T12:12:12",
+                  "reminder_time_specifier" => "custom"
+                }
+              }
+            }
+          })
+
+        # reminder_times are stored as UTC and shifted to America/New_York on load
+        assert rendered_view =~ ~s(value="2024-04-30T07:54")
+        assert rendered_view =~ ~s(value="2024-04-30T08:54")
+        # But this one was typed in, so we check for that value.
+        assert rendered_view =~ ~s(value="2025-06-01T12:12")
+      end
     end
 
     @tag :logged_in_user
@@ -558,13 +582,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       {:ok, _} =
         Alerts.create_or_update_alert(alert_params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           by_route_type: fn _route_type, _ -> [] end,
+           get_parent: fn _ -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
 
-      refute view |> element("#reminder_times_form") |> render =~
-               ~s(value=\"2024-04-30T07:54:00\")
+        refute view |> element("#reminder_times_form") |> render =~
+                 ~s(value=\"2024-04-30T07:54:00\")
 
-      refute view |> element("#reminder_times_form") |> render =~
-               ~s(value=\"2024-04-30T08:54:00\")
+        refute view |> element("#reminder_times_form") |> render =~
+                 ~s(value=\"2024-04-30T08:54:00\")
+      end
     end
   end
 
