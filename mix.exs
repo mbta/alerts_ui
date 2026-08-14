@@ -120,7 +120,7 @@ defmodule AlertsUI.MixProject do
       {:plug_cowboy, "~> 2.7"},
       {:postgrex, ">= 0.0.0"},
       {:protox, "~> 2.0"},
-      {:req, "~> 0.6.0"},
+      {:req, "~> 0.7.2"},
       {:sentry, "~> 13.0"},
       {:sftp_client, "~> 2.1"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
