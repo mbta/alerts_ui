@@ -365,7 +365,8 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
           recurrence_days: [:saturday]
         }
 
-      result = ActivePeriodBuilder.build_recurring_active_period(alert_data)
+      result =
+        ActivePeriodBuilder.build_recurring_active_period(alert_data, ~U[2024-10-12 13:00:00Z])
 
       assert result.active_period_start == ~U[2024-10-12 13:00:00Z]
       assert result.active_period_end == nil
@@ -373,6 +374,32 @@ defmodule AlertsUI.ActivePeriodBuilderTest do
       assert result.recurrence_end_time == ~T[10:30:00]
       assert (result.active_period |> Enum.reverse() |> hd).end == ~U[2025-10-11 14:30:00Z]
       assert length(result.active_period) == 53
+      assert result.duration_certainty == :UNKNOWN
+    end
+
+    test "builds active periods with no set end date and start time is in past" do
+      # if start time is in past, we make active periods for a year out from the current time
+      current_time = ~U[2025-10-11 13:00:00Z]
+
+      alert_data =
+        %{
+          active_period_start_date: ~D[2024-10-12],
+          active_period_end_date: nil,
+          active_period_start_time: ~T[09:00:00],
+          active_period_end_time: ~T[10:30:00],
+          active_period_end_specifier: :until_further_notice,
+          recurrence_days: [:saturday]
+        }
+
+      result = ActivePeriodBuilder.build_recurring_active_period(alert_data, current_time)
+
+      assert result.active_period_start == ~U[2024-10-12 13:00:00Z]
+      assert result.active_period_end == nil
+      assert result.recurrence_start_time == ~T[09:00:00]
+      assert result.recurrence_end_time == ~T[10:30:00]
+      assert (result.active_period |> hd).start == ~U[2024-10-12 13:00:00Z]
+      assert (result.active_period |> Enum.reverse() |> hd).end == ~U[2026-10-10 14:30:00Z]
+      assert length(result.active_period) == 105
       assert result.duration_certainty == :UNKNOWN
     end
   end

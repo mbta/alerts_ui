@@ -75,34 +75,53 @@ defmodule AlertsUI.ActivePeriodBuilder do
     }
   end
 
-  @spec build_recurring_active_period(%{
-          active_period_start_time: Time.t(),
-          active_period_end_time: Time.t(),
-          active_period_end_specifier: :until_further_notice | :custom,
-          active_period_start_date: Date.t(),
-          active_period_end_date: Date.t(),
-          recurrence_days: [atom()]
-        }) :: active_period_data_t() | %{}
+  @spec build_recurring_active_period(
+          %{
+            active_period_start_time: Time.t(),
+            active_period_end_time: Time.t(),
+            active_period_end_specifier: :until_further_notice | :custom,
+            active_period_start_date: Date.t(),
+            active_period_end_date: Date.t(),
+            recurrence_days: [atom()]
+          },
+          DateTime.t()
+        ) :: active_period_data_t() | %{}
 
-  def build_recurring_active_period(%{
-        active_period_start_time: start_time,
-        active_period_end_time: end_time,
-        active_period_start_date: start_date,
-        active_period_end_date: end_date,
-        active_period_end_specifier: end_specifier,
-        recurrence_days: recurrence_days
-      }) do
+  def build_recurring_active_period(
+        %{
+          active_period_start_time: start_time,
+          active_period_end_time: end_time,
+          active_period_start_date: start_date,
+          active_period_end_date: end_date,
+          active_period_end_specifier: end_specifier,
+          recurrence_days: recurrence_days
+        },
+        current_datetime \\ DateTime.utc_now()
+      ) do
+    # datetimes coming from the form are still in Eastern here, so the start must be compared
+    # to the current time in Eastern to see if it's in the past
+    current_date =
+      current_datetime |> DateTime.shift_zone!("America/New_York") |> DateTime.to_date()
+
+    start_date_for_recurrence =
+      if Date.before?(start_date, current_date) and end_specifier == :until_further_notice do
+        current_date
+      else
+        start_date
+      end
+
     weekday_integers = Enum.map(recurrence_days, &Timex.day_to_num/1)
 
     end_date =
       if end_specifier == :until_further_notice do
-        Timex.shift(start_date, years: 1)
+        Timex.shift(start_date_for_recurrence, years: 1)
       else
         end_date
       end
 
     list_of_dates =
-      Date.range(start_date, end_date) |> Enum.filter(&(Timex.weekday(&1) in weekday_integers))
+      Date.range(start_date, end_date)
+      |> Enum.filter(&(Timex.weekday(&1) in weekday_integers))
 
     next_day_modifier = if Time.before?(start_time, end_time), do: 0, else: 1
 
