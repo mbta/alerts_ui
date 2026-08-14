@@ -351,6 +351,36 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     Enum.join(routes, ", ")
   end
 
+  # being verbs
+  @spec singular_copula(__MODULE__.t()) :: String.t()
+  def singular_copula(%{start_datetime: nil}), do: ""
+
+  def singular_copula(%{start_specifier: :now}), do: "is"
+
+  def singular_copula(%{start_datetime: start_datetime}) do
+    current_time = DateTimeHelpers.current_time()
+
+    if DateTimeHelpers.time_is_in_future?(start_datetime, current_time) do
+      "will be"
+    else
+      "is"
+    end
+  end
+
+  @spec plural_copula(__MODULE__.t()) :: String.t()
+  def plural_copula(%{start_datetime: nil}), do: ""
+  def plural_copula(%{start_specifier: :now}), do: "are"
+
+  def plural_copula(%{start_datetime: start_datetime}) do
+    current_time = DateTimeHelpers.current_time()
+
+    if DateTimeHelpers.time_is_in_future?(start_datetime, current_time) do
+      "will be"
+    else
+      "are"
+    end
+  end
+
   # formatters
 
   def join_facilities([first, second | rest] = facilities) when length(facilities) > 3 do

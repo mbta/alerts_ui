@@ -116,7 +116,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         # Check header for autotext
         assert view |> element("#alert_data_header_text") |> render() =~
-                 "Framingham/Worcester Line: service suspended"
+                 "Framingham/Worcester Line: service is suspended"
       end
     end
 
