@@ -258,10 +258,10 @@ defmodule AlertsUI.TimeframeText do
 
   defp starts_a_while_later(
          {_, start_date, _} = start_time_tuple,
-         {_, end_date, _} = end_time_tuple
+         end_time_tuple
        ) do
     start_end_same_day = same_day?(start_time_tuple, end_time_tuple)
-    start_end_same_month = start_date.month == end_date.month
+    start_end_same_month = start_date.month == get_service_date(end_time_tuple).month
 
     cond do
       start_end_same_day ->
