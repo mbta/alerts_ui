@@ -361,22 +361,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     }
   end
 
-  def determine_recurring_active_period(%{active_period: active_period} = alert) do
+  def determine_recurring_active_period(alert) do
     shifted_active_period_start = shift_to_naive(alert.active_period_start)
     shifted_active_period_end = shift_to_naive(alert.active_period_end)
 
-    [start_datetime, end_datetime] =
-      if active_period && !Enum.empty?(active_period) do
-        # The active periods are not necessarily in order in the db!
-        active_period = Enum.sort(active_period, &(DateTime.compare(&1.start, &2.start) != :gt))
-
-        [
-          List.first(active_period).start |> shift_to_naive(),
-          List.last(active_period).end |> shift_to_naive()
-        ]
-      else
-        [shifted_active_period_start, shifted_active_period_end]
-      end
+    [start_datetime, end_datetime] = [shifted_active_period_start, shifted_active_period_end]
 
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"
 

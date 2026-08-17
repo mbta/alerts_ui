@@ -120,7 +120,7 @@ defmodule AlertsUI.ActivePeriodBuilder do
       end
 
     list_of_dates =
-      Date.range(start_date, end_date)
+      Date.range(start_date_for_recurrence, end_date)
       |> Enum.filter(&(Timex.weekday(&1) in weekday_integers))
 
     next_day_modifier = if Time.before?(start_time, end_time), do: 0, else: 1
@@ -155,7 +155,10 @@ defmodule AlertsUI.ActivePeriodBuilder do
       end
 
     %{
-      active_period_start: hd(active_periods).start,
+      active_period_start:
+        start_date
+        |> DTHelpers.round_up_to_gap!(start_time, "America/New_York")
+        |> DateTime.shift_zone!("Etc/UTC"),
       active_period_end: active_period_end,
       active_period: active_periods,
       # recurrence times are stored in eastern time, NOT shifted to UTC
