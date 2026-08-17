@@ -241,14 +241,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         nil
       end
 
-    notifcation_key =
+    notification_key =
       if form_type == :editing,
         do: :send_push_notification_on_edit,
         else: :send_push_notification_on_create
 
     send_push_notification? =
       GetKeyForModeEffect.get_value_of_key(
-        notifcation_key,
+        notification_key,
         route_type || primary_service_type,
         effect_name
       )
