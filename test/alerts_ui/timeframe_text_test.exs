@@ -652,17 +652,25 @@ defmodule AlertsUI.TimeframeTextTest do
     end
 
     test "ends same month as start date, but at 1am", %{now: now, start: start} do
-      ending = utc_datetime_from_local(~D[2024-03-31], ~T[01:00:00])
+      ending = utc_datetime_from_local(~D[2024-04-01], ~T[01:00:00])
 
-      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "March 3-30"
-      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 3-30"
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "March 3-31"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 3-31"
     end
 
     test "ends same month as start date, but at end of service", %{now: now, start: start} do
-      ending = utc_datetime_from_local(~D[2024-03-31], ActivePeriod.end_of_service_time())
+      ending = utc_datetime_from_local(~D[2024-04-01], ActivePeriod.end_of_service_time())
 
-      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "March 3-30"
-      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 3-30"
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "March 3-31"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "March 3-31"
+    end
+
+    test "ends same month as start date and spans entire month", %{now: now} do
+      start = utc_datetime_from_local(~D[2024-04-01], ActivePeriod.start_of_service_time())
+      ending = utc_datetime_from_local(~D[2024-05-01], ActivePeriod.end_of_service_time())
+
+      assert TimeframeText.timeframe_text(start, ending, false, :KNOWN, now) == "April 1-30"
+      assert TimeframeText.timeframe_text(start, ending, true, :KNOWN, now) == "April 1-30"
     end
 
     test "ends different month from start date", %{now: now, start: start} do
