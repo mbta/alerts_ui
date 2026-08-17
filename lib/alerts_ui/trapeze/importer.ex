@@ -8,6 +8,7 @@ defmodule AlertsUI.Trapeze.Importer do
   alias AlertsUI.FeatureFlags
   alias AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.Alert
   use Oban.Worker
+  require Logger
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Alert
@@ -117,6 +118,7 @@ defmodule AlertsUI.Trapeze.Importer do
   @spec persist(map()) :: {:ok | :error, String.t()}
   def persist(alert_params) do
     alert = get_existing_alert(alert_params) || %Alert{}
+    Logger.info("processing alert #{alert.alert_id}")
 
     case alert_change_state(alert, alert_params) do
       :create ->
@@ -130,7 +132,7 @@ defmodule AlertsUI.Trapeze.Importer do
         {:ok, "open -> open: IGNORE open, no change"}
 
       :close ->
-        close(alert, alert_params)
+        maybe_close(alert, alert_params)
 
       :ignore_closed_manually ->
         {:ok, "closed -> open: IGNORE closed manually"}
@@ -202,23 +204,39 @@ defmodule AlertsUI.Trapeze.Importer do
   end
 
   # When neither the new or old alerts are closed
-  defp close(%Alert{closed_timestamp: nil}, %{closed_timestamp: nil}),
-    do: {:ok, "open -> open: IGNORE not closed"}
+  defp maybe_close(%Alert{closed_timestamp: nil}, %{closed_timestamp: nil}) do
+    Logger.info("neither new nor old alerts are closed")
+    {:ok, "open -> open: IGNORE not closed"}
+  end
 
   # When the alert is marked as automatically closeable
-  defp close(
+  defp maybe_close(
          %Alert{
            closed_timestamp: nil,
-           can_close_automatically: true
+           can_close_automatically: true,
+           created_at: created_at
          } = alert,
          %{
-           closed_timestamp: _closed_timestamp
+           closed_timestamp: closed_timestamp
          }
-       ),
-       do: do_close(alert)
+       ) do
+    # only close if alert was created before the closed timestamp
+    Logger.info("Alert is marked as automatically closeable")
+
+    if safe_datetime_compare(created_at, closed_timestamp) == :lt do
+      Logger.info("alert created_at less than closed_timestamp. closing.")
+      close(alert)
+    else
+      Logger.info(
+        "datetime compare was #{safe_datetime_compare(alert.created_at, closed_timestamp)}. not closing. "
+      )
+
+      {:ok, "open -> open: IGNORE can't close automatically"}
+    end
+  end
 
   # When the alert is operating on the same Work Order
-  defp close(
+  defp maybe_close(
          %Alert{
            closed_timestamp: nil,
            work_order_id: work_order_id
@@ -227,14 +245,18 @@ defmodule AlertsUI.Trapeze.Importer do
            closed_timestamp: _closed_timestamp,
            work_order_id: work_order_id
          }
-       ),
-       do: do_close(alert)
+       ) do
+    Logger.info("alert operating on same work order")
+    close(alert)
+  end
 
   # Any other case should be ignored.
-  defp close(%Alert{closed_timestamp: _}, _),
-    do: {:ok, "open -> open: IGNORE can't close automatically"}
+  defp maybe_close(%Alert{closed_timestamp: _}, _) do
+    Logger.info("fallthrough case")
+    {:ok, "open -> open: IGNORE can't close automatically"}
+  end
 
-  defp do_close(alert) do
+  defp close(alert) do
     Alerts.close(
       Repo.reload!(alert),
       @closed_origin,
@@ -254,4 +276,10 @@ defmodule AlertsUI.Trapeze.Importer do
         SFTP.source_description().filename in [nil, ""]
 
   defp enabled?, do: FeatureFlags.enabled?("Trapeze Import")
+
+  defp safe_datetime_compare(%DateTime{} = start_datetime, %DateTime{} = end_datetime) do
+    DateTime.compare(start_datetime, end_datetime)
+  end
+
+  defp safe_datetime_compare(_, _), do: nil
 end
