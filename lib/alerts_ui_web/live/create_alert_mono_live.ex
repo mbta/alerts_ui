@@ -28,9 +28,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
+  alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
   alias Phoenix.LiveView
-  alias AlertsUI.Configs.ModeEffect
 
   alias AlertsUIWeb.CreateAlertMonoLive.{
     AlertData,
