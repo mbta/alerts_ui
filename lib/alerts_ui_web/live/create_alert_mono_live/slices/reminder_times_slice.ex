@@ -23,13 +23,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
     def extract(slice, %AlertData{reminder_times: reminder_times} = _alert_data, _params) do
       converted =
+        Enum.map(reminder_times || [], fn
+          %{id: id, time: time} -> %AlertData.ReminderTime{id: id, reminder_time: time}
+          %AlertData.ReminderTime{} = rt -> rt
+        end)
+
+      converted =
         if slice.form_type == :duplicating do
-          []
-        else
-          Enum.map(reminder_times || [], fn
-            %{id: id, time: time} -> %AlertData.ReminderTime{id: id, reminder_time: time}
-            %AlertData.ReminderTime{} = rt -> rt
+          # Filter to only future reminders when duplicating
+          converted
+          |> Enum.filter(fn %AlertData.ReminderTime{id: id, reminder_time: time} ->
+            ReminderTimes.editable?(id, time)
           end)
+        else
+          converted
         end
 
       %{slice | reminder_times: converted}
