@@ -8,7 +8,6 @@ defmodule AlertsUI.Trapeze.Importer do
   alias AlertsUI.FeatureFlags
   alias AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.Alert
   use Oban.Worker
-  require Logger
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Alert
@@ -118,7 +117,6 @@ defmodule AlertsUI.Trapeze.Importer do
   @spec persist(map()) :: {:ok | :error, String.t()}
   def persist(alert_params) do
     alert = get_existing_alert(alert_params) || %Alert{}
-    Logger.info("processing alert #{alert.alert_id}")
 
     case alert_change_state(alert, alert_params) do
       :create ->
@@ -205,7 +203,6 @@ defmodule AlertsUI.Trapeze.Importer do
 
   # When neither the new or old alerts are closed
   defp maybe_close(%Alert{closed_timestamp: nil}, %{closed_timestamp: nil}) do
-    Logger.info("neither new nor old alerts are closed")
     {:ok, "open -> open: IGNORE not closed"}
   end
 
@@ -221,19 +218,10 @@ defmodule AlertsUI.Trapeze.Importer do
          }
        ) do
     # only close if alert was created before the closed timestamp
-    Logger.info("Alert is marked as automatically closeable (first pattern)")
-    Logger.info("alert created_at is #{created_at}")
-    Logger.info("alert closed_timestamp is #{closed_timestamp}")
-
-    if safe_datetime_compare(created_at, closed_timestamp) == :lt do
-      Logger.info("alert created_at less than closed_timestamp. closing.")
-      close(alert)
-    else
-      Logger.info(
-        "datetime compare was #{safe_datetime_compare(created_at, closed_timestamp)}. not closing. "
-      )
-
+    if compare_timestamps(created_at, closed_timestamp) in [:gt, :eq] do
       {:ok, "open -> open: IGNORE can't close automatically"}
+    else
+      close(alert)
     end
   end
 
@@ -248,13 +236,11 @@ defmodule AlertsUI.Trapeze.Importer do
            work_order_id: work_order_id
          }
        ) do
-    Logger.info("alert operating on same work order")
     close(alert)
   end
 
   # Any other case should be ignored.
   defp maybe_close(%Alert{closed_timestamp: _}, _) do
-    Logger.info("fallthrough case")
     {:ok, "open -> open: IGNORE can't close automatically"}
   end
 
@@ -279,9 +265,7 @@ defmodule AlertsUI.Trapeze.Importer do
 
   defp enabled?, do: FeatureFlags.enabled?("Trapeze Import")
 
-  defp safe_datetime_compare(%DateTime{} = created_at, %NaiveDateTime{} = closed_timestamp) do
-    Logger.info("they were both datetimes")
-
+  defp compare_timestamps(%DateTime{} = created_at, %NaiveDateTime{} = closed_timestamp) do
     closed_timestamp =
       closed_timestamp
       |> DateTime.from_naive!("America/New_York")
@@ -290,8 +274,7 @@ defmodule AlertsUI.Trapeze.Importer do
     DateTime.compare(created_at, closed_timestamp)
   end
 
-  defp safe_datetime_compare(_, _) do
-    Logger.info("one of them was nil")
+  defp compare_timestamps(_, _) do
     nil
   end
 end
