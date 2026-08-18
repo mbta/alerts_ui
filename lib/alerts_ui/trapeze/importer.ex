@@ -219,20 +219,41 @@ defmodule AlertsUI.Trapeze.Importer do
          %{
            closed_timestamp: closed_timestamp
          }
-       ) do
+       )
+       when not is_nil(created_at) and not is_nil(closed_timestamp) do
     # only close if alert was created before the closed timestamp
-    Logger.info("Alert is marked as automatically closeable")
+    Logger.info("Alert is marked as automatically closeable (first pattern)")
+    Logger.info("alert created_at is #{created_at}")
+    Logger.info("alert closed_timestamp is #{closed_timestamp}")
 
     if safe_datetime_compare(created_at, closed_timestamp) == :lt do
       Logger.info("alert created_at less than closed_timestamp. closing.")
       close(alert)
     else
       Logger.info(
-        "datetime compare was #{safe_datetime_compare(alert.created_at, closed_timestamp)}. not closing. "
+        "datetime compare was #{safe_datetime_compare(created_at, closed_timestamp)}. not closing. "
       )
 
       {:ok, "open -> open: IGNORE can't close automatically"}
     end
+  end
+
+  # When the alert is marked as automatically closeable
+  defp maybe_close(
+         %Alert{
+           closed_timestamp: nil,
+           can_close_automatically: true
+         } = alert,
+         %{
+           closed_timestamp: closed_timestamp
+         }
+       ) do
+    # only close if alert was created before the closed timestamp
+    Logger.info("Alert is marked as automatically closeable (second pattern)")
+    Logger.info("alert created_at is #{Map.get(alert, :created_at, "no created at")}")
+    Logger.info("alert closed_timestamp is #{closed_timestamp}")
+
+    close(alert)
   end
 
   # When the alert is operating on the same Work Order
@@ -278,8 +299,12 @@ defmodule AlertsUI.Trapeze.Importer do
   defp enabled?, do: FeatureFlags.enabled?("Trapeze Import")
 
   defp safe_datetime_compare(%DateTime{} = start_datetime, %DateTime{} = end_datetime) do
+    Logger.info("they were both datetimes")
     DateTime.compare(start_datetime, end_datetime)
   end
 
-  defp safe_datetime_compare(_, _), do: nil
+  defp safe_datetime_compare(_, _) do
+    Logger.info("one of them was nil")
+    nil
+  end
 end
