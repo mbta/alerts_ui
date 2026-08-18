@@ -737,4 +737,54 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       end
     end
   end
+
+  describe "arbitrary URL params" do
+    @tag :logged_in_user
+    test "redirects if given an arbitrary route type", %{conn: conn} do
+      result = live(conn, "/alerts/new/foobus")
+
+      assert {:error, {:redirect, %{to: "/alerts/new", flash: %{}}}} =
+               result
+
+      {:ok, conn} = follow_redirect(result, conn)
+
+      assert html_response(conn, 200) =~ ~r/Create Alert/
+    end
+
+    @tag :logged_in_user
+    test "redirects if given an arbitrary number route type", %{conn: conn} do
+      result = live(conn, "/alerts/new/123")
+
+      assert {:error, {:redirect, %{to: "/alerts/new", flash: %{}}}} =
+               result
+
+      {:ok, conn} = follow_redirect(result, conn)
+
+      assert html_response(conn, 200) =~ ~r/Create Alert/
+    end
+
+    @tag :logged_in_user
+    test "redirects if given an arbitrary effect name", %{conn: conn} do
+      result = live(conn, "/alerts/new/facility/foodelay")
+
+      assert {:error, {:redirect, %{to: "/alerts/new", flash: %{}}}} =
+               result
+
+      {:ok, conn} = follow_redirect(result, conn)
+
+      assert html_response(conn, 200) =~ ~r/Create Alert/
+    end
+
+    @tag :logged_in_user
+    test "redirects if given a real effect name but for the wrong mode type", %{conn: conn} do
+      result = live(conn, "/alerts/new/facility/delay")
+
+      assert {:error, {:redirect, %{to: "/alerts/new", flash: %{}}}} =
+               result
+
+      {:ok, conn} = follow_redirect(result, conn)
+
+      assert html_response(conn, 200) =~ ~r/Create Alert/
+    end
+  end
 end
