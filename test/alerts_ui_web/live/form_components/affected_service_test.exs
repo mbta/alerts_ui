@@ -1121,7 +1121,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     } do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
-        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]}
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
@@ -1325,7 +1326,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
 
         {:ok, view, _html} = live(conn, "/alerts/legacy/edit?alert_id=123")
 
-        html = render(view)
+        html = render_async(view)
         assert html =~ ~s(selected="" value="CR-Worcester")
         assert html =~ ~s(selected="" value="South Station|place-sstat")
         assert html =~ ~s(selected="" value="CR-683322-595")
