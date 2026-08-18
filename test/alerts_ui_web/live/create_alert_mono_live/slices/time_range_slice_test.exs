@@ -373,33 +373,48 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     @tag :logged_in_user
     test "auto-selects 'when work order is closed' for an elevator closure alert", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
+      with_mock(FacilitiesRepo,
+        get_by_type: fn _types, _opts -> [@facility] end,
+        get: fn _id -> @facility end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
 
-      assert selected_end_specifier(view) == "when_work_order_is_closed"
+        assert selected_end_specifier(view) == "when_work_order_is_closed"
+      end
     end
 
     @tag :logged_in_user
     test "auto-selects 'when work order is closed' for an escalator closure alert", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Facility", "Escalator closure")
+      with_mock(FacilitiesRepo,
+        get_by_type: fn _types, _opts -> [@facility] end,
+        get: fn _id -> @facility end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Escalator closure")
 
-      assert selected_end_specifier(view) == "when_work_order_is_closed"
+        assert selected_end_specifier(view) == "when_work_order_is_closed"
+      end
     end
 
     @tag :logged_in_user
     test "keeps the user's end specifier after auto-selecting for an elevator closure", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
-      assert selected_end_specifier(view) == "when_work_order_is_closed"
+      with_mock(FacilitiesRepo,
+        get_by_type: fn _types, _opts -> [@facility] end,
+        get: fn _id -> @facility end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
+        assert selected_end_specifier(view) == "when_work_order_is_closed"
 
-      view
-      |> element("form")
-      |> render_change(%{"alert_data" => %{"active_period_end_specifier" => "end_of_service"}})
+        view
+        |> element("form")
+        |> render_change(%{"alert_data" => %{"active_period_end_specifier" => "end_of_service"}})
 
-      assert selected_end_specifier(view) == "end_of_service"
+        assert selected_end_specifier(view) == "end_of_service"
+      end
     end
 
     @tag :logged_in_user
@@ -820,12 +835,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   describe "editing" do
     @tag :logged_in_user
     test "keeps correct end time specifier when there is no end time", %{conn: conn} do
-      create_test_alert("tr-edit-1", duration_certainty: :UNKNOWN)
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        create_test_alert("tr-edit-1", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-1")
+        {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-1")
 
-      assert view |> render() =~ "alert is manually closed"
-      refute view |> render() =~ "until later today"
+        assert view |> render() =~ "alert is manually closed"
+        refute view |> render() =~ "until later today"
+      end
     end
 
     @tag :logged_in_user
@@ -846,12 +870,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/edit/123")
+      with_mock(FacilitiesRepo,
+        get_by_type: fn _types, _opts -> [@facility] end,
+        get: fn _id -> @facility end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
 
-      assert view |> element("#duration-text") |> render() =~ "alert is manually closed"
+        assert view |> element("#duration-text") |> render() =~ "alert is manually closed"
 
-      refute view |> element("#duration-text") |> render() =~
-               "until a work order with this facility ID is closed"
+        refute view |> element("#duration-text") |> render() =~
+                 "until a work order with this facility ID is closed"
+      end
     end
 
     @tag :logged_in_user
@@ -861,17 +890,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         active_period_attrs: %{start: ~U[2040-04-29 10:54:00Z], end: ~U[2040-04-30 15:59:00Z]}
       )
 
-      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-2")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-2")
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_end_specifier" => "end_of_service"
-        }
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_end_specifier" => "end_of_service"
+          }
+        })
 
-      refute view |> element("#time_range_view") |> render() =~ "Effect must end after"
+        refute view |> element("#time_range_view") |> render() =~ "Effect must end after"
+      end
     end
 
     @tag :logged_in_user
@@ -938,17 +976,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     test "does not check start time", %{conn: conn} do
       create_test_alert("tr-edit-3", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-3")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-3")
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_end_specifier" => "later_today"
-        }
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_end_specifier" => "later_today"
+          }
+        })
 
-      refute view |> render() =~ "Effect can't start in the past"
+        refute view |> render() =~ "Effect can't start in the past"
+      end
     end
 
     @tag :logged_in_user
@@ -958,36 +1005,54 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         active_period_attrs: %{start: ~U[2024-05-10 14:30:54Z], end: ~U[2024-05-11 14:00:00Z]}
       )
 
-      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-err-1")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-err-1")
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_end_specifier" => "custom",
-          "active_period_end" => "2024-05-10T08:00:00"
-        }
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_end_specifier" => "custom",
+            "active_period_end" => "2024-05-10T08:00:00"
+          }
+        })
 
-      assert view |> render() =~ "Effect must end after"
+        assert view |> render() =~ "Effect must end after"
+      end
     end
 
     @tag :logged_in_user
     test "editing with valid change shows no errors", %{conn: conn} do
       create_test_alert("tr-edit-ok-1", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-ok-1")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-ok-1")
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_end_specifier" => "until_further_notice"
-        }
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_end_specifier" => "until_further_notice"
+          }
+        })
 
-      refute view |> render() =~ "text-text-error"
-      assert view |> render() =~ "alert is manually closed"
+        refute view |> render() =~ "text-text-error"
+        assert view |> render() =~ "alert is manually closed"
+      end
     end
 
     @tag :logged_in_user
@@ -997,42 +1062,51 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         active_period_attrs: %{start: ~U[2040-04-29 10:54:00Z], end: ~U[2040-04-30 15:59:00Z]}
       )
 
-      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-4")
-      html = render(view)
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-4")
+        html = render(view)
 
-      # specifier for start and end should be 'Custom'
-      {:ok, document} = Floki.parse_document(html)
+        # specifier for start and end should be 'Custom'
+        {:ok, document} = Floki.parse_document(html)
 
-      selected_start =
-        Floki.find(document, "select#alert_data_active_period_start_specifier option[selected]")
-        |> Floki.attribute("value")
+        selected_start =
+          Floki.find(document, "select#alert_data_active_period_start_specifier option[selected]")
+          |> Floki.attribute("value")
 
-      assert selected_start === ["custom"]
+        assert selected_start === ["custom"]
 
-      selected_end =
-        Floki.find(document, "select#alert_data_active_period_end_specifier option[selected]")
-        |> Floki.attribute("value")
+        selected_end =
+          Floki.find(document, "select#alert_data_active_period_end_specifier option[selected]")
+          |> Floki.attribute("value")
 
-      assert selected_end === ["custom"]
+        assert selected_end === ["custom"]
 
-      # the effect start and end should not be hidden
-      assert has_element?(view, "#alert_data_active_period_start-root-element")
-      refute has_element?(view, "#alert_data_active_period_start-root-element.hidden")
-      assert has_element?(view, "#alert_data_active_period_end-root-element")
-      refute has_element?(view, "#alert_data_active_period_end-root-element.hidden")
+        # the effect start and end should not be hidden
+        assert has_element?(view, "#alert_data_active_period_start-root-element")
+        refute has_element?(view, "#alert_data_active_period_start-root-element.hidden")
+        assert has_element?(view, "#alert_data_active_period_end-root-element")
+        refute has_element?(view, "#alert_data_active_period_end-root-element.hidden")
 
-      # and they should have the right values
-      start_date =
-        Floki.find(document, "input#alert_data_active_period_start")
-        |> Floki.attribute("value")
+        # and they should have the right values
+        start_date =
+          Floki.find(document, "input#alert_data_active_period_start")
+          |> Floki.attribute("value")
 
-      assert start_date === ["2040-04-29T06:54"]
+        assert start_date === ["2040-04-29T06:54"]
 
-      end_date =
-        Floki.find(document, "input#alert_data_active_period_end")
-        |> Floki.attribute("value")
+        end_date =
+          Floki.find(document, "input#alert_data_active_period_end")
+          |> Floki.attribute("value")
 
-      assert end_date === ["2040-04-30T11:59"]
+        assert end_date === ["2040-04-30T11:59"]
+      end
     end
 
     @tag :logged_in_user
@@ -1054,86 +1128,122 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-5")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/tr-edit-5")
 
-      refute view |> element("#time_range_view") |> render() =~
-               "Alert start day must match a selected day of the week."
+        refute view |> element("#time_range_view") |> render() =~
+                 "Alert start day must match a selected day of the week."
 
-      assert view |> render() =~ ~s(value="tuesday" checked="")
-      assert view |> render() =~ ~s(value="wednesday" checked="")
+        assert view |> render() =~ ~s(value="tuesday" checked="")
+        assert view |> render() =~ ~s(value="wednesday" checked="")
+      end
     end
   end
 
   describe "duplicating" do
     @tag :logged_in_user
-    test "duplicating keeps correct end time specifier when there is no end time", %{conn: conn} do
+    test "keeps correct end time specifier when there is no end time", %{conn: conn} do
       create_test_alert("tr-dup-2", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-2")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-2")
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_end_specifier" => "later_today"
-        }
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_end_specifier" => "later_today"
+          }
+        })
 
-      refute view |> render() =~ "Effect can&#39;t start in the past"
+        refute view |> render() =~ "Effect can&#39;t start in the past"
+      end
     end
 
     # is this actually the desired behavior? it looks like this currently
     # wipes APE on duplicate
     @tag :logged_in_user
     @tag :skip
-    test "duplicating with end before start shows end and start-in-past errors", %{conn: conn} do
+    test "with end before start shows end and start-in-past errors", %{conn: conn} do
       create_test_alert("tr-dup-err-1", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-err-1")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-err-1")
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_end_specifier" => "custom"
-        }
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_end_specifier" => "custom"
+          }
+        })
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_end" => "2024-05-10T08:00:00"
-        }
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_end" => "2024-05-10T08:00:00"
+          }
+        })
 
-      assert view |> element("#time_range_view") |> render() =~ "Effect must end after"
+        assert view |> element("#time_range_view") |> render() =~ "Effect must end after"
 
-      assert view |> element("#time_range_view") |> render() =~
-               "Effect can&#39;t start in the past"
+        assert view |> element("#time_range_view") |> render() =~
+                 "Effect can&#39;t start in the past"
+      end
     end
 
     @tag :logged_in_user
-    test "duplicating with valid change shows no errors", %{conn: conn} do
+    test "with valid change shows no errors", %{conn: conn} do
       create_test_alert("tr-dup-ok-1", duration_certainty: :UNKNOWN)
 
-      {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-ok-1")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/duplicate/tr-dup-ok-1")
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_start_specifier" => "now",
-          "active_period_end_specifier" => "until_further_notice"
-        }
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_start_specifier" => "now",
+            "active_period_end_specifier" => "until_further_notice"
+          }
+        })
 
-      refute view |> render() =~ "text-text-error"
-      assert view |> render() =~ "alert is manually closed"
+        refute view |> render() =~ "text-text-error"
+        assert view |> render() =~ "alert is manually closed"
+      end
     end
 
     @tag :logged_in_user
-    test "duplicating 1-time with end in past has correct defaults", %{conn: conn} do
+    test "1-time with end in past has correct defaults", %{conn: conn} do
       params =
         build(:alert_map, %{
           alert_id: "123",
@@ -1150,31 +1260,40 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
 
-      assert view |> element("#alert_data_active_period_start_specifier") |> render() =~ "Now"
+        assert view |> element("#alert_data_active_period_start_specifier") |> render() =~ "Now"
 
-      assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
-               "Later today"
+        assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
+                 "Later today"
 
-      # test that we don't now crash when we go from 1-time to recurring
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "alert_timing" => "recurring"
-        }
-      })
+        # test that we don't now crash when we go from 1-time to recurring
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "alert_timing" => "recurring"
+          }
+        })
 
-      assert view |> element("#alert_data_active_period_start_time_specifier") |> render() =~
-               "Start of service"
+        assert view |> element("#alert_data_active_period_start_time_specifier") |> render() =~
+                 "Start of service"
 
-      assert view |> element("#alert_data_active_period_end_time_specifier") |> render() =~
-               "End of service"
+        assert view |> element("#alert_data_active_period_end_time_specifier") |> render() =~
+                 "End of service"
+      end
     end
 
     @tag :logged_in_user
-    test "duplicating recurring with end in past has correct defaults", %{conn: conn} do
+    test "recurring with end in past has correct defaults", %{conn: conn} do
       params =
         build(:alert_map, %{
           alert_id: "123",
@@ -1192,12 +1311,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           get_parent: fn _stop_id -> nil end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
 
-      assert view |> element("#alert_data_active_period_start_specifier") |> render() =~ "Now"
+        assert view |> element("#alert_data_active_period_start_specifier") |> render() =~ "Now"
 
-      assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
-               "When alert is closed"
+        assert view |> element("#alert_data_active_period_end_specifier") |> render() =~
+                 "When alert is closed"
+      end
     end
   end
 

@@ -211,7 +211,7 @@ defmodule AlertsUIWeb.SharedComponents do
   """
   attr :rest, :global,
     include:
-      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled data-count)
+      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled data-count type)
 
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :hidden, :boolean, default: false, doc: "hides component if true"
@@ -240,7 +240,7 @@ defmodule AlertsUIWeb.SharedComponents do
   """
   attr :rest, :global,
     include:
-      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
+      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled target)
 
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :href, :string, default: nil, doc: "additional link"
@@ -281,7 +281,7 @@ defmodule AlertsUIWeb.SharedComponents do
   """
   attr :rest, :global,
     include:
-      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
+      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled type)
 
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :hidden, :boolean, default: false, doc: "hides component if true"
@@ -335,7 +335,7 @@ defmodule AlertsUIWeb.SharedComponents do
   """
   attr :rest, :global,
     include:
-      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled)
+      ~w(phx-target phx-click phx-value-effect_name phx-value-route_type name id value disabled type)
 
   attr :class, :string, default: "", doc: "additional classes to add"
   attr :hidden, :boolean, default: false, doc: "hides component if true"

@@ -88,7 +88,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
            included_stops_by_route_id: fn _route_id, _ -> [@stop] end
          ]},
         {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
-        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]},
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 

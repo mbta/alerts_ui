@@ -31,6 +31,8 @@ defmodule AlertsUIWeb.Tickets.AlertsCrashUponReloadTest do
   use AlertsUIWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Mock
+  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
 
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
   alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
@@ -65,10 +67,14 @@ defmodule AlertsUIWeb.Tickets.AlertsCrashUponReloadTest do
       for {route_type, effect, title_fragment} <- @reload_cases do
         url = "/alerts/new/#{route_type}/#{effect}"
 
-        {:ok, _view, html} = live(conn, url)
+        with_mock(FacilitiesRepo,
+          get_by_type: fn _facility_types, _opts -> [] end
+        ) do
+          {:ok, _view, html} = live(conn, url)
 
-        assert html =~ title_fragment,
-               "connected mount of #{url} did not render #{inspect(title_fragment)}"
+          assert html =~ title_fragment,
+                 "connected mount of #{url} did not render #{inspect(title_fragment)}"
+        end
       end
     end
   end

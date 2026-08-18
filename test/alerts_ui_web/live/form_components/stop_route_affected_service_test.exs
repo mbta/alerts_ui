@@ -59,54 +59,64 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     end
 
     test "route options are disabled until a stop is chosen" do
-      {:ok, view, _html} =
-        live_isolated_component(
-          StopRouteAffectedService,
-          assigns(%{alert_data: %{route_type: 1}})
-        )
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _route_type, _ -> [@stop] end,
+           by_route: fn _routes, _direction, _opts -> [@stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            assigns(%{alert_data: %{route_type: 1}})
+          )
 
-      view
-      |> live_assign(%{
-        available_stops: %AsyncResult{
-          ok?: true,
-          loading: false,
-          failed: false,
-          result: [@stop]
-        }
-      })
+        view
+        |> live_assign(%{
+          available_stops: %AsyncResult{
+            ok?: true,
+            loading: false,
+            failed: false,
+            result: [@stop]
+          }
+        })
 
-      assert view
-             |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="")
+        assert view
+               |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="")
 
-      view
-      |> live_assign(%{
-        available_stops: %AsyncResult{
-          ok?: true,
-          loading: false,
-          failed: false,
-          result: @routes
-        }
-      })
+        view
+        |> live_assign(%{
+          available_stops: %AsyncResult{
+            ok?: true,
+            loading: false,
+            failed: false,
+            result: @routes
+          }
+        })
 
-      view
-      |> element("form")
-      |> render_change(%{"stop_route_affected_service" => %{"stop_ids" => ["Blue"]}})
+        view
+        |> element("form")
+        |> render_change(%{"stop_route_affected_service" => %{"stop_ids" => ["Blue"]}})
 
-      refute view
-             |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="")
+        refute view
+               |> render() =~ ~s(id="stop_route_affected_service_route_ids" disabled="")
 
-      view
-      |> live_assign(%{
-        available_routes: %AsyncResult{
-          ok?: true,
-          loading: false,
-          failed: false,
-          result: @routes
-        }
-      })
+        view
+        |> live_assign(%{
+          available_routes: %AsyncResult{
+            ok?: true,
+            loading: false,
+            failed: false,
+            result: @routes
+          }
+        })
 
-      assert view
-             |> render() =~ ~s(route_number_1)
+        assert view
+               |> render() =~ ~s(route_number_1)
+      end
     end
 
     test "shuttle routes are filtered out of routes filter list" do
@@ -681,24 +691,30 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
     end
 
     test "it sends section_completed if no error in changeset" do
-      {:ok, view, _html} =
-        live_isolated_component(
-          StopRouteAffectedService,
-          assigns(%{alert_data: %{route_type: 3}})
-        )
+      with_mocks([
+        {RoutesRepo, [],
+         [by_stop: fn _stop_id -> @routes end, by_type: fn _types -> @routes end]},
+        {StopsRepo, [], [by_route_type: fn _route_type, _ -> [@stop] end]}
+      ]) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            StopRouteAffectedService,
+            assigns(%{alert_data: %{route_type: 3}})
+          )
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "stop_route_affected_service" => %{"stop_ids" => ["1"], "route_ids" => ["1"]}
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "stop_route_affected_service" => %{"stop_ids" => ["1"], "route_ids" => ["1"]}
+        })
 
-      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:section_completed,
-                       %StopRouteAffectedService{
-                         stop_ids: ["1"],
-                         route_ids: ["1"]
-                       }}}
+        assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                        {:section_completed,
+                         %StopRouteAffectedService{
+                           stop_ids: ["1"],
+                           route_ids: ["1"]
+                         }}}
+      end
     end
   end
 

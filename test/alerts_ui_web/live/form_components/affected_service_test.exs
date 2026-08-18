@@ -191,7 +191,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "direction options are only populated once a route is chosen" do
-      with_mock(StopsRepo, by_route: fn _route, _direction, _opts -> [] end) do
+      with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end
+         ]}
+      ]) do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
@@ -271,9 +278,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     end
 
     test "trip options are only populated once a route is chosen" do
-      with_mock(SchedulesRepo,
-        by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end
-      ) do
+      with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]},
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end
+         ]}
+      ]) do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
@@ -434,21 +446,28 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       tomorrow = @todays_date |> Date.add(1) |> Date.to_string()
       tomorrow_day_name = Calendar.strftime(Date.add(@todays_date, 1), "%a %b %0d")
 
-      with_mock(SchedulesRepo,
-        by_route_ids: fn
-          # ISO date used when date is selected
-          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
-            [@schedule, @schedule_2]
+      with_mocks([
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn
+             # ISO date used when date is selected
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+               [@schedule, @schedule_2]
 
-          # Date struct used in all trips- consider refactoring for consistency
-          ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
-            [@schedule, @schedule_2]
+             # Date struct used in all trips- consider refactoring for consistency
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: @todays_date] ->
+               [@schedule, @schedule_2]
 
-          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
-            [@schedule_3, @schedule_4]
-        end,
-        end_of_rating: fn -> Date.add(@todays_date, 1) end
-      ) do
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^tomorrow] ->
+               [@schedule_3, @schedule_4]
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 1) end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end
+         ]}
+      ]) do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
@@ -575,13 +594,20 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
       today = @todays_date |> Date.to_string()
       tomorrow_day_name = Date.add(@todays_date, 1) |> Timex.format!("{WDshort}")
 
-      with_mock(SchedulesRepo,
-        by_route_ids: fn
-          ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
-            [@schedule, @schedule_2]
-        end,
-        end_of_rating: fn -> Date.add(@todays_date, 1) end
-      ) do
+      with_mocks([
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn
+             ["CR-Worcester"], [stop_sequences: [:first, :last], date: ^today] ->
+               [@schedule, @schedule_2]
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 1) end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end
+         ]}
+      ]) do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
@@ -835,7 +861,14 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
     test "disables stop selection if multiple routes selected" do
       stops = [%Stop{id: "1", name: "cool stop name"}]
 
-      with_mock(StopsRepo, by_route: fn _route, _direction, _opts -> stops end) do
+      with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> stops end
+         ]}
+      ]) do
+        # with_mock(StopsRepo, by_route: fn _route, _direction, _opts -> stops end) do
         {:ok, view, _html} =
           live_isolated_component(
             AffectedService,
