@@ -28,6 +28,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
+  alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
   alias Phoenix.LiveView
 
@@ -646,7 +647,44 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     end
   end
 
-  defp create_new_alert(%{assigns: %{} = _assigns} = socket, params) do
+  defp create_new_alert(
+         %{assigns: %{} = _assigns} = socket,
+         %{"effect_name" => effect_name, "route_type" => route_type} = params
+       ) do
+    effect_name = AlertDataHelpers.humanize_effect_name(route_type, effect_name)
+
+    if effect_name === nil do
+      redirect(socket, to: ~p"/alerts/new")
+    else
+      # create a new alert
+      {_, socket} = AlertData.init(socket, params, :new)
+
+      socket
+    end
+  end
+
+  defp create_new_alert(
+         %{assigns: %{} = _assigns} = socket,
+         %{"route_type" => route_type} = params
+       ) do
+    mode_effect = ModeEffect.mode_effects_by_route_type_name(String.to_existing_atom(route_type))
+
+    if mode_effect === nil do
+      redirect(socket, to: ~p"/alerts/new")
+    else
+      {_, socket} = AlertData.init(socket, params, :new)
+      socket
+    end
+  rescue
+    # This would happen if we are given an arbitrary route_type
+    ArgumentError ->
+      redirect(socket, to: ~p"/alerts/new")
+  end
+
+  defp create_new_alert(
+         %{assigns: %{} = _assigns} = socket,
+         params
+       ) do
     # create a new alert
     {_, socket} = AlertData.init(socket, params, :new)
 
