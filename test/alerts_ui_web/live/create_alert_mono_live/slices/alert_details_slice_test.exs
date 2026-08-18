@@ -361,34 +361,43 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     test "duration works correctly in case where time is start-to-end in future the same day", %{
       conn: conn
     } do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [@stop] end,
+           by_route_type: fn _route_type, _ -> [@stop, @stop_2, @stop_3] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
-      view = get_to_submission_page_refactor(conn, view, "Ferry", "Dock closure")
+        view = get_to_submission_page_refactor(conn, view, "Ferry", "Dock closure")
 
-      render(view)
+        render(view)
 
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_start_specifier" => "start_of_service",
-          "active_period_end_specifier" => "end_of_service",
-          "active_period_start_date" => Date.to_iso8601(@tomorrows_date),
-          "active_period_end_date" => Date.to_iso8601(@tomorrows_date),
-          "active_period_start" =>
-            @tomorrows_date |> NaiveDateTime.new!(~T[03:00:00]) |> NaiveDateTime.to_iso8601(),
-          "active_period_end" =>
-            @tomorrows_date
-            |> Date.add(1)
-            |> NaiveDateTime.new!(~T[03:00:00])
-            |> NaiveDateTime.to_iso8601()
-        }
-      })
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_start_specifier" => "start_of_service",
+            "active_period_end_specifier" => "end_of_service",
+            "active_period_start_date" => Date.to_iso8601(@tomorrows_date),
+            "active_period_end_date" => Date.to_iso8601(@tomorrows_date),
+            "active_period_start" =>
+              @tomorrows_date |> NaiveDateTime.new!(~T[03:00:00]) |> NaiveDateTime.to_iso8601(),
+            "active_period_end" =>
+              @tomorrows_date
+              |> Date.add(1)
+              |> NaiveDateTime.new!(~T[03:00:00])
+              |> NaiveDateTime.to_iso8601()
+          }
+        })
 
-      assert view
-             |> element("#details_view")
-             |> render() =~
-               "on #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")}.</textarea>"
+        assert view
+               |> element("#details_view")
+               |> render() =~
+                 "on #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")}.</textarea>"
+      end
     end
 
     @tag :logged_in_user
@@ -396,42 +405,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
          %{
            conn: conn
          } do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      with_mocks([
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]},
+        {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end,
+           by_route_type: fn _route_type, _ -> [@stop, @stop_2, @stop_3] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
-      view = get_to_submission_page_refactor(conn, view, "Ferry", "Dock closure")
+        view = get_to_submission_page_refactor(conn, view, "Ferry", "Dock closure")
 
-      render(view)
+        render(view)
 
-      # Mock timerange selections
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_start_specifier" => "start_of_service",
-          "active_period_end_specifier" => "end_of_service",
-          "active_period_start_date" => @tomorrows_date |> Date.to_iso8601(),
-          "active_period_end_date" => @tomorrows_date |> Date.add(1),
-          "active_period_start" =>
-            @tomorrows_date |> NaiveDateTime.new!(~T[03:00:00]) |> NaiveDateTime.to_iso8601(),
-          "active_period_end" =>
-            @tomorrows_date
-            |> Date.add(2)
-            |> NaiveDateTime.new!(~T[03:00:00])
-            |> NaiveDateTime.to_iso8601()
-        }
-      })
+        # Mock timerange selections
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "active_period_start_specifier" => "start_of_service",
+            "active_period_end_specifier" => "end_of_service",
+            "active_period_start_date" => @tomorrows_date |> Date.to_iso8601(),
+            "active_period_end_date" => @tomorrows_date |> Date.add(1),
+            "active_period_start" =>
+              @tomorrows_date |> NaiveDateTime.new!(~T[03:00:00]) |> NaiveDateTime.to_iso8601(),
+            "active_period_end" =>
+              @tomorrows_date
+              |> Date.add(2)
+              |> NaiveDateTime.new!(~T[03:00:00])
+              |> NaiveDateTime.to_iso8601()
+          }
+        })
 
-      # expected outcome is different if the dates are weekends
-      expected_string =
-        if Date.day_of_week(@tomorrows_date) == 6 do
-          "closed the weekend of #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} and #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
-        else
-          "from #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} through #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
-        end
+        # expected outcome is different if the dates are weekends
+        expected_string =
+          if Date.day_of_week(@tomorrows_date) == 6 do
+            "closed the weekend of #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} and #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
+          else
+            "from #{Calendar.strftime(@tomorrows_date, "%a, %b %-d")} through #{Calendar.strftime(Date.add(@tomorrows_date, 1), "%a, %b %-d")}"
+          end
 
-      assert view
-             |> element("#details_view")
-             |> render() =~ expected_string
+        assert view
+               |> element("#details_view")
+               |> render() =~ expected_string
+      end
     end
 
     @tag :logged_in_user
@@ -440,7 +459,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     } do
       with_mocks([
         {RoutesRepo, [], [by_type: fn _types -> [@route] end]},
-        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]}
+        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop] end]},
+        {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 

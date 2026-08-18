@@ -65,7 +65,8 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
          ]},
         {StopsRepo, [],
          [by_route: fn _, _, _opts -> [@stop] end, all: fn ["filter[id]": ""], _ -> [@stop] end]},
-        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]},
+        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
       ]) do
         insert(:alert, alert_id: "1")
         {:ok, view, _html} = live(conn, "/alerts/legacy/new")

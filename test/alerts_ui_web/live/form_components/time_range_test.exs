@@ -941,7 +941,7 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
       assert_receive {:__live_isolated_component_handle_info_received__, _pid,
                       {:section_completed,
                        %TimeRange{
-                         active_period_end: ~N[2024-12-18 03:00:00]
+                         active_period_end: ~N[2024-12-18 08:00:00]
                        }}}
     end
 

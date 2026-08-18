@@ -3,6 +3,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
+  import Mock
+  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   describe "component" do
     @tag :logged_in_user
@@ -36,19 +39,28 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
 
     @tag :logged_in_user
     test "goes to next view when effect is selected", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/new")
+      with_mocks([
+        {RoutesRepo, [], [by_type: fn _types -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [] end,
+           by_route_type: fn _route_type, _ -> [] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
 
-      view
-      |> element("#route-type-subway-button")
-      |> render_click()
-
-      {:ok, _details_view, details_html} =
         view
-        |> element("#effect-name-station_issue-button")
+        |> element("#route-type-subway-button")
         |> render_click()
-        |> follow_redirect(conn)
 
-      assert details_html =~ ~s(Alert details)
+        {:ok, _details_view, details_html} =
+          view
+          |> element("#effect-name-station_issue-button")
+          |> render_click()
+          |> follow_redirect(conn)
+
+        assert details_html =~ ~s(Alert details)
+      end
     end
   end
 

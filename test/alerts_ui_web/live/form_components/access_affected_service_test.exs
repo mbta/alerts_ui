@@ -59,20 +59,24 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
     test "it sends section_completed if no error in changeset" do
       :ACCESS_ISSUE
 
-      {:ok, view, _html} =
-        live_isolated_component(
-          AccessAffectedService,
-          assigns(%{
-            alert_data: %{route_type: nil, effect_name: "Access Issue"}
-          })
-        )
+      with_mock(FacilitiesRepo,
+        get_by_type: fn _facility_types, _opts -> [@facility, @facility_two] end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            AccessAffectedService,
+            assigns(%{
+              alert_data: %{route_type: nil, effect_name: "Access Issue"}
+            })
+          )
 
-      view
-      |> element("form")
-      |> render_change(%{"access_affected_service" => %{"facility_ids" => ["Facility-3"]}})
+        view
+        |> element("form")
+        |> render_change(%{"access_affected_service" => %{"facility_ids" => ["Facility-3"]}})
 
-      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:section_completed, %AccessAffectedService{facility_ids: ["Facility-3"]}}}
+        assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                        {:section_completed, %AccessAffectedService{facility_ids: ["Facility-3"]}}}
+      end
     end
 
     test "search works" do
@@ -405,23 +409,27 @@ defmodule AlertsUIWeb.FormComponents.AccessAffectedServiceTest do
     test "it sends errors if errors changeset" do
       :FACILITY_ISSUE
 
-      {:ok, view, _html} =
-        live_isolated_component(
-          AccessAffectedService,
-          assigns(%{
-            alert_data: %{route_type: nil, effect_name: "Facility Issue"}
-          })
-        )
+      with_mock(FacilitiesRepo,
+        get_by_type: fn _facility_types, _opts -> [@facility, @facility_two] end
+      ) do
+        {:ok, view, _html} =
+          live_isolated_component(
+            AccessAffectedService,
+            assigns(%{
+              alert_data: %{route_type: nil, effect_name: "Facility Issue"}
+            })
+          )
 
-      view
-      |> element("form")
-      |> render_change(%{"access_affected_service" => %{"facility_ids" => []}})
+        view
+        |> element("form")
+        |> render_change(%{"access_affected_service" => %{"facility_ids" => []}})
 
-      assert_receive {:__live_isolated_component_handle_info_received__, _pid,
-                      {:section_completed,
-                       %Ecto.Changeset{
-                         errors: [facility_ids: {"can't be blank", [validation: :required]}]
-                       }}}
+        assert_receive {:__live_isolated_component_handle_info_received__, _pid,
+                        {:section_completed,
+                         %Ecto.Changeset{
+                           errors: [facility_ids: {"can't be blank", [validation: :required]}]
+                         }}}
+      end
     end
 
     test "renders while editing an existing alerts" do

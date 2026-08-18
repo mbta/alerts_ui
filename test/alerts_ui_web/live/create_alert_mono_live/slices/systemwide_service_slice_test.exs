@@ -53,6 +53,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
           alert_id: "test-systemwide-edit",
           effect: :OTHER_EFFECT,
           effect_detail: "NOTICE",
+          primary_service_type: "systemwide",
           service_types: [1]
         })
 
