@@ -309,7 +309,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           facility_ids: ["123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~U[2026-02-19 08:01:00Z],
+          closed_timestamp: ~N[2026-02-19 03:01:00],
           status: :closed
         })
 
@@ -336,7 +336,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           facility_ids: ["123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~U[2026-02-19 08:01:00Z],
+          closed_timestamp: ~N[2026-02-19 03:01:00],
           status: :closed
         })
 
@@ -362,7 +362,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           facility_ids: ["123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~U[2026-02-19 08:01:00Z],
+          closed_timestamp: ~N[2026-02-19 03:01:00],
           status: :closed
         })
 
@@ -386,7 +386,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           original_facility_selections: ["stop|123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~U[2026-02-19 08:01:00Z],
+          closed_timestamp: ~N[2026-02-19 03:01:00],
           status: :closed
         })
 
@@ -401,7 +401,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           work_order_id: "TESTORDER1",
           closed_timestamp: nil,
           can_close_automatically: true,
-          created_at: ~U[2026-02-20 08:01:00Z]
+          created_at: ~N[2026-02-20 03:01:00]
         })
 
       result =
@@ -410,7 +410,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           original_facility_selections: ["stop|123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~U[2026-02-19 08:01:00Z],
+          closed_timestamp: ~N[2026-02-19 03:01:00],
           status: :closed
         })
 
@@ -464,7 +464,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           original_facility_selections: ["stop|123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~U[2026-02-19 08:01:00Z],
+          closed_timestamp: ~N[2026-02-19 03:01:00Z],
           status: :closed
         })
 
@@ -508,7 +508,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           original_facility_selections: ["stop|123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~U[2026-02-14T12:00:00Z],
+          closed_timestamp: ~N[2026-02-14T07:00:00],
           status: :closed
         })
 

@@ -219,8 +219,7 @@ defmodule AlertsUI.Trapeze.Importer do
          %{
            closed_timestamp: closed_timestamp
          }
-       )
-       when not is_nil(created_at) and not is_nil(closed_timestamp) do
+       ) do
     # only close if alert was created before the closed timestamp
     Logger.info("Alert is marked as automatically closeable (first pattern)")
     Logger.info("alert created_at is #{created_at}")
@@ -236,24 +235,6 @@ defmodule AlertsUI.Trapeze.Importer do
 
       {:ok, "open -> open: IGNORE can't close automatically"}
     end
-  end
-
-  # When the alert is marked as automatically closeable
-  defp maybe_close(
-         %Alert{
-           closed_timestamp: nil,
-           can_close_automatically: true
-         } = alert,
-         %{
-           closed_timestamp: closed_timestamp
-         }
-       ) do
-    # only close if alert was created before the closed timestamp
-    Logger.info("Alert is marked as automatically closeable (second pattern)")
-    Logger.info("alert created_at is #{Map.get(alert, :created_at, "no created at")}")
-    Logger.info("alert closed_timestamp is #{closed_timestamp}")
-
-    close(alert)
   end
 
   # When the alert is operating on the same Work Order
@@ -298,9 +279,15 @@ defmodule AlertsUI.Trapeze.Importer do
 
   defp enabled?, do: FeatureFlags.enabled?("Trapeze Import")
 
-  defp safe_datetime_compare(%DateTime{} = start_datetime, %DateTime{} = end_datetime) do
+  defp safe_datetime_compare(%DateTime{} = created_at, %NaiveDateTime{} = closed_timestamp) do
     Logger.info("they were both datetimes")
-    DateTime.compare(start_datetime, end_datetime)
+
+    closed_timestamp =
+      closed_timestamp
+      |> DateTime.from_naive!("America/New_York")
+      |> DateTime.shift_zone!("Etc/UTC")
+
+    DateTime.compare(created_at, closed_timestamp)
   end
 
   defp safe_datetime_compare(_, _) do
