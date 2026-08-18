@@ -564,7 +564,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
-    test "don't keep reminders if duplicating", %{conn: conn} do
+    test "only keep future reminders if duplicating", %{conn: conn} do
+      now = DateTime.utc_now()
+      past_reminders = [now |> DateTime.add(-2, :minute), now |> DateTime.add(-1, :day)]
+      future_reminders = [now |> DateTime.add(2, :minute), now |> DateTime.add(1, :day)]
+
       alert_params =
         build(:alert_map, %{
           alert_id: "123",
@@ -574,8 +578,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
           cause_detail: "UNKNOWN",
           active_period_start: ~U[2024-04-30 11:45:00Z],
           reminder_times: [
-            %{reminder_time: ~U[2024-04-30 11:54:00Z]},
-            %{reminder_time: ~U[2024-04-30 12:54:00Z]}
+            %{reminder_time: hd(past_reminders)},
+            %{reminder_time: List.last(past_reminders)},
+            %{reminder_time: hd(future_reminders)},
+            %{reminder_time: List.last(future_reminders)}
           ]
         })
 
@@ -593,11 +599,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
 
-        refute view |> element("#reminder_times_form") |> render =~
-                 ~s(value=\"2024-04-30T07:54:00\")
+        Enum.each(past_reminders, fn reminder ->
+          converted =
+            DateTime.shift_zone!(reminder, "America/New_York")
+            |> Calendar.strftime("%Y-%m-%dT%H:%M")
 
-        refute view |> element("#reminder_times_form") |> render =~
-                 ~s(value=\"2024-04-30T08:54:00\")
+          refute view |> element("#reminder_times_form") |> render =~
+                   ~s(value=\"#{converted}\")
+        end)
+
+        Enum.each(future_reminders, fn reminder ->
+          converted =
+            DateTime.shift_zone!(reminder, "America/New_York")
+            |> Calendar.strftime("%Y-%m-%dT%H:%M")
+
+          assert view |> element("#reminder_times_form") |> render =~
+                   ~s(value=\"#{converted}\")
+        end)
       end
     end
   end
