@@ -126,28 +126,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
   defp validate_before_notification_end(changeset, _max_time), do: changeset
 
-  def add_new_time(changeset, %{"reminder_times" => %{"new" => "new"}}) do
-    existing = get_field(changeset, :reminder_times, [])
-    put_embed(changeset, :reminder_times, existing ++ [%{}])
-  end
-
-  def add_new_time(changeset, _), do: changeset
-
-  def drop_times(changeset, %{"reminder_drop" => indices}) do
-    indices = Enum.filter(indices, &(&1 != ""))
-    reminder_times = get_field(changeset, :reminder_times, [])
-
-    # This is blowing away the errors by pulling them out and readding them.
-    filtered =
-      Enum.reduce(indices, reminder_times, fn index, rts ->
-        List.pop_at(rts, String.to_integer(index)) |> elem(1)
-      end)
-
-    put_embed(changeset, :reminder_times, filtered)
-  end
-
-  def drop_times(changeset, _), do: changeset
-
   def render(assigns) do
     ~H"""
     <div class="min-w-full flex flex-col mt-8" id="reminder_times_form">
