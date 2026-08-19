@@ -85,15 +85,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   end
 
   def reminder_time_changeset(source, params, min_time, max_time) do
+    id = if source.id, do: source.id, else: "new-#{Ecto.UUID.generate()}"
+    source = %{source | id: id}
+
     source
     |> cast(params, [:reminder_time, :id])
     |> validate_required(:reminder_time, message: "Select reminder time")
-    |> validate_after_notification_start(params, min_time)
+    |> validate_after_notification_start(min_time)
     |> validate_before_notification_end(max_time)
   end
 
-  defp validate_after_notification_start(changeset, params, %NaiveDateTime{} = min_time) do
-    exists? = String.trim(params["id"] || "") != ""
+  defp validate_after_notification_start(changeset, %NaiveDateTime{} = min_time) do
+    id = get_field(changeset, :id)
+    exists? = not String.starts_with?(id, "new-")
     time = get_field(changeset, :reminder_time)
 
     if not exists? and match?(%NaiveDateTime{}, time) and
@@ -108,7 +112,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
     end
   end
 
-  defp validate_after_notification_start(changeset, _params, _min_time), do: changeset
+  defp validate_after_notification_start(changeset, _min_time), do: changeset
 
   defp validate_before_notification_end(changeset, %NaiveDateTime{} = max_time) do
     time = get_field(changeset, :reminder_time)
