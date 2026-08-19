@@ -33,6 +33,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatter do
     |> Enum.flat_map(fn {field, messages} ->
       Enum.map(messages, fn msg -> {field, {msg, []}} end)
     end)
+    # Remove empty values
+    |> Enum.reject(fn {_key, value} -> value === {%{}, []} end)
   end
 
   def parse_field_errors(error_map, combination) when is_map(error_map) do
