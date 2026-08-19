@@ -103,6 +103,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
     current_date =
       current_datetime |> DateTime.shift_zone!("America/New_York") |> DateTime.to_date()
 
+    # if the start date is in the past (eg when editing) we start active periods from
+    # today instead.
     start_date_for_recurrence =
       if Date.before?(start_date, current_date) and end_specifier == :until_further_notice do
         current_date
@@ -147,6 +149,11 @@ defmodule AlertsUI.ActivePeriodBuilder do
         List.last(active_periods).end
       end
 
+    active_period_start =
+      start_date
+      |> DTHelpers.round_up_to_gap!(start_time, "America/New_York")
+      |> DateTime.shift_zone!("Etc/UTC")
+
     duration_certainty =
       if end_specifier == :until_further_notice do
         :UNKNOWN
@@ -155,10 +162,7 @@ defmodule AlertsUI.ActivePeriodBuilder do
       end
 
     %{
-      active_period_start:
-        start_date
-        |> DTHelpers.round_up_to_gap!(start_time, "America/New_York")
-        |> DateTime.shift_zone!("Etc/UTC"),
+      active_period_start: active_period_start,
       active_period_end: active_period_end,
       active_period: active_periods,
       # recurrence times are stored in eastern time, NOT shifted to UTC
