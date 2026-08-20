@@ -81,6 +81,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpersTest do
              ) == false
     end
 
+    test "returns false when effect_name is not set and flag is active" do
+      change_effect_flag_active? = true
+      changing_effect? = false
+
+      assert AlertDataHelpers.show_details?(
+               map_form(%{}),
+               change_effect_flag_active?,
+               changing_effect?
+             ) == false
+    end
+
     test "returns true when effect_name is set, flag is off, but somehow change_effect is on" do
       change_effect_flag_active? = false
       changing_effect? = true
