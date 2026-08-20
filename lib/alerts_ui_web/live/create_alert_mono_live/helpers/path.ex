@@ -94,6 +94,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
     socket.assigns.form[:effect_name].value
   end
 
+  def path_effect_name_from_form(%Form{} = form) do
+    form[:effect_name].value
+  end
+
   def effect_from_url_name(nil), do: nil
 
   def effect_from_url_name(url_name) when is_atom(url_name) do

@@ -110,7 +110,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         stops_touched?: false,
         image_preview_size: nil,
         first_async_load: true,
-        steps: @steps
+        steps: @steps,
+        change_type: false
       })
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
@@ -167,11 +168,62 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
+  def handle_event(
+        "push_route_type",
+        params,
+        %{assigns: %{allow_changing_mode_effect_type: true, change_type: true}} = socket
+      ) do
+    route_type = Map.get(params, "value")
+    {:noreply, socket |> assign(:path_route_type, route_type)}
+  end
+
+  @impl true
   def handle_event("push_route_type", params, socket) do
     route_type = Map.get(params, "value")
     path = PathHelper.path_with_route_type(socket.assigns, route_type)
 
     {:noreply, push_patch(socket, to: path)}
+  end
+
+  @impl true
+  def handle_event(
+        "move_progress",
+        %{"value" => "route_type_and_effect"},
+        %{assigns: %{allow_changing_mode_effect_type: true}} = socket
+      ) do
+    cleared_source =
+      change(
+        socket.assigns.form.source,
+        %{
+          # route_type: nil,
+          # effect_name: nil,
+          combination: nil,
+          route_ids: nil,
+          stop_ids: nil,
+          trip_ids: nil,
+          facility_ids: nil
+        }
+      )
+
+    form = Phoenix.Component.to_form(cleared_source)
+
+    socket =
+      socket
+      # |> start_socket(%{})
+      |> assign(%{
+        form: Phoenix.Component.to_form(cleared_source),
+        progress: get_step_by_name("route_type_and_effect"),
+        path_route_type: Atom.to_string(PathHelper.path_route_type_from_form(form)),
+        path_effect_name: PathHelper.path_effect_name_from_form(form),
+        selections: nil,
+        change_type: true
+      })
+
+    socket =
+      socket
+      |> push_patch(to: PathHelper.path(socket.assigns))
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -208,6 +260,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
+  end
+
+  @impl true
+  def handle_event(
+        "push_effect_name",
+        params,
+        %{assigns: %{allow_changing_mode_effect_type: true, change_type: true}} = socket
+      ) do
+    effect_name = Map.get(params, "value")
+    {:noreply, socket |> assign(%{path_effect_name: effect_name, change_type: false})}
   end
 
   @impl true
@@ -636,7 +698,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       {nil, :new} ->
         create_new_alert(socket, params)
 
-      {nil, action} when action in [:edit, :duplicate] ->
+      {nil, action}
+      when action in [:edit, :duplicate] and not socket.assigns.allow_changing_mode_effect_type ->
         raise %ArgumentError{message: "you need an alert id to #{action}"}
 
       {alert_id, :new} ->

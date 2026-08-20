@@ -76,7 +76,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         %{
           alert_id: alert_id,
           path_route_type: path_route_type,
-          path_effect_name: path_effect_name
+          path_effect_name: path_effect_name,
+          change_type: socket.assigns.change_type
         }
       )
     end
@@ -201,10 +202,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   def render(
         %{
           path_route_type: path_route_type,
-          path_effect_name: path_effect_name
+          path_effect_name: path_effect_name,
+          change_type: change_type
         } = assigns
       ) do
-    if is_nil(path_route_type) || is_nil(path_effect_name) do
+    if is_nil(path_route_type) || is_nil(path_effect_name) || change_type do
       ~H"""
       <div class="min-w-full flex flex-col mb-8" id="route_view">
         <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
@@ -226,7 +228,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
           </div>
 
           <div
-            :if={is_nil(@path_effect_name)}
+            :if={is_nil(@path_effect_name) || @change_type}
             class="w-4 mr-4 w-full text-center md:text-left gap-4 flex flex-col"
           >
             Effect

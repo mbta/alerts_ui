@@ -40,8 +40,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
     get_field(form.source, key)
   end
 
-  def show_details?(form) do
-    !is_nil(form[:effect_name].value)
+  def show_details?(form, allow_changing_mode_effect_type, change_type) do
+    if allow_changing_mode_effect_type do
+      !change_type
+    else
+      !is_nil(form[:effect_name].value)
+    end
   end
 
   def get_route_type(nil), do: nil
