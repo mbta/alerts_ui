@@ -30,12 +30,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   alias AlertsUI.Alerts
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.InformedEntity
   alias Phoenix.LiveView
 
   alias AlertsUIWeb.CreateAlertMonoLive.{
     AlertData,
     Title
   }
+
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AccessAffectedServiceSlice,
@@ -191,36 +194,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         %{"value" => "route_type_and_effect"},
         %{assigns: %{allow_changing_mode_effect_type: true}} = socket
       ) do
-    cleared_source =
-      change(
-        socket.assigns.form.source,
-        %{
-          # route_type: nil,
-          # effect_name: nil,
-          combination: nil,
-          route_ids: nil,
-          stop_ids: nil,
-          trip_ids: nil,
-          facility_ids: nil
-        }
-      )
-
-    form = Phoenix.Component.to_form(cleared_source)
-
     socket =
       socket
-      # |> start_socket(%{})
       |> assign(%{
-        form: Phoenix.Component.to_form(cleared_source),
         progress: get_step_by_name("route_type_and_effect"),
-        path_route_type: Atom.to_string(PathHelper.path_route_type_from_form(form)),
-        path_effect_name: PathHelper.path_effect_name_from_form(form),
+        path_route_type: Atom.to_string(PathHelper.path_route_type_from_socket(socket)),
+        path_effect_name: PathHelper.path_effect_name_from_socket(socket),
         selections: nil,
         change_type: true
       })
-
-    socket =
-      socket
       |> push_patch(to: PathHelper.path(socket.assigns))
 
     {:noreply, socket}
@@ -269,7 +251,44 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         %{assigns: %{allow_changing_mode_effect_type: true, change_type: true}} = socket
       ) do
     effect_name = Map.get(params, "value")
-    {:noreply, socket |> assign(%{path_effect_name: effect_name, change_type: false})}
+
+    previous_combination = socket.assigns.form[:combination].value
+
+    next_combination =
+      AlertDataHelpers.combination_for(socket.assigns.path_route_type, effect_name)
+
+    previous_route_type = socket.assigns.form[:route_type].value
+    next_route_type = InformedEntity.route_type_mapping(socket.assigns.path_route_type)
+
+    form_updates =
+      ModeEffectChange.new_form_values(
+        previous_combination,
+        next_combination,
+        previous_route_type !== next_route_type
+      )
+
+    updated_source =
+      change(
+        socket.assigns.form.source,
+        Map.merge(
+          %{
+            route_type: next_route_type,
+            effect_name: effect_name,
+            combination: next_combination
+          },
+          form_updates
+        )
+      )
+
+    {:noreply,
+     socket
+     |> assign(%{
+       form: Phoenix.Component.to_form(updated_source),
+       progress: get_step_by_name(socket.assigns.progress.next),
+       path_effect_name: effect_name,
+       change_type: false
+     })
+     |> sync_socket(%{})}
   end
 
   @impl true
