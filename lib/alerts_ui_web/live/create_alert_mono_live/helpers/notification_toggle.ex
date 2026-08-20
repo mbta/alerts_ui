@@ -7,8 +7,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.NotificationToggle do
   def get_notification_toggle_default(
         %{notification_toggle: nil, route_type: route_type},
         effect_name,
-        :creating
-      ) do
+        action
+      )
+      when action in [:creating, :duplicating] do
     GetKeyForModeEffect.get_value_of_key(
       :send_push_notification_on_create,
       route_type,

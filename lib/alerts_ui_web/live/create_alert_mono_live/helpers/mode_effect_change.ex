@@ -26,7 +26,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     %{}
   end
 
-  # Eventually we can be smarter about what we retain depending on combo changes
+  # Eventually we can be smarter about what we retain depending on combo changes, i.e.
+  # def new_form_values(:RDS, :SR, false) do ...
   def new_form_values(_previous_combination, _next_combination, false) do
     %{
       route_ids: nil,

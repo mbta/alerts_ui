@@ -38,7 +38,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     Title
   }
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.{ModeEffectChange, NotificationToggle}
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AccessAffectedServiceSlice,
@@ -274,7 +274,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           %{
             route_type: next_route_type,
             effect_name: effect_name,
-            combination: next_combination
+            combination: next_combination,
+            # We want to initialize with the default for the NEW mode/effect
+            notification_toggle:
+              NotificationToggle.get_notification_toggle_default(
+                %{notification_toggle: nil, route_type: next_route_type},
+                effect_name,
+                socket.assigns.form_type
+              )
           },
           form_updates
         )
