@@ -130,7 +130,7 @@ defmodule AlertsUI.Trapeze.Importer do
         {:ok, "open -> open: IGNORE open, no change"}
 
       :close ->
-        close(alert, alert_params)
+        maybe_close(alert, alert_params)
 
       :ignore_closed_manually ->
         {:ok, "closed -> open: IGNORE closed manually"}
@@ -202,23 +202,31 @@ defmodule AlertsUI.Trapeze.Importer do
   end
 
   # When neither the new or old alerts are closed
-  defp close(%Alert{closed_timestamp: nil}, %{closed_timestamp: nil}),
-    do: {:ok, "open -> open: IGNORE not closed"}
+  defp maybe_close(%Alert{closed_timestamp: nil}, %{closed_timestamp: nil}) do
+    {:ok, "open -> open: IGNORE not closed"}
+  end
 
   # When the alert is marked as automatically closeable
-  defp close(
+  defp maybe_close(
          %Alert{
            closed_timestamp: nil,
-           can_close_automatically: true
+           can_close_automatically: true,
+           created_at: created_at
          } = alert,
          %{
-           closed_timestamp: _closed_timestamp
+           closed_timestamp: closed_timestamp
          }
-       ),
-       do: do_close(alert)
+       ) do
+    # only close if alert was created before the closed timestamp
+    if compare_timestamps(created_at, closed_timestamp) in [:gt, :eq] do
+      {:ok, "open -> open: IGNORE can't close automatically"}
+    else
+      close(alert)
+    end
+  end
 
   # When the alert is operating on the same Work Order
-  defp close(
+  defp maybe_close(
          %Alert{
            closed_timestamp: nil,
            work_order_id: work_order_id
@@ -227,14 +235,16 @@ defmodule AlertsUI.Trapeze.Importer do
            closed_timestamp: _closed_timestamp,
            work_order_id: work_order_id
          }
-       ),
-       do: do_close(alert)
+       ) do
+    close(alert)
+  end
 
   # Any other case should be ignored.
-  defp close(%Alert{closed_timestamp: _}, _),
-    do: {:ok, "open -> open: IGNORE can't close automatically"}
+  defp maybe_close(%Alert{closed_timestamp: _}, _) do
+    {:ok, "open -> open: IGNORE can't close automatically"}
+  end
 
-  defp do_close(alert) do
+  defp close(alert) do
     Alerts.close(
       Repo.reload!(alert),
       @closed_origin,
@@ -254,4 +264,17 @@ defmodule AlertsUI.Trapeze.Importer do
         SFTP.source_description().filename in [nil, ""]
 
   defp enabled?, do: FeatureFlags.enabled?("Trapeze Import")
+
+  defp compare_timestamps(%DateTime{} = created_at, %NaiveDateTime{} = closed_timestamp) do
+    closed_timestamp =
+      closed_timestamp
+      |> DateTime.from_naive!("America/New_York")
+      |> DateTime.shift_zone!("Etc/UTC")
+
+    DateTime.compare(created_at, closed_timestamp)
+  end
+
+  defp compare_timestamps(_, _) do
+    nil
+  end
 end
