@@ -365,25 +365,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     shifted_active_period_start = shift_to_naive(alert.active_period_start)
     shifted_active_period_end = shift_to_naive(alert.active_period_end)
 
-    [start_datetime, end_datetime] =
-      if active_period && !Enum.empty?(active_period) do
-        # The active periods are not necessarily in order in the db!
-        active_period = Enum.sort(active_period, &(DateTime.compare(&1.start, &2.start) != :gt))
-
-        [
-          List.first(active_period).start |> shift_to_naive(),
-          List.last(active_period).end |> shift_to_naive()
-        ]
-      else
-        [shifted_active_period_start, shifted_active_period_end]
-      end
+    [start_datetime, end_datetime] = [shifted_active_period_start, shifted_active_period_end]
 
     end_specifier = if alert.active_period_end, do: "custom", else: "until_further_notice"
 
     [recurrence_start_time, recurrence_end_time] =
       [
         Map.get(alert, :recurrence_start_time) || NaiveDateTime.to_time(start_datetime),
-        Map.get(alert, :recurrence_end_time) || NaiveDateTime.to_time(end_datetime)
+        Map.get(alert, :recurrence_end_time) || further_notice_end_time(active_period)
       ]
 
     %{
@@ -402,6 +391,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
         alert.active_period_end |> shift_to_naive |> end_date(end_specifier),
       recurrence_days: alert.recurrence_days |> Enum.map(&Atom.to_string/1)
     }
+  end
+
+  defp further_notice_end_time(active_period) do
+    # get end time from first active period. fallback for older alerts with no
+    # recurrence time stored.
+    hd(active_period).end |> shift_to_naive() |> NaiveDateTime.to_time()
   end
 
   defp get_notification_specifier(nil), do: :same_as_effect_period
