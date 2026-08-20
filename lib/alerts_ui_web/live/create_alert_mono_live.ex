@@ -279,16 +279,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           form_updates
         )
       )
+      |> Map.put(:errors, [])
 
-    {:noreply,
-     socket
-     |> assign(%{
-       form: Phoenix.Component.to_form(updated_source),
-       progress: get_step_by_name(socket.assigns.progress.next),
-       path_effect_name: effect_name,
-       change_type: false
-     })
-     |> sync_socket(%{})}
+    socket =
+      socket
+      |> assign(%{
+        form: Phoenix.Component.to_form(updated_source),
+        progress: get_step_by_name(socket.assigns.progress.next),
+        path_effect_name: effect_name,
+        change_type: false,
+        submitted?: false
+      })
+      |> sync_socket(%{})
+
+    {:noreply, socket}
   end
 
   @impl true
