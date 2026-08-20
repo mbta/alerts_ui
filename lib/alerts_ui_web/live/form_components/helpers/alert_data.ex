@@ -61,7 +61,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :trip_ids,
     :url,
     :last_push_notification_timestamp,
-    :notification_toggle
+    :notification_toggle,
+    :work_order_id
   ]
 
   @type reminder_time_t :: %{
@@ -116,7 +117,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           trip_ids: [String.t()] | nil,
           url: String.t() | nil,
           last_push_notification_timestamp: DateTime.t() | nil,
-          notification_toggle: boolean()
+          notification_toggle: boolean(),
+          work_order_id: String.t() | nil
         }
   # effect names where user can only select 1 type of thing
   @single_route_effect_names ["Detour", "Snow Route"]
@@ -165,6 +167,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     |> Map.put(:form_type, form_type)
     |> Map.merge(service_types(alert))
     |> Map.merge(banner_sync_toggle(alert))
+    |> Map.merge(work_order_id(alert, form_type))
   end
 
   def build_alert_data(_, _), do: %__MODULE__{}
@@ -328,6 +331,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   defp banner_sync_toggle(alert) do
     %{banner_sync_toggle: is_nil(alert.banner_text)}
   end
+
+  defp work_order_id(alert, :editing) do
+    %{
+      work_order_id: alert.work_order_id
+    }
+  end
+
+  defp work_order_id(_alert, _form_type), do: %{work_order_id: nil}
 
   def determine_one_time_active_period(alert) do
     shifted_active_period_start = shift_to_naive(alert.active_period_start)

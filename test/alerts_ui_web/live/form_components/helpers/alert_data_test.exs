@@ -845,6 +845,54 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
     end
   end
 
+  test "correctly adds work order id if edited by user" do
+    user = insert(:user)
+
+    original_alert_map =
+      build(
+        :alert_map,
+        %{
+          alert_id: "123",
+          header_text: "old header text",
+          work_order_id: "123-abc",
+          user: user
+        }
+      )
+
+    Alerts.create_or_update_alert(original_alert_map, user)
+
+    existing_alert = Alerts.get_by_alert_id("123")
+    assert existing_alert.work_order_id == "123-abc"
+
+    alert_data = AlertData.build_alert_data("123", :editing)
+
+    assert alert_data.work_order_id == "123-abc"
+  end
+
+  test "does not add work order id if duplicated by user" do
+    user = insert(:user)
+
+    original_alert_map =
+      build(
+        :alert_map,
+        %{
+          alert_id: "123",
+          header_text: "old header text",
+          work_order_id: "123-abc",
+          user: user
+        }
+      )
+
+    Alerts.create_or_update_alert(original_alert_map, user)
+
+    existing_alert = Alerts.get_by_alert_id("123")
+    assert existing_alert.work_order_id == "123-abc"
+
+    alert_data = AlertData.build_alert_data("123", :duplicating)
+
+    assert is_nil(alert_data.work_order_id)
+  end
+
   defp utc_datetime_from_local(date, time) do
     DateTime.new!(date, time, "America/New_York") |> DateTime.shift_zone!("Etc/UTC")
   end

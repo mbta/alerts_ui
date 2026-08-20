@@ -105,6 +105,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :trip_information_by_id, {:map, :map}
     field :trip_search_term, :string
     field :service_types, {:array, :integer}
+    field :work_order_id, :string
 
     # time range
     field :alert_timing, Ecto.Enum, values: @alert_timing_values, default: :"one-time"
@@ -183,6 +184,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
           original_trip_selections: [String.t()] | nil,
           trip_information_by_id: map() | nil,
           service_types: [integer()] | nil,
+          work_order_id: String.t() | nil,
           # timing
           active_period_end: NaiveDateTime.t() | nil,
           active_period_end_date: Date.t() | nil,
