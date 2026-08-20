@@ -320,7 +320,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
-    test "reminder validates when the notifiation period changes",
+    test "reminder validates when the notification period changes",
          %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
@@ -564,7 +564,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
     end
 
     @tag :logged_in_user
-    test "don't keep reminders if duplicating", %{conn: conn} do
+    test "only keep future reminders if duplicating", %{conn: conn} do
+      now = DateTime.utc_now()
+      past_reminders = [now |> DateTime.add(-2, :minute), now |> DateTime.add(-1, :day)]
+      future_reminders = [now |> DateTime.add(2, :minute), now |> DateTime.add(1, :day)]
+
       alert_params =
         build(:alert_map, %{
           alert_id: "123",
@@ -574,8 +578,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
           cause_detail: "UNKNOWN",
           active_period_start: ~U[2024-04-30 11:45:00Z],
           reminder_times: [
-            %{reminder_time: ~U[2024-04-30 11:54:00Z]},
-            %{reminder_time: ~U[2024-04-30 12:54:00Z]}
+            %{reminder_time: hd(past_reminders)},
+            %{reminder_time: List.last(past_reminders)},
+            %{reminder_time: hd(future_reminders)},
+            %{reminder_time: List.last(future_reminders)}
           ]
         })
 
@@ -593,11 +599,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
 
-        refute view |> element("#reminder_times_form") |> render =~
-                 ~s(value=\"2024-04-30T07:54:00\")
+        Enum.each(past_reminders, fn reminder ->
+          converted =
+            DateTime.shift_zone!(reminder, "America/New_York")
+            |> Calendar.strftime("%Y-%m-%dT%H:%M")
 
-        refute view |> element("#reminder_times_form") |> render =~
-                 ~s(value=\"2024-04-30T08:54:00\")
+          refute view |> element("#reminder_times_form") |> render =~
+                   ~s(value=\"#{converted}\")
+        end)
+
+        Enum.each(future_reminders, fn reminder ->
+          converted =
+            DateTime.shift_zone!(reminder, "America/New_York")
+            |> Calendar.strftime("%Y-%m-%dT%H:%M")
+
+          assert view |> element("#reminder_times_form") |> render =~
+                   ~s(value=\"#{converted}\")
+        end)
       end
     end
   end
@@ -643,7 +661,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       assert after_add.assigns.form.source.action == :validate,
              "form should be invalid for this regression to be meaningful"
 
-      assert length(reminders(after_add)) == 1,
+      created_reminders = reminders(after_add)
+
+      assert length(created_reminders) == 1,
              "reminder should be added even when validation fails"
 
       # Drop the only entry. Without the materialize step, cast_embed would short-circuit
@@ -656,7 +676,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
             "reminder_sort" => ["0"],
             "reminder_drop" => ["", "0"],
             "reminder_times" => %{
-              "0" => %{"id" => ""}
+              "0" => %{"id" => hd(created_reminders).id}
             }
           })
         )
@@ -673,6 +693,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
       initial_socket = :sys.get_state(view.pid).socket
 
       after_add = sync!(initial_socket, invalid_form_params(%{"reminder_sort" => ["new"]}))
+      created_reminder_id = hd(reminders(after_add)).id
 
       after_fill =
         sync!(
@@ -681,7 +702,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
             "reminder_sort" => ["0"],
             "reminder_times" => %{
               "0" => %{
-                "id" => "",
+                "id" => created_reminder_id,
                 "reminder_time" => "2222-02-22T22:22:00"
               }
             }
@@ -699,7 +720,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
             "reminder_drop" => ["", "0"],
             "reminder_times" => %{
               "0" => %{
-                "id" => "",
+                "id" => created_reminder_id,
                 "reminder_time" => "2222-02-22T22:22:00"
               }
             }
