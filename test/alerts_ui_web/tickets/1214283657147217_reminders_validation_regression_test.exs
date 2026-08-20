@@ -44,15 +44,10 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
 
   describe "reminder_time_changeset/4 — blank value" do
     test "blank reminder_time produces 'Select reminder time' error" do
-      params = %{
-        "reminder_time" => "",
-        "id" => ""
-      }
-
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
-          params,
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{id: "", reminder_time: ""},
+          %{},
           @min_time,
           @max_time
         )
@@ -63,14 +58,10 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     end
 
     test "nil reminder_time produces 'Select reminder time' error" do
-      params = %{
-        "id" => ""
-      }
-
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
-          params,
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{id: nil, reminder_time: nil},
+          %{},
           @min_time,
           @max_time
         )
@@ -83,16 +74,17 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
 
   describe "reminder_time_changeset/4 — past value" do
     test "reminder_time before notification start produces 'after notification period starts' error for new entries" do
-      # new entry: id is blank
-      params = %{
-        "reminder_time" => "2024-09-25T06:00:00",
-        "id" => ""
-      }
-
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
-          params,
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{
+            id: "new-123",
+            reminder_time: nil
+          },
+          %{
+            "_persistent_id" => "0",
+            "id" => "new-123",
+            "reminder_time" => "2024-09-25T06:00:00"
+          },
           @min_time,
           @max_time
         )
@@ -107,16 +99,18 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     end
 
     test "existing reminder (has id) before notification start does NOT produce a past-time error" do
-      # existing record: past times are allowed (already sent)
-      params = %{
-        "reminder_time" => "2024-09-25T06:00:00",
-        "id" => "some-existing-uuid"
-      }
-
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
-          params,
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{
+            id: "some-existing-uuid",
+            # existing record: past times are allowed (already sent)
+            reminder_time: ~N[2024-09-25 06:00:00]
+          },
+          %{
+            "_persistent_id" => "0",
+            "id" => "some-existing-uuid",
+            "reminder_time" => "2024-09-25T06:00:00"
+          },
           @min_time,
           @max_time
         )
@@ -133,13 +127,17 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
   describe "reminder_time_changeset/4 — valid future value" do
     test "future reminder time within notification end has no errors" do
       params = %{
+        "_persistent_id" => "0",
         "reminder_time" => "2024-09-25T12:00:00",
-        "id" => ""
+        "id" => "new-123"
       }
 
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{
+            id: "new-123",
+            reminder_time: nil
+          },
           params,
           @min_time,
           @max_time
@@ -151,13 +149,17 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
 
     test "nil notification end (until further notice) skips the upper-bound check" do
       params = %{
+        "_persistent_id" => "0",
         "reminder_time" => "3030-01-01T00:00:00",
-        "id" => ""
+        "id" => "new-123"
       }
 
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{},
+          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{
+            id: "new-123",
+            reminder_time: nil
+          },
           params,
           @min_time,
           nil
@@ -198,7 +200,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
             "reminder_times" => %{
               "0" => %{
                 "_persistent_id" => "0",
-                "id" => "",
+                "id" => "new-123",
                 "reminder_time" => "2020-01-01T10:00:00"
               }
             }
@@ -234,7 +236,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
             "reminder_times" => %{
               "0" => %{
                 "_persistent_id" => "0",
-                "id" => "",
+                "id" => "new-123",
                 "reminder_time" => ""
               }
             }

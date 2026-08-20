@@ -23,13 +23,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
 
     def extract(slice, %AlertData{reminder_times: reminder_times} = _alert_data, _params) do
       converted =
+        Enum.map(reminder_times || [], fn
+          %{id: id, time: time} -> %AlertData.ReminderTime{id: id, reminder_time: time}
+          %AlertData.ReminderTime{} = rt -> rt
+        end)
+
+      converted =
         if slice.form_type == :duplicating do
-          []
-        else
-          Enum.map(reminder_times || [], fn
-            %{id: id, time: time} -> %AlertData.ReminderTime{id: id, reminder_time: time}
-            %AlertData.ReminderTime{} = rt -> rt
+          # Filter to only future reminders when duplicating
+          converted
+          |> Enum.filter(fn %AlertData.ReminderTime{id: id, reminder_time: time} ->
+            ReminderTimes.editable?(id, time)
           end)
+        else
+          converted
         end
 
       %{slice | reminder_times: converted}
@@ -78,15 +85,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   end
 
   def reminder_time_changeset(source, params, min_time, max_time) do
+    id = if source.id, do: source.id, else: "new-#{Ecto.UUID.generate()}"
+    source = %{source | id: id}
+
     source
     |> cast(params, [:reminder_time, :id])
     |> validate_required(:reminder_time, message: "Select reminder time")
-    |> validate_after_notification_start(params, min_time)
+    |> validate_after_notification_start(min_time)
     |> validate_before_notification_end(max_time)
   end
 
-  defp validate_after_notification_start(changeset, params, %NaiveDateTime{} = min_time) do
-    exists? = String.trim(params["id"] || "") != ""
+  defp validate_after_notification_start(changeset, %NaiveDateTime{} = min_time) do
+    id = get_field(changeset, :id)
+    exists? = not String.starts_with?(id, "new-")
     time = get_field(changeset, :reminder_time)
 
     if not exists? and match?(%NaiveDateTime{}, time) and
@@ -101,7 +112,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
     end
   end
 
-  defp validate_after_notification_start(changeset, _params, _min_time), do: changeset
+  defp validate_after_notification_start(changeset, _min_time), do: changeset
 
   defp validate_before_notification_end(changeset, %NaiveDateTime{} = max_time) do
     time = get_field(changeset, :reminder_time)
@@ -118,28 +129,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   end
 
   defp validate_before_notification_end(changeset, _max_time), do: changeset
-
-  def add_new_time(changeset, %{"reminder_times" => %{"new" => "new"}}) do
-    existing = get_field(changeset, :reminder_times, [])
-    put_embed(changeset, :reminder_times, existing ++ [%{}])
-  end
-
-  def add_new_time(changeset, _), do: changeset
-
-  def drop_times(changeset, %{"reminder_drop" => indices}) do
-    indices = Enum.filter(indices, &(&1 != ""))
-    reminder_times = get_field(changeset, :reminder_times, [])
-
-    # This is blowing away the errors by pulling them out and readding them.
-    filtered =
-      Enum.reduce(indices, reminder_times, fn index, rts ->
-        List.pop_at(rts, String.to_integer(index)) |> elem(1)
-      end)
-
-    put_embed(changeset, :reminder_times, filtered)
-  end
-
-  def drop_times(changeset, _), do: changeset
 
   def render(assigns) do
     ~H"""
