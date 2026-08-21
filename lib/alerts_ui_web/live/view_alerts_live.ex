@@ -41,6 +41,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     # subscribe to changes in the alerts listing
     if connected?(socket) do
       Phoenix.PubSub.subscribe(AlertsUI.PubSub, "alerts")
+      Phoenix.PubSub.subscribe(AlertsUI.PubSub, "paginating")
     end
 
     filters = Map.get(params, "filter", %{"timeline" => "current"})
@@ -59,16 +60,39 @@ defmodule AlertsUIWeb.ViewAlertsLive do
        params: params,
        scroll_to_top: false,
        send_all_clear?: false,
-       alerts: []
+       alerts: [],
+       loading: false
      )}
   end
 
   @impl true
   def handle_info({:alerts_updated}, socket) do
+    Phoenix.PubSub.broadcast(
+      AlertsUI.PubSub,
+      "paginating",
+      {:paginate_start}
+    )
+
     # Whenever an alert is edited or added/deleted, list all the alerts again.
     with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.meta.flop) do
+      Phoenix.PubSub.broadcast(
+        AlertsUI.PubSub,
+        "paginating",
+        {:paginate_end}
+      )
+
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
+  end
+
+  @impl true
+  def handle_info({:paginate_start}, socket) do
+    {:noreply, assign(socket, loading: true)}
+  end
+
+  @impl true
+  def handle_info({:paginate_end}, socket) do
+    {:noreply, assign(socket, loading: false)}
   end
 
   @impl true
@@ -80,6 +104,12 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_params(params, _url, socket) do
+    Phoenix.PubSub.broadcast(
+      AlertsUI.PubSub,
+      "paginating",
+      {:paginate_start}
+    )
+
     # default to timeline: current if params have no values
     # (eg no user input has occurred and we're probably in a fresh reload)
     filters = get_filters(params, "current")
@@ -123,6 +153,12 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> Phoenix.Component.to_form()
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
+      Phoenix.PubSub.broadcast(
+        AlertsUI.PubSub,
+        "paginating",
+        {:paginate_end}
+      )
+
       {:noreply,
        assign(socket, meta: meta, alerts: alerts, form: form, params: params, loading: false)}
     end
@@ -130,10 +166,22 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_event("paginate-alerts", %{"page" => page}, socket) do
+    Phoenix.PubSub.broadcast(
+      AlertsUI.PubSub,
+      "paginating",
+      {:paginate_start}
+    )
+
     flop =
       Flop.set_page(socket.assigns.meta.flop, page)
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
+      Phoenix.PubSub.broadcast(
+        AlertsUI.PubSub,
+        "paginating",
+        {:paginate_end}
+      )
+
       params = Map.merge(socket.assigns.params, %{"page" => page})
 
       {:noreply,

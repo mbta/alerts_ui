@@ -1867,7 +1867,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       })
 
       conn = get(conn, "/alerts")
-      assert html_response(conn, 200) =~ "Loading..."
+      assert html_response(conn, 200) =~ "Loading"
 
       {:ok, _view, html} = live(conn)
       refute html =~ "Loading"
