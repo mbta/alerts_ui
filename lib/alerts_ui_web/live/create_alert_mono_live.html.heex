@@ -79,6 +79,7 @@
             check_predictions={@check_predictions}
             check_trip_end={@check_trip_end}
             allow_changing_mode_effect_type={@allow_changing_mode_effect_type}
+            persisting_alert={@persisting_alert}
           />
           <.modal
             :if={obsolete_ids_found?(@obsolete_ids)}

@@ -63,7 +63,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
           )
       end
 
-    loading = Map.get(assigns.selections, :loading, false)
+    loading = Map.get(assigns.selections, :loading, false) or assigns.persisting_alert
 
     assigns =
       assign(

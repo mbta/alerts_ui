@@ -98,6 +98,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     form_type = form_type_from_socket(socket)
     form_title = form_title_from_type(form_type)
 
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(AlertsUI.PubSub, "persisting")
+    end
+
     socket =
       socket
       |> assign(%{
@@ -114,7 +118,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         image_preview_size: nil,
         first_async_load: true,
         steps: @steps,
-        change_type: false
+        change_type: false,
+        persisting_alert: false
       })
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
@@ -696,6 +701,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_info({:persisting_start}, socket) do
+    {:noreply, assign(socket, persisting_alert: true)}
+  end
+
+  @impl true
+  def handle_info({:persisting_end}, socket) do
+    {:noreply, assign(socket, persisting_alert: false)}
+  end
+
   defp get_step_by_name(name) do
     Enum.find(@steps, &(&1.name == name))
   end
@@ -921,6 +936,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   defp flash_text(_assigns_alert_id, alert_id, _form_type), do: "Alert ##{alert_id} updated"
 
   defp persist_valid_alert(socket) do
+    Phoenix.PubSub.broadcast(
+      AlertsUI.PubSub,
+      "persisting",
+      {:persisting_start}
+    )
+
     alert_data = socket.assigns.form.source.data
 
     alert_data =
@@ -967,6 +988,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           # Form validation should prevent us from getting here
           # but in case we do, we log an error and show
           # an error flash to the user
+          Phoenix.PubSub.broadcast(
+            AlertsUI.PubSub,
+            "persisting",
+            {:persisting_end}
+          )
+
           errors =
             changeset
             |> Alerts.parse_changeset_errors()
