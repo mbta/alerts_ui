@@ -16,7 +16,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
       route_ids: nil,
       stop_ids: nil,
       trip_ids: nil,
-      facility_ids: nil
+      facility_ids: nil,
+      stop_names_and_ids: nil
     }
   end
 
@@ -33,7 +34,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
       route_ids: nil,
       stop_ids: nil,
       trip_ids: nil,
-      facility_ids: nil
+      facility_ids: nil,
+      stop_names_and_ids: nil
     }
   end
 end
