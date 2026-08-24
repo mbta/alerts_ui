@@ -897,9 +897,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop, @stop_2] end,
-           get_parent: fn _ -> nil end
+           get_parent: fn _ -> nil end,
+           all: fn ["filter[id]": "place-crtst"], [] -> [@stop_2] end
          ]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [@route_pattern] end,
+           included_stops_by_route_id: fn _route_id, _ -> [@stop] end
+         ]}
       ]) do
         conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
@@ -945,6 +951,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
                  document,
                  "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
                )
+
+        open_review_modal(view)
+        assert view |> element("#review-modal-container", "Bus • Notice") |> has_element?
+        assert view |> element("#review-modal-container", "SLW") |> has_element?
+        assert view |> element("#review-modal-container", "Courthouse (outbound)") |> has_element?
+
+        submit_alert(view)
+
+        flash = assert_redirect(view, "/")
+        assert flash["info"] =~ "Alert #test-bus-delay updated"
       end
     end
 
