@@ -58,7 +58,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         selections ->
           Enum.filter(
             Map.get(selections, :available_routes, []) || [],
-            &(&1.id in alert_data.route_ids)
+            &(&1.id in (alert_data.route_ids || []))
           )
       end
 
