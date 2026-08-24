@@ -64,6 +64,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     type: 3,
     name: "SLW"
   }
+  @bus_route_2 %Route{
+    direction_names: %{1 => "Inbound", 0 => "Outbound"},
+    sort_order: 3,
+    id: "749",
+    type: 3,
+    name: "SL5"
+  }
   @stop %Stop{id: "place-sstat", name: "South Station"}
   @stop_2 %Stop{id: "place-crtst", name: "Courthouse"}
 
@@ -965,7 +972,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "changing from a bus delay to a bus detour clears routes and stops", %{conn: conn} do
+    test "changing from a bus delay with one route to a bus detour retains the route and stops",
+         %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 
       with_mocks([
@@ -1005,6 +1013,133 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         assert has_element?(view, "div", "Bus • Detour")
         refute has_element?(view, "div", "Bus • Delay")
 
+        assert document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+      end
+    end
+
+    # @tag :logged_in_user
+    # test "changing from a facility access issue with one elevator to a bus detour retains the route and stops",
+    #      %{conn: conn} do
+    #   {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+    #   with_mocks([
+    #     {RoutesRepo, [],
+    #      [
+    #        by_type: fn _ -> [@bus_route] end,
+    #        get: fn _ -> @bus_route end,
+    #        get: fn _, _ -> @bus_route end,
+    #        all: fn _ -> [@bus_route] end
+    #      ]},
+    #     {StopsRepo, [],
+    #      [
+    #        by_route: fn _, _, _ -> [@stop, @stop_2] end,
+    #        get_parent: fn _ -> nil end
+    #      ]},
+    #     {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+    #   ]) do
+    #     conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+    #     {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+    #     render_async(view)
+
+    #     view
+    #     |> element("#route_type_and_effect")
+    #     |> render_click()
+
+    #     view
+    #     |> element("#effect-name-detour-button")
+    #     |> render_click()
+
+    #     render_async(view)
+
+    #     {:ok, document} =
+    #       view
+    #       |> render()
+    #       |> Floki.parse_document()
+
+    #     assert has_element?(view, "div", "Bus • Detour")
+    #     refute has_element?(view, "div", "Bus • Delay")
+
+    #     assert document_has_element?(
+    #              document,
+    #              "option[value=\"746\"][selected]"
+    #            )
+
+    #     assert document_has_element?(
+    #              document,
+    #              "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+    #            )
+    #   end
+    # end
+
+    @tag :logged_in_user
+    test "changing from a bus delay with >1 route to a bus detour clears all routes and stops", %{
+      conn: conn
+    } do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-bus-delay-multiroute",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY",
+          primary_service_type: "3",
+          informed_entity: [
+            %{
+              route_type: 3,
+              route_id: @bus_route.id,
+              stop_id: @stop_2.id,
+              direction_id: 0
+            }
+          ],
+          original_route_selections: ["SLW|746", "SL5|749"],
+          original_stop_selections: []
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route, @bus_route_2] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route, @bus_route_2] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay-multiroute")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-detour-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert has_element?(view, "div", "Bus • Detour")
+        refute has_element?(view, "div", "Bus • Delay")
+
         refute document_has_element?(
                  document,
                  "option[value=\"746\"][selected]"
@@ -1019,6 +1154,74 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
     @tag :logged_in_user
     test "changing from a bus detour to a bus delay should keep the one route", %{conn: conn} do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-bus-detour",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DETOUR",
+          effect_name: "Detour",
+          primary_service_type: "3",
+          informed_entity: [
+            %{
+              route_type: 3,
+              route_id: @bus_route.id,
+              stop_id: @stop_2.id,
+              direction_id: 0
+            }
+          ],
+          original_route_selections: ["SLW|746"],
+          original_stop_selections: ["Courthouse (outbound)|place-crtst"]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-detour")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-delay-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert has_element?(view, "div", "Bus • Delay")
+        refute has_element?(view, "div", "Bus • Detour")
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+      end
     end
 
     @tag :logged_in_user

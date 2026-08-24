@@ -251,21 +251,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         %{assigns: %{allow_changing_mode_effect_type: true, change_type: true}} = socket
       ) do
     effect_name = Map.get(params, "value")
-
-    previous_combination = socket.assigns.form[:combination].value
-
-    next_combination =
-      AlertDataHelpers.combination_for(socket.assigns.path_route_type, effect_name)
-
-    previous_route_type = socket.assigns.form[:route_type].value
     next_route_type = InformedEntity.route_type_mapping(socket.assigns.path_route_type)
 
     form_updates =
-      ModeEffectChange.new_form_values(
-        previous_combination,
-        next_combination,
-        previous_route_type !== next_route_type
-      )
+      ModeEffectChange.new_form_values(socket.assigns.form, effect_name, next_route_type)
 
     updated_source =
       change(
@@ -274,7 +263,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           %{
             route_type: next_route_type,
             effect_name: effect_name,
-            combination: next_combination,
+            combination: AlertDataHelpers.combination_for(next_route_type, effect_name),
             # We want to initialize with the default for the NEW mode/effect
             notification_toggle:
               NotificationToggle.get_notification_toggle_default(

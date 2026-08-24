@@ -1,35 +1,70 @@
+alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
+
 defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   @moduledoc """
   Helpers for converting an alert's mode or effect type.
   """
 
-  @spec new_form_values(atom(), atom(), boolean()) :: map()
-  def new_form_values(
-        previous_combination,
-        next_combination,
-        service_type_changed?
-      )
+  @spec new_form_values(Phoenix.HTML.Form.t(), String.t(), String.t()) :: map()
+  def new_form_values(form, next_effect_name, next_route_type)
 
-  # If service type has changed, retain no selections
-  def new_form_values(_, _, true) do
-    %{
-      route_ids: nil,
-      stop_ids: nil,
-      trip_ids: nil,
-      facility_ids: nil,
-      stop_names_and_ids: nil
-    }
+  def new_form_values(form, next_effect_name, next_route_type) do
+    previous_combination = form[:combination].value
+
+    next_combination =
+      AlertDataHelpers.combination_for(next_route_type, next_effect_name)
+
+    previous_route_type = form[:route_type].value
+
+    cond do
+      next_route_type !== previous_route_type ->
+        %{
+          route_ids: nil,
+          stop_ids: nil,
+          trip_ids: nil,
+          facility_ids: nil,
+          stop_names_and_ids: nil
+        }
+
+      previous_combination === next_combination ->
+        same_combination(previous_combination, form, next_route_type, next_effect_name)
+
+      true ->
+        different_combination(previous_combination, next_combination, form)
+    end
   end
 
-  # If the combination is still the same, retain all selections
-  def new_form_values(previous_combination, next_combination, false)
-      when previous_combination === next_combination do
-    %{}
+  defp same_combination(:ACCESS, form, next_route_type, next_effect_name) do
+    next_single_facility? =
+      AlertDataHelpers.humanize_effect_name(next_route_type, next_effect_name) in AlertDataHelpers.get_single_facility_effect_names()
+
+    currently_one_facility? = length(form[:facility_ids].value) === 1
+
+    if next_single_facility? and currently_one_facility? do
+      %{single_facility_id: hd(form[:facility_ids].value)}
+    else
+      %{}
+    end
+  end
+
+  defp same_combination(_combination, form, next_route_type, next_effect_name) do
+    # If it is the same combination and service type, we want to retain the same selections, but
+    # we need to do some massaging of the data between single and multi-selectors
+    next_single_route? =
+      AlertDataHelpers.humanize_effect_name(next_route_type, next_effect_name) in AlertDataHelpers.get_single_route_effect_names()
+
+    currently_one_route? = length(form[:route_ids].value) === 1
+
+    if next_single_route? and currently_one_route? do
+      %{single_route_id: hd(form[:route_ids].value)}
+    else
+      %{}
+    end
   end
 
   # Eventually we can be smarter about what we retain depending on combo changes, i.e.
-  # def new_form_values(:RDS, :SR, false) do ...
-  def new_form_values(_previous_combination, _next_combination, false) do
+  # def different_combination(:RDS, :SR, form) do ...
+  defp different_combination(_previous_combination, _next_combination, _) do
     %{
       route_ids: nil,
       stop_ids: nil,
