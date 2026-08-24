@@ -6,9 +6,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
   """
 
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.NotificationToggle
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path
   alias Phoenix.HTML.Form
 
   use AlertsUIWeb, :html
