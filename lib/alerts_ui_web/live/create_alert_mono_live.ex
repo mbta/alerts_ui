@@ -254,7 +254,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     next_route_type = InformedEntity.route_type_mapping(socket.assigns.path_route_type)
 
     form_updates =
-      ModeEffectChange.new_form_values(socket.assigns.form, effect_name, next_route_type)
+      ModeEffectChange.new_form_values(socket.assigns.form, next_route_type, effect_name)
 
     updated_source =
       change(

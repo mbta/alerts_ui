@@ -11,10 +11,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   Helpers for converting an alert's mode or effect type.
   """
 
-  @spec new_form_values(Phoenix.HTML.Form.t(), String.t(), String.t()) :: map()
-  def new_form_values(form, next_effect_name, next_route_type)
+  @spec new_form_values(Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
+  def new_form_values(form, next_route_type, next_effect_name)
 
-  def new_form_values(form, next_effect_name, next_route_type) do
+  def new_form_values(form, next_route_type, next_effect_name) do
     previous_combination = form[:combination].value
 
     next_combination = combination_for(next_route_type, next_effect_name)
@@ -22,6 +22,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     previous_route_type = form[:route_type].value
 
     cond do
+      # If the mode changes, wipe all values
       next_route_type !== previous_route_type ->
         %{
           route_ids: nil,
@@ -38,6 +39,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
         different_combination(previous_combination, next_combination, form)
     end
   end
+
+  @spec same_combination(atom(), Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
+  defp same_combination(combination, form, next_route_type, next_effect_name)
 
   defp same_combination(:ACCESS, form, next_route_type, next_effect_name) do
     next_single_facility? =

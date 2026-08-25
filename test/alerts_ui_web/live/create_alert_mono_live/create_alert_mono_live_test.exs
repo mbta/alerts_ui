@@ -1025,60 +1025,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       end
     end
 
-    # @tag :logged_in_user
-    # test "changing from a facility access issue with one elevator to a bus detour retains the route and stops",
-    #      %{conn: conn} do
-    #   {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
-
-    #   with_mocks([
-    #     {RoutesRepo, [],
-    #      [
-    #        by_type: fn _ -> [@bus_route] end,
-    #        get: fn _ -> @bus_route end,
-    #        get: fn _, _ -> @bus_route end,
-    #        all: fn _ -> [@bus_route] end
-    #      ]},
-    #     {StopsRepo, [],
-    #      [
-    #        by_route: fn _, _, _ -> [@stop, @stop_2] end,
-    #        get_parent: fn _ -> nil end
-    #      ]},
-    #     {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
-    #   ]) do
-    #     conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
-    #     {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
-    #     render_async(view)
-
-    #     view
-    #     |> element("#route_type_and_effect")
-    #     |> render_click()
-
-    #     view
-    #     |> element("#effect-name-detour-button")
-    #     |> render_click()
-
-    #     render_async(view)
-
-    #     {:ok, document} =
-    #       view
-    #       |> render()
-    #       |> Floki.parse_document()
-
-    #     assert has_element?(view, "div", "Bus • Detour")
-    #     refute has_element?(view, "div", "Bus • Delay")
-
-    #     assert document_has_element?(
-    #              document,
-    #              "option[value=\"746\"][selected]"
-    #            )
-
-    #     assert document_has_element?(
-    #              document,
-    #              "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
-    #            )
-    #   end
-    # end
-
     @tag :logged_in_user
     test "changing from a bus delay with >1 route to a bus detour clears all routes and stops", %{
       conn: conn

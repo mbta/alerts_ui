@@ -40,7 +40,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
     get_field(form.source, key)
   end
 
-  @spec show_details?(Phoenix.HTML.Form.t(), boolean(), boolean()) :: map()
+  @spec show_details?(Phoenix.HTML.Form.t(), boolean(), boolean()) :: boolean()
   def show_details?(form, allow_changing_mode_effect_type?, change_type?)
 
   def show_details?(form, false, _change_type) do
