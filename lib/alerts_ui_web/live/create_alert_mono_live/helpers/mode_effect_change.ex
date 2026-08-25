@@ -1,4 +1,10 @@
-alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
+import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+  only: [
+    combination_for: 2,
+    get_single_facility_effect_names: 0,
+    get_single_route_effect_names: 0,
+    humanize_effect_name: 2
+  ]
 
 defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   @moduledoc """
@@ -11,8 +17,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   def new_form_values(form, next_effect_name, next_route_type) do
     previous_combination = form[:combination].value
 
-    next_combination =
-      AlertDataHelpers.combination_for(next_route_type, next_effect_name)
+    next_combination = combination_for(next_route_type, next_effect_name)
 
     previous_route_type = form[:route_type].value
 
@@ -36,7 +41,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
 
   defp same_combination(:ACCESS, form, next_route_type, next_effect_name) do
     next_single_facility? =
-      AlertDataHelpers.humanize_effect_name(next_route_type, next_effect_name) in AlertDataHelpers.get_single_facility_effect_names()
+      humanize_effect_name(next_route_type, next_effect_name) in get_single_facility_effect_names()
 
     currently_one_facility? = length(form[:facility_ids].value) === 1
 
@@ -51,7 +56,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     # If it is the same combination and service type, we want to retain the same selections, but
     # we need to do some massaging of the data between single and multi-selectors
     next_single_route? =
-      AlertDataHelpers.humanize_effect_name(next_route_type, next_effect_name) in AlertDataHelpers.get_single_route_effect_names()
+      humanize_effect_name(next_route_type, next_effect_name) in get_single_route_effect_names()
 
     currently_one_route? = length(form[:route_ids].value) === 1
 
