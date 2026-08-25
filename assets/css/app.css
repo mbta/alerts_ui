@@ -8,13 +8,7 @@
 
 @layer utilities {
 
-    @keyframes ellipsis {
-        to {
-            width: 1.25em;
-        }
-    }
-
-    @keyframes elipsis-2 {
+    @keyframes loading-animation {
 
         0%,
         100% {
@@ -27,23 +21,23 @@
     }
 
 
-    .loading-elipsis,
-    .loading-elipsis span {
-        animation-name: elipsis-2;
+        .loading-ellipsis,
+        .loading-ellipsis span {
+        animation-name: loading-animation;
         animation-duration: 1400ms;
         animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
         animation-iteration-count: infinite;
     }
 
-    .loading-elipsis span:nth-child(1) {
+        .loading-ellipsis span:nth-child(1) {
         animation-delay: 150ms;
     }
 
-    .loading-elipsis span:nth-child(2) {
+        .loading-ellipsis span:nth-child(2) {
         animation-delay: 300ms;
     }
 
-    .loading-elipsis span:nth-child(3) {
+        .loading-ellipsis span:nth-child(3) {
         animation-delay: 450ms;
     }
 }
