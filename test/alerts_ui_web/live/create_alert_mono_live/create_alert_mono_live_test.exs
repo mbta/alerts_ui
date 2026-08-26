@@ -1293,6 +1293,95 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
+    test "changing from a CR delay to a facility issue should wipe affected service but keep trip times",
+         %{conn: conn} do
+      ap =
+        build(
+          :active_period,
+          %{start: ~U[2024-05-10 14:30:54Z], end: ~U[2024-05-10 16:30:00Z]}
+        )
+
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY",
+          header_text: "cool header text",
+          severity: 3,
+          severity_level: :WARNING,
+          cause_detail: "UNKNOWN",
+          reminder_times: [],
+          informed_entity: [
+            %{
+              route_type: 3,
+              route_id: "CR-Worcester",
+              direction_id: 0,
+              stop_id: "place-sstat",
+              trip_id: @schedule.trip.id
+            }
+          ],
+          original_route_selections: [
+            "Framingham/Worcester Line|CR-Worcester"
+          ],
+          original_stop_selections: ["South Station|place-sstat"],
+          original_trip_selections: [@schedule.trip.id],
+          active_period: [Map.from_struct(ap)],
+          active_period_start: ap.start,
+          active_period_end: ap.end,
+          duration_certainty: :KNOWN,
+          primary_service_type: "2"
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route] end,
+           by_type: fn _, _ -> [@route] end,
+           get: fn _ -> @route end,
+           get: fn _, _ -> @route end,
+           all: fn _ -> [@route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ -> [@schedule, @schedule_2] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
+        {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#route-type-facility-button")
+        |> render_click()
+
+        view
+        |> element("#effect-name-access_issue-button")
+        |> render_click()
+
+        render_async(view)
+
+        assert has_element?(view, "div", "Facility • Access Issue")
+        refute has_element?(view, "div", "Commuter Rail • Delay")
+
+        assert has_element?(view, "#alert_data_active_period_start[value=\"2024-05-10T10:30\"]")
+        assert has_element?(view, "#alert_data_active_period_end[value=\"2024-05-10T12:30\"]")
+      end
+    end
+
+    @tag :logged_in_user
     test "errors do not persist across changing mode/effects", %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 

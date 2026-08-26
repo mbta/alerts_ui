@@ -11,6 +11,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   Helpers for converting an alert's mode or effect type.
   """
 
+  @full_reset %{
+    route_ids: [],
+    stop_ids: [],
+    trip_ids: [],
+    facility_ids: [],
+    stop_names_and_ids: []
+  }
+
   @spec new_form_values(Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
   def new_form_values(form, next_route_type, next_effect_name)
 
@@ -24,13 +32,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     cond do
       # If the mode changes, wipe all values
       next_route_type !== previous_route_type ->
-        %{
-          route_ids: nil,
-          stop_ids: nil,
-          trip_ids: nil,
-          facility_ids: nil,
-          stop_names_and_ids: nil
-        }
+        @full_reset
 
       previous_combination === next_combination ->
         same_combination(previous_combination, form, next_route_type, next_effect_name)
@@ -74,12 +76,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   # Eventually we can be smarter about what we retain depending on combo changes, i.e.
   # def different_combination(:RDS, :SR, form) do ...
   defp different_combination(_previous_combination, _next_combination, _) do
-    %{
-      route_ids: nil,
-      stop_ids: nil,
-      trip_ids: nil,
-      facility_ids: nil,
-      stop_names_and_ids: nil
-    }
+    @full_reset
   end
 end
