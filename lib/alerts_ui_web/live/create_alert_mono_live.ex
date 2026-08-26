@@ -92,6 +92,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     %Step{name: "preview", previous: nil, next: nil, label: "Review and Submit"}
   ]
 
+  @gtfs_modal_id "gtfs-warning-modal"
+  @change_mode_effect_modal_id "change-mode-effect-modal"
+
   @impl true
   def mount(params, session, socket) do
     # initialize the alert data form or throw an exception trying
@@ -120,6 +123,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         steps: @steps,
         change_type: false,
         persisting_alert: false,
+        modal_open_map: %{@gtfs_modal_id => false, @change_mode_effect_modal_id => false},
+        gtfs_modal_id: @gtfs_modal_id,
+        change_mode_effect_modal_id: @change_mode_effect_modal_id,
         change_type_data: []
       })
       |> assign_new(:return_to, fn -> session["return_to"] end)
@@ -514,25 +520,35 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("accepted_gtfs_modal", _params, socket) do
-    {:noreply, socket}
+    {:noreply, socket |> set_modal_open(@gtfs_modal_id, false)}
   end
 
   @impl true
   def handle_event("cancelled_gtfs_modal", _params, socket) do
-    {:noreply, socket |> redirect(to: return_to(socket.assigns.return_to || "/"))}
+    {:noreply,
+     socket
+     |> set_modal_open(@gtfs_modal_id, false)
+     |> redirect(to: return_to(socket.assigns.return_to || "/"))}
   end
 
   @impl true
   def handle_event("accepted_change_mode_effect_modal", _params, socket) do
-    {:noreply, socket |> assign(change_type_data: [])}
+    {:noreply, socket |> set_modal_open(@change_mode_effect_modal_id, false)}
   end
 
   @impl true
   def handle_event("cancelled_change_mode_effect_modal", _params, socket) do
     {:noreply,
      socket
-     |> assign(change_type_data: [])
+     |> set_modal_open(@change_mode_effect_modal_id, false)
      |> redirect(to: return_to(socket.assigns.return_to || "/"))}
+  end
+
+  defp set_modal_open(socket, id, state) do
+    new_modal_state =
+      Map.merge(socket.assigns.modal_open_map, %{id => state})
+
+    socket |> assign(modal_open_map: new_modal_state)
   end
 
   def check_predictions(params, socket) do
@@ -713,8 +729,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
     socket =
       socket
-      |> assign(obsolete_id_text: obsolete_id_text, obsolete_ids: obsolete_ids_map)
-      |> push_event("show-modal", %{id: "gtfs-warning-modal"})
+      |> assign(
+        obsolete_id_text: obsolete_id_text,
+        obsolete_ids: obsolete_ids_map
+      )
+      |> set_modal_open(@gtfs_modal_id, true)
+      |> push_event("show-modal", %{id: @gtfs_modal_id})
 
     {:noreply, socket}
   end
@@ -725,7 +745,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       socket
       # Fill in the data that is changing here based on form_updates
       |> assign(change_type_data: ["todo"])
-      |> push_event("show-modal", %{id: "change-mode-effect-modal"})
+      |> set_modal_open(@change_mode_effect_modal_id, true)
+      |> push_event("show-modal", %{id: @change_mode_effect_modal_id})
 
     {:noreply, socket}
   end
