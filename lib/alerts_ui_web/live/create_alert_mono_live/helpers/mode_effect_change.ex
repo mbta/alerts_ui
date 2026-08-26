@@ -1,7 +1,9 @@
+alias AlertsUI.Models.InformedEntity
+
 import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
   only: [
     combination_for: 2,
-    get_single_facility_effect_names: 0,
+    facility_types: 1,
     get_single_route_effect_names: 0,
     humanize_effect_name: 2
   ]
@@ -45,16 +47,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   @spec same_combination(atom(), Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
   defp same_combination(combination, form, next_route_type, next_effect_name)
 
-  defp same_combination(:ACCESS, form, next_route_type, next_effect_name) do
-    next_single_facility? =
-      humanize_effect_name(next_route_type, next_effect_name) in get_single_facility_effect_names()
+  defp same_combination(:ACCESS, form, _next_route_type, next_effect_name) do
+    previous_effect_name = form[:effect_name].value
+    previous_facility_types = facility_types(previous_effect_name)
+    next_facility_types = facility_types(next_effect_name)
 
-    currently_one_facility? = length(form[:facility_ids].value) === 1
+    cond do
+      # If the next state has all facility types, do not remove anything
+      next_facility_types === InformedEntity.all_facility_types() ->
+        %{}
 
-    if next_single_facility? and currently_one_facility? do
-      %{single_facility_id: hd(form[:facility_ids].value)}
-    else
-      %{}
+      previous_facility_types !== next_facility_types ->
+        %{facility_ids: nil}
+
+      true ->
+        %{}
     end
   end
 

@@ -1,6 +1,7 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   alias Phoenix.HTML.Form
@@ -147,6 +148,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
 
   def get_single_facility_effect_names do
     ["Elevator Closure", "Escalator Closure"]
+  end
+
+  @spec facility_types(String.t()) :: [String.t()]
+  def facility_types(effect_name) do
+    effect_name
+    |> effect_to_lookup_key()
+    |> InformedEntity.facility_effect_to_types()
+  end
+
+  defp effect_to_lookup_key(nil), do: nil
+
+  defp effect_to_lookup_key(string) do
+    string
+    |> String.upcase()
+    |> String.replace(" ", "_")
   end
 
   @doc """
