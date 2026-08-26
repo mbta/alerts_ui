@@ -977,7 +977,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "changing from a bus delay to a bus notice retains all info", %{conn: conn} do
+    test "changing from a bus delay to a bus notice retains all info and does not show warning modal",
+         %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 
       with_mocks([
@@ -1035,6 +1036,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         assert has_element?(view, "div", "Bus • Notice")
         refute has_element?(view, "div", "Bus • Delay")
+
+        refute view
+               |> element("#change-mode-effect-modal")
+               |> has_element?
 
         assert document_has_element?(
                  document,
@@ -1441,7 +1446,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "changing from a bus delay to a ferry delay should wipe everything", %{conn: conn} do
+    test "changing from a bus delay to a ferry delay should wipe everything and trigger the modal",
+         %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 
       with_mocks([
@@ -1481,24 +1487,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         assert has_element?(view, "div", "Ferry • Delay")
         refute has_element?(view, "div", "Bus • Delay")
 
-        assert has_element?(view, "#alert_data_route_ids_selector")
-        assert has_element?(view, "#alert_data_trip_ids_selector")
-        assert has_element?(view, "#alert_data_stop_names_and_ids_selector")
-
-        # Trips and stops selectors should be disabled because no route is selected
-        assert has_element?(view, "#alert_data_trip_ids[disabled]")
-        assert has_element?(view, "#alert_data_stop_names_and_ids[disabled]")
-
-        open_review_modal(view)
-
-        render_async(view)
-
-        assert has_element?(view, "p.text-text-error", "Select route(s)")
-
-        # Flash
-        assert view
-               |> element("#flash")
-               |> render() =~ "Select route(s)"
+        rendered_view = view |> element("#change-mode-effect-modal-content") |> render_async()
+        assert rendered_view =~ "some affected services may be omitted"
       end
     end
 
