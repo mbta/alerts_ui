@@ -101,7 +101,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       disable_button(
         step.name,
         assigns.previous_steps -- [assigns.progress.name],
-        assigns.form_type != :creating
+        assigns.form_type != :creating,
+        assigns.allow_changing_mode_effect_type
       )
 
     clickable_class =
@@ -143,7 +144,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
     """
   end
 
-  defp disable_button(name, previous_steps, editing) do
-    name not in previous_steps or (editing and name === "route_type_and_effect")
+  defp disable_button(name, previous_steps, editing, allow_changing_mode_effect_type) do
+    future_step? = name not in previous_steps
+
+    if allow_changing_mode_effect_type do
+      future_step?
+    else
+      future_step? or (editing and name === "route_type_and_effect")
+    end
   end
 end

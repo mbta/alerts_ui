@@ -30,12 +30,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   alias AlertsUI.Alerts
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.InformedEntity
   alias Phoenix.LiveView
 
   alias AlertsUIWeb.CreateAlertMonoLive.{
     AlertData,
     Title
   }
+
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.{ModeEffectChange, NotificationToggle}
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
     AccessAffectedServiceSlice,
@@ -110,7 +113,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         stops_touched?: false,
         image_preview_size: nil,
         first_async_load: true,
-        steps: @steps
+        steps: @steps,
+        change_type: false
       })
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
@@ -167,11 +171,41 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
+  def handle_event(
+        "push_route_type",
+        params,
+        %{assigns: %{allow_changing_mode_effect_type: true, change_type: true}} = socket
+      ) do
+    route_type = Map.get(params, "value")
+    {:noreply, socket |> assign(:path_route_type, route_type)}
+  end
+
+  @impl true
   def handle_event("push_route_type", params, socket) do
     route_type = Map.get(params, "value")
     path = PathHelper.path_with_route_type(socket.assigns, route_type)
 
     {:noreply, push_patch(socket, to: path)}
+  end
+
+  @impl true
+  def handle_event(
+        "move_progress",
+        %{"value" => "route_type_and_effect"},
+        %{assigns: %{allow_changing_mode_effect_type: true}} = socket
+      ) do
+    socket =
+      socket
+      |> assign(%{
+        progress: get_step_by_name("route_type_and_effect"),
+        path_route_type: Atom.to_string(PathHelper.path_route_type_from_socket(socket)),
+        path_effect_name: PathHelper.path_effect_name_from_socket(socket),
+        selections: nil,
+        change_type: true
+      })
+      |> push_patch(to: PathHelper.path(socket.assigns))
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -208,6 +242,53 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
+  end
+
+  @impl true
+  def handle_event(
+        "push_effect_name",
+        params,
+        %{assigns: %{allow_changing_mode_effect_type: true, change_type: true}} = socket
+      ) do
+    effect_name = Map.get(params, "value")
+    next_route_type = InformedEntity.route_type_mapping(socket.assigns.path_route_type)
+
+    form_updates =
+      ModeEffectChange.new_form_values(socket.assigns.form, next_route_type, effect_name)
+
+    updated_source =
+      change(
+        socket.assigns.form.source,
+        Map.merge(
+          %{
+            route_type: next_route_type,
+            effect_name: effect_name,
+            combination: AlertDataHelpers.combination_for(next_route_type, effect_name),
+            # We want to initialize with the default for the NEW mode/effect
+            notification_toggle:
+              NotificationToggle.get_notification_toggle_default(
+                %{notification_toggle: nil, route_type: next_route_type},
+                effect_name,
+                socket.assigns.form_type
+              )
+          },
+          form_updates
+        )
+      )
+      |> Map.put(:errors, [])
+
+    socket =
+      socket
+      |> assign(%{
+        form: Phoenix.Component.to_form(updated_source),
+        progress: get_step_by_name(socket.assigns.progress.next),
+        path_effect_name: effect_name,
+        change_type: false,
+        submitted?: false
+      })
+      |> sync_socket(%{})
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -636,7 +717,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       {nil, :new} ->
         create_new_alert(socket, params)
 
-      {nil, action} when action in [:edit, :duplicate] ->
+      {nil, action}
+      when action in [:edit, :duplicate] and not socket.assigns.allow_changing_mode_effect_type ->
         raise %ArgumentError{message: "you need an alert id to #{action}"}
 
       {alert_id, :new} ->

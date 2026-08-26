@@ -6,9 +6,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
   """
 
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
+  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.NotificationToggle
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   alias Phoenix.HTML.Form
 
   use AlertsUIWeb, :html
@@ -37,7 +37,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       effect_name = Path.effect_from_url_name(delivery_data.effect_name || "")
 
       notification_toggle =
-        get_notification_toggle_default(delivery_data, effect_name, socket.assigns.form_type)
+        NotificationToggle.get_notification_toggle_default(
+          delivery_data,
+          effect_name,
+          socket.assigns.form_type
+        )
 
       [_, target | _] = Map.get(params, "_target", [nil, nil])
 
@@ -94,34 +98,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
 
     def assigns(_delivery_data, socket, _params) do
       socket
-    end
-
-    defp get_notification_toggle_default(
-           %{notification_toggle: nil, route_type: route_type},
-           effect_name,
-           :creating
-         ) do
-      GetKeyForModeEffect.get_value_of_key(
-        :send_push_notification_on_create,
-        route_type,
-        effect_name
-      )
-    end
-
-    defp get_notification_toggle_default(
-           %{notification_toggle: nil, route_type: route_type},
-           effect_name,
-           :editing
-         ) do
-      GetKeyForModeEffect.get_value_of_key(
-        :send_push_notification_on_edit,
-        route_type,
-        effect_name
-      )
-    end
-
-    defp get_notification_toggle_default(%{notification_toggle: notification_toggle}, _, _) do
-      notification_toggle
     end
   end
 

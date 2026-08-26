@@ -40,8 +40,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
     get_field(form.source, key)
   end
 
-  def show_details?(form) do
+  @spec show_details?(Phoenix.HTML.Form.t(), boolean(), boolean()) :: boolean()
+  def show_details?(form, allow_changing_mode_effect_type?, change_type?)
+
+  def show_details?(form, false, _change_type) do
     !is_nil(form[:effect_name].value)
+  end
+
+  def show_details?(form, _allow_changing_mode_effect_type?, change_type?) do
+    if change_type? do
+      false
+    else
+      !is_nil(form[:effect_name].value)
+    end
   end
 
   def get_route_type(nil), do: nil

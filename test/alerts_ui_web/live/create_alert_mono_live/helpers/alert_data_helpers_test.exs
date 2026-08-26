@@ -47,13 +47,60 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpersTest do
     end
   end
 
-  describe "show_details?/1" do
+  describe "show_details?/3" do
     test "returns true when effect_name is set" do
-      assert AlertDataHelpers.show_details?(map_form(%{"effect_name" => "delay"})) == true
+      change_effect_flag_active? = false
+      changing_effect? = false
+
+      assert AlertDataHelpers.show_details?(
+               map_form(%{"effect_name" => "delay"}),
+               change_effect_flag_active?,
+               changing_effect?
+             ) == true
     end
 
     test "returns false when effect_name is nil" do
-      assert AlertDataHelpers.show_details?(map_form(%{})) == false
+      change_effect_flag_active? = false
+      changing_effect? = false
+
+      assert AlertDataHelpers.show_details?(
+               map_form(%{}),
+               change_effect_flag_active?,
+               changing_effect?
+             ) == false
+    end
+
+    test "returns false when effect_name is set but we are changing the effect" do
+      change_effect_flag_active? = true
+      changing_effect? = true
+
+      assert AlertDataHelpers.show_details?(
+               map_form(%{"effect_name" => "delay"}),
+               change_effect_flag_active?,
+               changing_effect?
+             ) == false
+    end
+
+    test "returns false when effect_name is not set and flag is active" do
+      change_effect_flag_active? = true
+      changing_effect? = false
+
+      assert AlertDataHelpers.show_details?(
+               map_form(%{}),
+               change_effect_flag_active?,
+               changing_effect?
+             ) == false
+    end
+
+    test "returns true when effect_name is set, flag is off, but somehow change_effect is on" do
+      change_effect_flag_active? = false
+      changing_effect? = true
+
+      assert AlertDataHelpers.show_details?(
+               map_form(%{"effect_name" => "delay"}),
+               change_effect_flag_active?,
+               changing_effect?
+             ) == true
     end
   end
 

@@ -6,18 +6,24 @@
     steps={@steps}
     form_type={@form_type}
     alert_id={@alert_id}
+    allow_changing_mode_effect_type={@allow_changing_mode_effect_type}
   />
   <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
     <article class="flex flex-col items-center justify-center w-[100%]">
       <div class="w-full">
         <UrlSlice.render
-          :if={!AlertDataHelpers.show_details?(@form)}
+          :if={
+            !AlertDataHelpers.show_details?(@form, @allow_changing_mode_effect_type, @change_type)
+          }
           alert_id={@alert_id}
           path_route_type={@path_route_type}
           path_effect_name={@path_effect_name}
+          change_type={@change_type}
         />
         <.form
-          :if={AlertDataHelpers.show_details?(@form)}
+          :if={
+            AlertDataHelpers.show_details?(@form, @allow_changing_mode_effect_type, @change_type)
+          }
           for={@form}
           id="alert_form"
           class="form-control flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]"
@@ -72,6 +78,7 @@
             image_preview_size={@image_preview_size}
             check_predictions={@check_predictions}
             check_trip_end={@check_trip_end}
+            allow_changing_mode_effect_type={@allow_changing_mode_effect_type}
           />
           <.modal
             :if={obsolete_ids_found?(@obsolete_ids)}

@@ -55,6 +55,33 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
                |> DateTime.shift_zone!("America/New_York")
                |> DateTime.to_date()
 
+  @edit_mode_effect_flag "allow_changing_mode_effect_type"
+
+  @bus_route %Route{
+    direction_names: %{1 => "Inbound", 0 => "Outbound"},
+    sort_order: 3,
+    id: "746",
+    type: 3,
+    name: "SLW"
+  }
+  @bus_route_2 %Route{
+    direction_names: %{1 => "Inbound", 0 => "Outbound"},
+    sort_order: 3,
+    id: "749",
+    type: 3,
+    name: "SL5"
+  }
+  @stop %Stop{id: "place-sstat", name: "South Station"}
+  @stop_2 %Stop{id: "place-crtst", name: "Courthouse"}
+
+  @ferry_route %Route{
+    direction_names: %{0 => "Outbound", 1 => "Inbound"},
+    sort_order: 1,
+    id: "Boat-F4",
+    type: 4,
+    name: "Charlestown Ferry"
+  }
+
   describe "create alerts page" do
     @tag :logged_in_user
     test "connected mount displays first page of form when logged in", %{conn: conn} do
@@ -785,6 +812,713 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       {:ok, conn} = follow_redirect(result, conn)
 
       assert html_response(conn, 200) =~ ~r/Create Alert/
+    end
+  end
+
+  describe "changing mode/effect types" do
+    @alert_params build(:alert_map, %{
+                    alert_id: "test-bus-delay",
+                    effect: :OTHER_EFFECT,
+                    effect_detail: "DELAY",
+                    primary_service_type: "3",
+                    informed_entity: [
+                      %{
+                        route_type: 3,
+                        route_id: @bus_route.id,
+                        stop_id: @stop_2.id,
+                        direction_id: 0
+                      }
+                    ],
+                    original_route_selections: ["SLW|746"],
+                    original_stop_selections: ["Courthouse (outbound)|place-crtst"]
+                  })
+
+    @tag :logged_in_user
+    test "changing mode/effect initializes form page 1 with the previously selected options", %{
+      conn: conn
+    } do
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+        render_async(view)
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+
+        {:ok, document} =
+          view
+          |> element("#route_type_and_effect")
+          |> render_click()
+          |> Floki.parse_document()
+
+        bus_button = Floki.find(document, "#route-type-bus-button")
+        subway_button = Floki.find(document, "#route-type-subway-button")
+        delay_button = Floki.find(document, "#effect-name-delay-button")
+
+        assert Floki.attribute(bus_button, "class")
+               |> hd()
+               |> String.contains?("bg-secondary-active")
+
+        assert Floki.attribute(delay_button, "class")
+               |> hd()
+               |> String.contains?("bg-secondary-active")
+
+        refute Floki.attribute(subway_button, "class")
+               |> hd()
+               |> String.contains?("bg-secondary-active")
+      end
+    end
+
+    @tag :logged_in_user
+    test "changing from a bus delay to a bus notice retains all info", %{conn: conn} do
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end,
+           all: fn ["filter[id]": "place-crtst"], [] -> [@stop_2] end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [@route_pattern] end,
+           included_stops_by_route_id: fn _route_id, _ -> [@stop] end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+        render_async(view)
+        assert has_element?(view, "div", "Bus • Delay")
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-notice-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert has_element?(view, "div", "Bus • Notice")
+        refute has_element?(view, "div", "Bus • Delay")
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+
+        open_review_modal(view)
+        assert view |> element("#review-modal-container", "Bus • Notice") |> has_element?
+        assert view |> element("#review-modal-container", "SLW") |> has_element?
+        assert view |> element("#review-modal-container", "Courthouse (outbound)") |> has_element?
+
+        submit_alert(view)
+
+        flash = assert_redirect(view, "/")
+        assert flash["info"] =~ "Alert #test-bus-delay updated"
+      end
+    end
+
+    @tag :logged_in_user
+    test "changing from a bus delay with one route to a bus detour retains the route and stops",
+         %{conn: conn} do
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-detour-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert has_element?(view, "div", "Bus • Detour")
+        refute has_element?(view, "div", "Bus • Delay")
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+      end
+    end
+
+    @tag :logged_in_user
+    test "changing from a bus delay with >1 route to a bus detour clears all routes and stops", %{
+      conn: conn
+    } do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-bus-delay-multiroute",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY",
+          primary_service_type: "3",
+          informed_entity: [
+            %{
+              route_type: 3,
+              route_id: @bus_route.id,
+              stop_id: @stop_2.id,
+              direction_id: 0
+            }
+          ],
+          original_route_selections: ["SLW|746", "SL5|749"],
+          original_stop_selections: []
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route, @bus_route_2] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route, @bus_route_2] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay-multiroute")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-detour-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert has_element?(view, "div", "Bus • Detour")
+        refute has_element?(view, "div", "Bus • Delay")
+
+        refute document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        refute document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+      end
+    end
+
+    @tag :logged_in_user
+    test "changing from a bus detour to a bus delay should keep the one route", %{conn: conn} do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-bus-detour",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DETOUR",
+          effect_name: "Detour",
+          primary_service_type: "3",
+          informed_entity: [
+            %{
+              route_type: 3,
+              route_id: @bus_route.id,
+              stop_id: @stop_2.id,
+              direction_id: 0
+            }
+          ],
+          original_route_selections: ["SLW|746"],
+          original_stop_selections: ["Courthouse (outbound)|place-crtst"]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-detour")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-delay-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert has_element?(view, "div", "Bus • Delay")
+        refute has_element?(view, "div", "Bus • Detour")
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+      end
+    end
+
+    @tag :logged_in_user
+    test "changing from RDS to SR should wipe everything", %{conn: conn} do
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-stop_closure-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert has_element?(view, "div", "Bus • Stop Closure")
+        refute has_element?(view, "div", "Bus • Delay")
+
+        assert has_element?(view, "#alert_data_stop_names_and_ids_selector")
+        assert has_element?(view, "#alert_data_route_ids_selector")
+
+        # Route selector should be disabled because no route is selected
+        assert has_element?(view, "label", "Impacted routes")
+        assert has_element?(view, "#alert_data_route_ids[disabled]")
+
+        refute document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        refute document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+      end
+    end
+
+    @tag :logged_in_user
+    test "changing from a bus delay to a ferry delay should wipe everything", %{conn: conn} do
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           by_type: fn _, _ -> [@ferry_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#route-type-ferry-button")
+        |> render_click()
+
+        view
+        |> element("#effect-name-delay-button")
+        |> render_click()
+
+        render_async(view)
+
+        assert has_element?(view, "div", "Ferry • Delay")
+        refute has_element?(view, "div", "Bus • Delay")
+
+        assert has_element?(view, "#alert_data_route_ids_selector")
+        assert has_element?(view, "#alert_data_trip_ids_selector")
+        assert has_element?(view, "#alert_data_stop_names_and_ids_selector")
+
+        # Trips and stops selectors should be disabled because no route is selected
+        assert has_element?(view, "#alert_data_trip_ids[disabled]")
+        assert has_element?(view, "#alert_data_stop_names_and_ids[disabled]")
+
+        open_review_modal(view)
+
+        render_async(view)
+
+        assert has_element?(view, "p.text-text-error", "Select route(s)")
+
+        # Flash
+        assert view
+               |> element("#flash")
+               |> render() =~ "Select route(s)"
+      end
+    end
+
+    @tag :logged_in_user
+    test "changing from a CR delay to a facility issue should wipe affected service but keep trip times",
+         %{conn: conn} do
+      ap =
+        build(
+          :active_period,
+          %{start: ~U[2024-05-10 14:30:54Z], end: ~U[2024-05-10 16:30:00Z]}
+        )
+
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "123",
+          effect: :OTHER_EFFECT,
+          effect_detail: "DELAY",
+          header_text: "cool header text",
+          severity: 3,
+          severity_level: :WARNING,
+          cause_detail: "UNKNOWN",
+          reminder_times: [],
+          informed_entity: [
+            %{
+              route_type: 3,
+              route_id: "CR-Worcester",
+              direction_id: 0,
+              stop_id: "place-sstat",
+              trip_id: @schedule.trip.id
+            }
+          ],
+          original_route_selections: [
+            "Framingham/Worcester Line|CR-Worcester"
+          ],
+          original_stop_selections: ["South Station|place-sstat"],
+          original_trip_selections: [@schedule.trip.id],
+          active_period: [Map.from_struct(ap)],
+          active_period_start: ap.start,
+          active_period_end: ap.end,
+          duration_certainty: :KNOWN,
+          primary_service_type: "2"
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route] end,
+           by_type: fn _, _ -> [@route] end,
+           get: fn _ -> @route end,
+           get: fn _, _ -> @route end,
+           all: fn _ -> [@route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ -> [@schedule, @schedule_2] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
+        {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/123")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#route-type-facility-button")
+        |> render_click()
+
+        view
+        |> element("#effect-name-access_issue-button")
+        |> render_click()
+
+        render_async(view)
+
+        assert has_element?(view, "div", "Facility • Access Issue")
+        refute has_element?(view, "div", "Commuter Rail • Delay")
+
+        assert has_element?(view, "#alert_data_active_period_start[value=\"2024-05-10T10:30\"]")
+        assert has_element?(view, "#alert_data_active_period_end[value=\"2024-05-10T12:30\"]")
+      end
+    end
+
+    @tag :logged_in_user
+    test "errors do not persist across changing mode/effects", %{conn: conn} do
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           by_type: fn _, _ -> [@ferry_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+        render_async(view)
+
+        # Unclick the route
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => []}
+        })
+
+        open_review_modal(view)
+        render_async(view)
+
+        assert has_element?(view, "p.text-text-error", "Select route(s)")
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-notice-button")
+        |> render_click()
+
+        render_async(view)
+
+        assert has_element?(view, "div", "Bus • Notice")
+        refute has_element?(view, "div", "Bus • Delay")
+
+        refute has_element?(view, "p.text-text-error", "Select route(s)")
+      end
+    end
+
+    @tag :logged_in_user
+    test "notification toggle defaults as expected on edit", %{conn: conn} do
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           by_type: fn _, _ -> [@ferry_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+        render_async(view)
+        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"false\"]")
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#route-type-commuter_rail-button")
+        |> render_click()
+
+        view
+        |> element("#effect-name-cancellation-button")
+        |> render_click()
+
+        render_async(view)
+
+        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"true\"]")
+      end
+    end
+
+    @tag :logged_in_user
+    test "notification toggle defaults as expected on duplicate", %{conn: conn} do
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           by_type: fn _, _ -> [@ferry_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/duplicate/test-bus-delay")
+        render_async(view)
+        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"false\"]")
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#route-type-commuter_rail-button")
+        |> render_click()
+
+        view
+        |> element("#effect-name-cancellation-button")
+        |> render_click()
+
+        render_async(view)
+
+        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"true\"]")
+      end
     end
   end
 end

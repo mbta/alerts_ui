@@ -40,7 +40,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
       reviewing = Map.get(params, "review", false)
 
       assign(socket,
-        back: socket.assigns.form_type == :creating,
+        back:
+          socket.assigns.form_type == :creating or socket.assigns.allow_changing_mode_effect_type,
         show: reviewing in ["true", true]
       )
     end
@@ -58,7 +59,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         selections ->
           Enum.filter(
             Map.get(selections, :available_routes, []) || [],
-            &(&1.id in alert_data.route_ids)
+            &(&1.id in (alert_data.route_ids || []))
           )
       end
 

@@ -313,6 +313,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
           options={@selections.facility_id_options}
         />
       </fieldset>
+      <p :if={@show_stop_ids} class="mt-2">
+        Selected facility ids: {(@form[:facility_ids].value || []) |> Enum.join(", ")}
+      </p>
       <hr class="mt-8" />
     </div>
     """
