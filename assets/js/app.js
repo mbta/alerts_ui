@@ -93,7 +93,8 @@ window.addEventListener("phx:copy", (data) => {
   }
 })
 
-window.addEventListener("phx:show-gtfs-modal", (e) => {
+window.addEventListener("phx:show-modal", (e) => {
+
   let el = document.getElementById(e.detail.id)
   if (el) {
     liveSocket.execJS(el, el.getAttribute("data-show"))
