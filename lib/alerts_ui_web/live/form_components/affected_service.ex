@@ -837,7 +837,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     |> Enum.reduce(%{}, fn schedule, acc ->
       Map.put(acc, schedule.trip.id, %{
         direction_id: schedule.trip.direction_id,
-        route_id: schedule.route.id,
+        route_id: schedule.route_id,
         trip_name: SelectFormatter.name_for_option(schedule, route_type),
         added_route_ids: schedule.added_route_ids
       })
@@ -936,9 +936,16 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     assigns.available_schedules.result
     |> Enum.filter(fn schedule ->
       # If a line was selected and deselected, value here may be set to nil
-      schedule.route.id in (assigns.form[:route_ids].value || [])
+      schedule.route_id in (assigns.form[:route_ids].value || [])
     end)
-    |> Enum.group_by(&SelectFormatter.name_for_option(&1.route))
+    |> Enum.group_by(fn schedule ->
+      route =
+        Enum.find(Map.get(assigns.available_routes, :result) || [], fn route ->
+          route.id == schedule.route_id
+        end)
+
+      SelectFormatter.name_for_option(route)
+    end)
   end
 
   defp get_selected_schedules(nil, _), do: nil

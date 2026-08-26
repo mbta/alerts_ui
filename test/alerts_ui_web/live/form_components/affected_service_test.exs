@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   alias Phoenix.LiveView.AsyncResult
 
   @schedule %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: nil,
@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   }
 
   @schedule_2 %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
@@ -43,7 +43,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   }
 
   @schedule_3 %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683322-596", name: "596", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),
@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
   }
 
   @schedule_4 %EnhancedSchedule{
-    route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+    route_id: "CR-Worcester",
     trip: %Trip{id: "CR-683322-596", name: "596", direction_id: 0},
     stop: %Stop{id: "place-sstat", name: "South Station"},
     arrival_time: DateTime.utc_now() |> DateTime.shift_zone!("America/New_York"),

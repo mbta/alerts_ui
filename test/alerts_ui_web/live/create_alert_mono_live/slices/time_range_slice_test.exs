@@ -477,7 +477,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       }
 
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,
@@ -485,7 +485,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       }
 
       schedule_2 = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "CR-683322-595", name: "595", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: Date.utc_today() |> DateTime.new!(~T[22:00:00], "America/New_York"),
@@ -1332,7 +1332,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   describe "trip selection" do
     test "populates start and end from trip when departure is in the future" do
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,
@@ -1365,7 +1365,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     test "sets start specifier to now when trip departure has already passed" do
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,
@@ -1393,7 +1393,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     test "displays error if start after trip end when start changes" do
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,
@@ -1417,7 +1417,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     test "no error if start after trip end when start changes on recurring alert" do
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,
@@ -1443,7 +1443,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     test "displays error if start after trip end when 'start of service' is selected" do
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,
@@ -1479,7 +1479,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     test "doesn't display error if start within 1 hour of trip end" do
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,
@@ -1562,7 +1562,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     test "resets start and end to defaults when all trips are deselected" do
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,
@@ -1628,7 +1628,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
     test "start and end time updated if trip changes and departure before current time" do
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "trip-595", name: "595", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,
@@ -1676,7 +1676,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       arrival_utc = ~U[2024-01-15 19:00:00Z]
 
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "trip-tz-1", name: "1", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,
@@ -1701,7 +1701,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       arrival_utc = ~U[2024-07-15 19:00:00Z]
 
       schedule = %EnhancedSchedule{
-        route: %Route{id: "CR-Worcester", type: 2, name: "Framingham/Worcester Line"},
+        route_id: "CR-Worcester",
         trip: %Trip{id: "trip-tz-2", name: "2", direction_id: 0},
         stop: %Stop{id: "place-sstat", name: "South Station"},
         arrival_time: nil,

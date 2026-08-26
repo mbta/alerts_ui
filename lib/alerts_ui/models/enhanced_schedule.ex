@@ -13,7 +13,7 @@ defmodule AlertsUI.Models.EnhancedSchedule do
   defstruct @schedule_keys ++ @enhanced_keys
 
   @type t :: %__MODULE__{
-          route: Route.t(),
+          route_id: Route.id_t(),
           trip: Trip.t(),
           stop: Stop.t(),
           arrival_time: DateTime.t() | nil,
