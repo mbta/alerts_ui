@@ -36,11 +36,14 @@ defmodule AlertsUI.Jobs.AlertValidationUpcomingWorker do
     else
       {:error, error} when is_atom(error) ->
         Logger.error("error in processing upcoming GTFS validation: #{error}")
+        {:error, error}
 
       {:error, exception} ->
         Logger.error(
           "error in processing upcoming GTFS validation: " <> Exception.message(exception)
         )
+
+        {:error, Exception.message(exception)}
 
       false ->
         Logger.info("Did not run upcoming GTFS validation")

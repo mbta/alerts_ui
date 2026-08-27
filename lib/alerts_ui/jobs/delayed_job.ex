@@ -43,5 +43,6 @@ defmodule AlertsUI.Jobs.DelayedJob do
   rescue
     e ->
       Logger.error("Error delaying job. #{Exception.format(:error, e, __STACKTRACE__)}")
+      {:error, "error delaying job"}
   end
 end

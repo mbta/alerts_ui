@@ -14,14 +14,15 @@ defmodule AlertsUI.Jobs.FeedWriter do
 
     :timer.tc(&WriteFeed.write_feed/1, [opts])
     |> log_results()
-  rescue
-    e ->
-      Logger.error("Error writing to file: #{Exception.format(:error, e, __STACKTRACE__)}")
   end
 
   @spec log_results({integer(), {:ok, binary()}} | {integer(), {:error, String.t()}}) :: :ok
-  defp log_results({export_time, {:ok, _export_json}}),
-    do: Logger.info("#{__MODULE__}: Wrote alerts feed: time_ms=#{export_time / 1_000}")
+  defp log_results({export_time, {:ok, _export_json}}) do
+    Logger.info("#{__MODULE__}: Wrote alerts feed: time_ms=#{export_time / 1_000}")
+  end
 
-  defp log_results({_, {:error, reason}}), do: Logger.warning("Error writing to file: #{reason}")
+  defp log_results({_, {:error, reason}}) do
+    Logger.error("Error writing to file: #{reason}")
+    {:error, reason}
+  end
 end
