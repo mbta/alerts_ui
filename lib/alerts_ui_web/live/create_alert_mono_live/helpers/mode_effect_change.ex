@@ -20,6 +20,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
 
   @full_reset Map.new(@affected_service_fields, fn field -> {field, []} end)
 
+  # expose @full_reset for the test to use too
+  def full_reset, do: @full_reset
+
   @spec condensed_form(Phoenix.HTML.Form.t()) :: map()
   @doc """
   From a Phoenix Form, return a map of relevant values needed in order to figure out
@@ -47,6 +50,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
 
     previous_route_type = form[:route_type]
 
+    IO.inspect([previous_combination, next_combination, previous_route_type, next_route_type])
+
     new_values =
       cond do
         # If the mode changes, wipe all values
@@ -66,6 +71,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   @spec derive_cleared_values(Phoenix.HTML.Form.t(), map()) :: map()
   defp derive_cleared_values(form, new_values) do
     Map.new(new_values, fn {key, _value} -> {key, form[key]} end)
+    |> Map.reject(fn {_key, value} -> value === [] or is_nil(value) end)
   end
 
   @spec same_combination(atom(), Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
@@ -114,9 +120,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   @spec different_combination(:atom, :atom, Phoenix.HTML.Form.t()) :: map()
   defp different_combination(previous_combination, next_combination, form)
 
+  defp different_combination(:RDS, :SR, _) do
+    retain([:stop_ids, :stop_names_and_ids])
+  end
+
   # Eventually we can be smarter about what we retain depending on combo changes, i.e.
   # def different_combination(:RDS, :SR, form) do ...
   defp different_combination(_previous_combination, _next_combination, _) do
     @full_reset
+  end
+
+  @spec retain([atom()]) :: map()
+  defp retain(fields) do
+    @affected_service_fields
+    |> Enum.filter(fn field -> field not in fields end)
+    |> Map.new(fn field -> {field, []} end)
   end
 end
