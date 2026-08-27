@@ -964,6 +964,9 @@ defmodule AlertsUIWeb.SharedComponents do
           />
         </button>
       </div>
+      <div :if={!@disabled} class="ml-4">
+        <.loading loading={@loading}></.loading>
+      </div>
       <select
         name={@name}
         id={@id}
@@ -1148,7 +1151,7 @@ defmodule AlertsUIWeb.SharedComponents do
           prompt={
             cond do
               @disabled -> nil
-              @loading -> "Loading..."
+              @loading -> nil
               @filter_field.value in [nil, ""] -> @prompt
               true -> nil
             end
@@ -1621,13 +1624,13 @@ defmodule AlertsUIWeb.SharedComponents do
   def loading(assigns) do
     ~H"""
     <%= if @loading do %>
-      <div class="flex space-x-1 items-baseline">
-        <p class="mr-[1.5px]">{@loading_text}</p>
-        <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce [animation-delay:-0.3s]">
-        </div>
-        <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce [animation-delay:-0.15s]">
-        </div>
-        <div class="h-[3px] w-[3px] bg-text-dark rounded-full animate-bounce"></div>
+      <div class="flex space-x-1 items-baseline hover:cursor-wait">
+        <span class="loading-ellipsis">{@loading_text}</span>
+        <span class="loading-ellipsis">
+          <span>.</span>
+          <span>.</span>
+          <span>.</span>
+        </span>
       </div>
     <% else %>
       {render_slot(@inner_block)}

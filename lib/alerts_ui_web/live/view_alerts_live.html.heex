@@ -30,12 +30,14 @@
     data-showing-alert-id={Map.get(assigns, :selected_alert_id, "")}
     id="alerts-table-container"
   >
+    <.loading loading={@loading}></.loading>
     <Flop.Phoenix.table
+      :if={!@loading}
       items={@alerts}
       meta={@meta}
       on_sort={JS.push("sort-alerts")}
       opts={[
-        no_results_content: if(@loading, do: "Loading...", else: "No alerts found"),
+        no_results_content: "No alerts found",
         symbol_asc: sort_icon(:asc),
         symbol_desc: sort_icon(:desc),
         symbol_unsorted: sort_icon(nil),
