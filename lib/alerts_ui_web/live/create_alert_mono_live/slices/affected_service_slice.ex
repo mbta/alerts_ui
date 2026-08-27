@@ -628,7 +628,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       </.h5>
       <div class={[
         "flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]",
-        @route_field.errors != [] && "mb-8"
+        @route_field.errors != [] && "mb-10",
+        @form[:stop_names_and_ids].errors != [] && "mb-14 md:mb-16"
       ]}>
         <div class={[
           "mb-4 md:mb-0 w-full md:w-[25%] md:mr-8",
