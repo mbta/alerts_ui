@@ -676,7 +676,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         </.modal>
         <div
           :if={show_trips_input?(@form[:combination].value)}
-          class="flex flex-col justify-start md:w-[25%] md:mr-8"
+          class="flex flex-col justify-start w-full md:w-[25%] md:mr-8"
         >
           <.select
             :if={show_directions_input?(@form[:combination].value)}
