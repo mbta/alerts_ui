@@ -13,26 +13,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   Helpers for converting an alert's mode or effect type.
   """
 
-  # All of the form fields we need in order to figure out what to retain
-  @form_fields [
-    :route_ids,
-    :stop_ids,
-    :trip_ids,
-    :facility_ids,
-    :stop_names_and_ids,
-    :combination,
-    :route_type,
-    :effect_name
-  ]
+  @affected_service_fields [:route_ids, :stop_ids, :trip_ids, :facility_ids, :stop_names_and_ids]
 
-  @full_reset %{
-    direction: nil,
-    route_ids: [],
-    stop_ids: [],
-    trip_ids: [],
-    facility_ids: [],
-    stop_names_and_ids: []
-  }
+  # All of the form fields we need in order to figure out what to retain
+  @form_fields @affected_service_fields ++ [:combination, :route_type, :effect_name]
+
+  @full_reset Map.new(@affected_service_fields, fn field -> {field, []} end)
 
   @spec condensed_form(Phoenix.HTML.Form.t()) :: map()
   @doc """
@@ -48,7 +34,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     |> Map.put(:source, form.source)
   end
 
-  @spec new_form_values(Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
+  @spec new_form_values(Phoenix.HTML.Form.t(), integer(), String.t()) :: %{
+          new: map(),
+          replaced: map()
+        }
   def new_form_values(form, next_route_type, next_effect_name)
 
   def new_form_values(form, next_route_type, next_effect_name) do
@@ -58,17 +47,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
 
     previous_route_type = form[:route_type]
 
-    cond do
-      # If the mode changes, wipe all values
-      next_route_type !== previous_route_type ->
-        @full_reset
+    new_values =
+      cond do
+        # If the mode changes, wipe all values
+        next_route_type !== previous_route_type ->
+          @full_reset
 
-      previous_combination === next_combination ->
-        same_combination(previous_combination, form, next_route_type, next_effect_name)
+        previous_combination === next_combination ->
+          same_combination(previous_combination, form, next_route_type, next_effect_name)
 
-      true ->
-        different_combination(previous_combination, next_combination, form)
-    end
+        true ->
+          different_combination(previous_combination, next_combination, form)
+      end
+
+    %{new: new_values, replaced: derive_cleared_values(form, new_values)}
+  end
+
+  @spec derive_cleared_values(Phoenix.HTML.Form.t(), map()) :: map()
+  defp derive_cleared_values(form, new_values) do
+    Map.new(new_values, fn {key, _value} -> {key, form[key]} end)
   end
 
   @spec same_combination(atom(), Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
@@ -113,6 +110,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
         %{}
     end
   end
+
+  @spec different_combination(:atom, :atom, Phoenix.HTML.Form.t()) :: map()
+  defp different_combination(previous_combination, next_combination, form)
 
   # Eventually we can be smarter about what we retain depending on combo changes, i.e.
   # def different_combination(:RDS, :SR, form) do ...

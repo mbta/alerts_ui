@@ -274,8 +274,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         do: ModeEffectChange.condensed_form(socket.assigns.form),
         else: socket.assigns.original_alert_form
 
-    form_updates =
+    %{new: form_updates, replaced: replaced_values} =
       ModeEffectChange.new_form_values(form_to_compare, next_route_type, effect_name)
+
+    IO.inspect(replaced_values, label: "replaced values")
 
     updated_source =
       change(
