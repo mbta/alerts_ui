@@ -498,6 +498,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           }
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert render(view) =~ ~r/Routes:.*Framingham\/Worcester Line/s

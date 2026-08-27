@@ -269,7 +269,7 @@ defmodule AlertsUI.Alerts do
     )
   end
 
-  @spec get_by_alert_id(String.t() | integer()) :: Alert.t()
+  @spec get_by_alert_id(String.t() | integer()) :: Alert.t() | nil
   def get_by_alert_id(alert_id) when is_integer(alert_id) do
     alert_id
     |> Integer.to_string()
