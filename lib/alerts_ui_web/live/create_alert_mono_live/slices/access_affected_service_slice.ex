@@ -5,14 +5,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   facility picker with an optional stop-filter modal.
   """
 
-  alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
-    only: [get_single_facility_effect_names: 0, humanize_effect_name: 1]
+    only: [get_single_facility_effect_names: 0, humanize_effect_name: 1, facility_types: 1]
 
   import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
     only: [always_validate_required: 3]
@@ -152,10 +151,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
 
     form = assigns.form
 
-    facility_types =
-      form[:effect_name].value
-      |> effect_to_lookup_key()
-      |> InformedEntity.facility_effect_to_types()
+    facility_types = facility_types(form[:effect_name].value)
 
     socket
     |> assign(:selections, %{prev | loading: true})
@@ -225,14 +221,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
       end
 
     equals_stop_id or facility.id in selected_facility_ids
-  end
-
-  defp effect_to_lookup_key(nil), do: nil
-
-  defp effect_to_lookup_key(string) do
-    string
-    |> String.upcase()
-    |> String.replace(" ", "_")
   end
 
   def on_filter_accept(socket) do

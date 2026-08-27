@@ -82,6 +82,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     name: "Charlestown Ferry"
   }
 
+  @bike_facility %Facility{
+    id: "Facility-bike",
+    long_name: "Bike Facility",
+    stop: @stop
+  }
+
+  @parking_facility %Facility{
+    id: "Facility-parking",
+    long_name: "Parking Facility",
+    stop: @stop
+  }
+
   describe "create alerts page" do
     @tag :logged_in_user
     test "connected mount displays first page of form when logged in", %{conn: conn} do
@@ -1226,6 +1238,129 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         refute document_has_element?(
                  document,
                  "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+      end
+    end
+
+    @tag :logged_in_user
+    test "changing between different facility types should wipe everything", %{conn: conn} do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-access-edit",
+          effect: :OTHER_EFFECT,
+          effect_detail: "BIKE_ISSUE",
+          primary_service_type: "access",
+          informed_entity: [
+            %{facility_id: @bike_facility.id, route_type: nil}
+          ],
+          original_facility_selections: [@bike_facility.id]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mock(FacilitiesRepo,
+        get_by_type: fn
+          ["BIKE_STORAGE"], _ -> [@bike_facility]
+          ["PARKING_AREA", "PICK_DROP"], _ -> [@parking_facility]
+        end
+      ) do
+        conn =
+          put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+          |> put_resp_cookie("show_stop_ids", "true")
+
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-access-edit")
+        render_async(view)
+        assert has_element?(view, "p", "Selected facility ids: #{@bike_facility.id}")
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-parking_closure-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert has_element?(view, "div", "Facility • Parking Closure")
+        refute has_element?(view, "div", "Facility • Bike Issue")
+
+        refute document_has_element?(
+                 document,
+                 "option[value=\"#{@bike_facility.id}\"][selected]"
+               )
+
+        refute has_element?(view, "p", "Selected facility ids: #{@bike_facility.id}")
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"#{@parking_facility.id}\"]"
+               )
+      end
+    end
+
+    @tag :logged_in_user
+    test "changing between from a bike facility to access issue should retain selections", %{
+      conn: conn
+    } do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-access-edit",
+          effect: :OTHER_EFFECT,
+          effect_detail: "BIKE_ISSUE",
+          primary_service_type: "access",
+          informed_entity: [
+            %{facility_id: @bike_facility.id, route_type: nil}
+          ],
+          original_facility_selections: [@bike_facility.id]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mock(FacilitiesRepo,
+        get_by_type: fn
+          ["BIKE_STORAGE"], _ -> [@bike_facility]
+          ["PARKING_AREA", "PICK_DROP"], _ -> [@parking_facility]
+          _, _ -> [@bike_facility, @parking_facility]
+        end
+      ) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-access-edit")
+        render_async(view)
+        assert has_element?(view, "div", "Facility • Bike Issue")
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-access_issue-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        refute has_element?(view, "div", "Facility • Bike Issue")
+        assert has_element?(view, "div", "Facility • Access Issue")
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"#{@bike_facility.id}\"][selected]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"#{@parking_facility.id}\"]"
                )
       end
     end
