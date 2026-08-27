@@ -1627,9 +1627,7 @@ defmodule AlertsUIWeb.SharedComponents do
       <div class="flex space-x-1 items-baseline hover:cursor-wait">
         <span class="loading-ellipsis">{@loading_text}</span>
         <span class="loading-ellipsis">
-          <span>.</span>
-          <span>.</span>
-          <span>.</span>
+          <span>.</span><span>.</span><span>.</span>
         </span>
       </div>
     <% else %>
