@@ -1601,6 +1601,54 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
+    test "can edit a systemwide delay without error", %{conn: conn} do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-systemwide-edit",
+          effect: :OTHER_EFFECT,
+          effect_detail: "NOTICE",
+          primary_service_type: "systemwide",
+          service_types: [1]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           by_type: fn _, _ -> [@ferry_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-systemwide-edit")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-delay-button")
+        |> render_click()
+
+        render_async(view)
+
+        assert has_element?(view, "div", "Systemwide • Delay")
+        refute has_element?(view, "div", "Systemwide • Notice")
+      end
+    end
+
+    @tag :logged_in_user
     test "errors do not persist across changing mode/effects", %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 

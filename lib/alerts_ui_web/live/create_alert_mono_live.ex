@@ -212,7 +212,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         progress: get_step_by_name("route_type_and_effect"),
         path_route_type: Atom.to_string(PathHelper.path_route_type_from_socket(socket)),
         path_effect_name: PathHelper.path_effect_name_from_socket(socket),
-        selections: nil,
+        selections: %{},
         change_type: true
       })
       |> push_patch(to: PathHelper.path(socket.assigns))
@@ -244,7 +244,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         progress: get_step_by_name("route_type_and_effect"),
         path_route_type: nil,
         path_effect_name: nil,
-        selections: nil
+        selections: %{}
       })
       |> push_patch(to: PathHelper.path(socket.assigns))
 
