@@ -628,9 +628,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       </.h5>
       <div class={[
         "flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem]",
-        (@route_field.errors != [] || @form[:stop_names_and_ids].errors != []) && "mb-16"
+        @route_field.errors != [] && "mb-8"
       ]}>
-        <div class="mb-4 md:mb-0 w-full md:w-[25%] md:mr-8">
+        <div class={[
+          "mb-4 md:mb-0 w-full md:w-[25%] md:mr-8",
+          @route_field.errors != [] && "mb-10"
+        ]}>
           <.filtered_select
             label={if @form[:route_type].value in [0, 1, 2], do: "Lines", else: "Routes"}
             field={@route_field}
