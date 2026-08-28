@@ -463,7 +463,7 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <button
       class="px-2 py-1 border border-border-primary bg-bg-input-default active:bg-secondary-active rounded hover:bg-secondary-hover"
-      phx-click={JS.dispatch("phx:copy", to: @copy_id)}
+      phx-click={JS.dispatch("phx:copy_input", to: @copy_id)}
       title={@title}
       type="button"
     >

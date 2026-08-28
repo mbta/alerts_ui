@@ -62,6 +62,7 @@ defmodule AlertsUIWeb.ReviewModal do
     doc: "The target to send the events to (eg form component id)"
 
   attr :current_user, :map, default: %{}, doc: "Current user, for first and last name"
+  attr :current_url, :string, default: "", doc: "Current url, to use as part of modal permalink"
   attr :rest, :global, include: ~w(cancel_event_name accept_event_name target_id)
 
   def review_modal(assigns) do
@@ -396,7 +397,15 @@ defmodule AlertsUIWeb.ReviewModal do
               {@last_edited_by}
             </p>
           <% end %>
-
+          <div
+            :if={@alert_id}
+            class="text-primary hover:text-primary-hover hover:underline cursor-pointer"
+            phx-click={
+              JS.dispatch("phx:copy", detail: %{text: @current_url <> "?alert_id=#{@alert_id}"})
+            }
+          >
+            <.icon name="hero-link-solid" class="w-4 h-4" /> Copy link
+          </div>
           <.link
             :if={@alert_id}
             class="text-primary hover:text-primary-hover hover:underline"

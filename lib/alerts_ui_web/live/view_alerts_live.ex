@@ -61,7 +61,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
        scroll_to_top: false,
        send_all_clear?: false,
        alerts: [],
-       loading: false
+       loading: false,
+       url: ""
      )}
   end
 
@@ -107,7 +108,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     # adding an "alert_id" param opens the details modal if the alert exists
     socket =
       socket
-      |> assign(loading: true)
       |> push_event("openDetails", %{alert_id: alert_id})
       |> push_patch(to: ~p"/alerts")
 
@@ -115,7 +115,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
-  def handle_params(params, _url, socket) do
+  def handle_params(params, url, socket) do
     Phoenix.PubSub.broadcast(
       AlertsUI.PubSub,
       "paginating",
@@ -172,7 +172,14 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       )
 
       {:noreply,
-       assign(socket, meta: meta, alerts: alerts, form: form, params: params, loading: false)}
+       assign(socket,
+         meta: meta,
+         alerts: alerts,
+         form: form,
+         params: params,
+         loading: false,
+         url: url
+       )}
     end
   end
 
