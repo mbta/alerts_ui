@@ -104,6 +104,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
   def get_recurring_start_datetime(start_date, start_time) do
     start_date
     |> DTHelpers.round_up_to_gap!(start_time, "America/New_York")
+    |> DateTime.to_naive()
   end
 
   # one-time end
