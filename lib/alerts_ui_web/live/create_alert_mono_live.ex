@@ -804,7 +804,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       end
 
     if Map.get(socket.assigns, :form) do
-      socket |> assign(:original_alert_form, socket.assigns.form)
+      original_form_fields =
+        Map.new(ModeEffectChange.form_fields(), fn field ->
+          {field, socket.assigns.form[field].value}
+        end)
+        |> Map.put(:source, socket.assigns.form.source)
+
+      socket |> assign(:original_alert_form, original_form_fields)
     else
       socket
     end
