@@ -265,17 +265,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       ) do
     effect_name = Map.get(params, "value")
     next_route_type = InformedEntity.route_type_mapping(socket.assigns.path_route_type)
+    create? = socket.assigns.form_type === :creating
+
+    # On edit/duplicate, we always compare to the saved form
+    # On create, we compare to the last form the user edited
+    form_to_compare =
+      if create?,
+        do: ModeEffectChange.condensed_form(socket.assigns.form),
+        else: socket.assigns.original_alert_form
 
     form_updates =
-      ModeEffectChange.new_form_values(
-        socket.assigns.original_alert_form,
-        next_route_type,
-        effect_name
-      )
+      ModeEffectChange.new_form_values(form_to_compare, next_route_type, effect_name)
 
     updated_source =
       change(
-        socket.assigns.original_alert_form.source,
+        form_to_compare.source,
         Map.merge(
           %{
             route_type: next_route_type,
@@ -804,13 +808,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       end
 
     if Map.get(socket.assigns, :form) do
-      original_form_fields =
-        Map.new(ModeEffectChange.form_fields(), fn field ->
-          {field, socket.assigns.form[field].value}
-        end)
-        |> Map.put(:source, socket.assigns.form.source)
-
-      socket |> assign(:original_alert_form, original_form_fields)
+      socket |> assign(:original_alert_form, ModeEffectChange.condensed_form(socket.assigns.form))
     else
       socket
     end

@@ -33,7 +33,19 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     stop_names_and_ids: []
   }
 
-  def form_fields(), do: @form_fields
+  @spec condensed_form(Phoenix.HTML.Form.t()) :: map()
+  @doc """
+  From a Phoenix Form, return a map of relevant values needed in order to figure out
+  what to retain from switching mode/effect types. This is used so we do not need to
+  store another large form on the socket, and can instead just send around the values
+  we need.
+  """
+  def condensed_form(form) do
+    Map.new(@form_fields, fn field ->
+      {field, form[field].value}
+    end)
+    |> Map.put(:source, form.source)
+  end
 
   @spec new_form_values(Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
   def new_form_values(form, next_route_type, next_effect_name)
