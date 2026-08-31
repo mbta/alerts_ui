@@ -17,8 +17,9 @@
     <.filter_form form={@form} filter_count={@filter_count} />
   </div>
 
-  <div class="sticky top-0 z-20 flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between">
+  <div class="sticky top-0 z-20 flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between min-h-[2.5rem]">
     <span class="w-24">
+      <.loading loading={@loading}></.loading>
       <span :if={!@loading}>
         {@meta.total_count} {BuildAutoText.maybe_pluralize("alert", @meta.total_count != 1)}
       </span>
@@ -34,7 +35,6 @@
     data-showing-alert-id={Map.get(assigns, :selected_alert_id, "")}
     id="alerts-table-container"
   >
-    <.loading loading={@loading}></.loading>
     <Flop.Phoenix.table
       :if={!@loading}
       items={@alerts}
