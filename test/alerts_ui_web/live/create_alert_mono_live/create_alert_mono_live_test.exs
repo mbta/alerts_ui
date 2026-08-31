@@ -1787,5 +1787,104 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"true\"]")
       end
     end
+
+    @tag :logged_in_user
+    test "changing forms multiple times always compares to the original form", %{conn: conn} do
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end,
+           all: fn ["filter[id]": "place-crtst"], [] -> [@stop_2] end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [@route_pattern] end,
+           included_stops_by_route_id: fn _route_id, _ -> [@stop] end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+        render_async(view)
+        assert has_element?(view, "div", "Bus • Delay")
+
+        {:ok, document} = view |> render() |> Floki.parse_document()
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-stop_closure-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert has_element?(view, "div", "Bus • Stop Closure")
+        refute has_element?(view, "div", "Bus • Delay")
+
+        refute document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        refute document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-notice-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        assert has_element?(view, "div", "Bus • Notice")
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+               )
+      end
+    end
   end
 end
