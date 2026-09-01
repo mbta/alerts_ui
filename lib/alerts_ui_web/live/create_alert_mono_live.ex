@@ -936,11 +936,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   defp flash_text(_assigns_alert_id, alert_id, _form_type), do: "Alert ##{alert_id} updated"
 
   defp persist_valid_alert(socket) do
-    Phoenix.PubSub.broadcast(
-      AlertsUI.PubSub,
-      "persisting",
-      {:persisting_start}
-    )
+    send(self(), {:persisting_start})
 
     alert_data = socket.assigns.form.source.data
 
@@ -988,11 +984,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
           # Form validation should prevent us from getting here
           # but in case we do, we log an error and show
           # an error flash to the user
-          Phoenix.PubSub.broadcast(
-            AlertsUI.PubSub,
-            "persisting",
-            {:persisting_end}
-          )
+          send(self(), {:persisting_end})
 
           errors =
             changeset

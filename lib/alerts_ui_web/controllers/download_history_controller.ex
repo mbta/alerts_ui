@@ -23,9 +23,11 @@ defmodule AlertsUIWeb.DownloadHistoryController do
   def export_bulk(conn, %{"month" => month, "year" => year}) do
     with {month, _} <- Integer.parse(month),
          {year, _} <- Integer.parse(year) do
+      channel_id = (conn.private.plug_session["live_socket_id"] || "") |> String.slice(-5..-1)
+
       Phoenix.PubSub.broadcast(
         AlertsUI.PubSub,
-        "file_downloading",
+        "file_downloading-" <> channel_id,
         {:download_started}
       )
 
@@ -38,7 +40,7 @@ defmodule AlertsUIWeb.DownloadHistoryController do
 
       Phoenix.PubSub.broadcast(
         AlertsUI.PubSub,
-        "file_downloading",
+        "file_downloading-" <> channel_id,
         {:download_finished}
       )
 
