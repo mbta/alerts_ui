@@ -125,8 +125,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         persisting_alert: false,
         modal_open_map: %{@gtfs_modal_id => false, @change_mode_effect_modal_id => false},
         gtfs_modal_id: @gtfs_modal_id,
-        change_mode_effect_modal_id: @change_mode_effect_modal_id,
-        change_type_data: []
+        change_mode_effect_modal_id: @change_mode_effect_modal_id
       })
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
@@ -743,8 +742,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_info({:changing_mode_effect, _form_updates}, socket) do
     socket =
       socket
-      # Fill in the data that is changing here based on form_updates
-      |> assign(change_type_data: ["todo"])
       |> set_modal_open(@change_mode_effect_modal_id, true)
       |> push_event("show-modal", %{id: @change_mode_effect_modal_id})
 
