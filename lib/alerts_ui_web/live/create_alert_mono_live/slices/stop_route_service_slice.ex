@@ -192,6 +192,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       available_stops = CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
 
       stop_ids = Alert.get_original_ids(stop_names_and_ids)
+      IO.inspect(stop_ids, label: "stop ids")
       available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
 
       available_stop_ids = Enum.map(available_stops, fn stop -> stop.id end)
@@ -205,6 +206,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       candidate_stops = previously_selected_stops ++ available_stops
 
       selected_stops = get_selected_stops(candidate_stops, stop_ids)
+      IO.inspect(selected_stops)
 
       modal_route_id_options =
         modal_route_id_options(available_filter_routes, form)
@@ -214,6 +216,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
 
       stop_id_options =
         stop_id_options(candidate_stops, form)
+
+      # IO.inspect(Enum.find(stop_id_options, fn option -> option[:key] === "South Station" end))
 
       filter_title_value = filter_title_value(modal_route_id, available_filter_routes)
 
