@@ -5,12 +5,14 @@ defmodule AlertsUIWeb.DownloadHistoryLive do
   use AlertsUIWeb, :live_view
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
     now = DateTime.shift_zone!(DateTime.utc_now(), "America/New_York")
     previous_month = rem(now.month + 10, 12) + 1
 
     if connected?(socket) do
-      Phoenix.PubSub.subscribe(AlertsUI.PubSub, "file_downloading")
+      # use part of live_socket_id to only broadcast to same user
+      channel_id = (Map.get(session, "live_socket_id") || "") |> String.slice(-5..-1)
+      Phoenix.PubSub.subscribe(AlertsUI.PubSub, "file_downloading-" <> channel_id)
     end
 
     {:ok,

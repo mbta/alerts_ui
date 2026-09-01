@@ -933,7 +933,10 @@ defmodule AlertsUIWeb.SharedComponents do
       end)
 
     ~H"""
-    <div phx-feedback-for={@name} class={["#{@class}", @hidden && "hidden"]}>
+    <div phx-feedback-for={@name} class={["#{@class}", "relative", @hidden && "hidden"]}>
+      <div :if={!@disabled} class="ml-4 absolute">
+        <.loading loading={@loading}></.loading>
+      </div>
       <div :if={@modal_filter_id || @label} class="flex flex-row justify-between">
         <.label for={@id} class={"block #{if @disabled, do: "text-text-disabled", else: ""}"}>
           {@label}
@@ -963,9 +966,6 @@ defmodule AlertsUIWeb.SharedComponents do
             class="hero-x-circle-mini w-4 h-4 ml-1 bg-primary"
           />
         </button>
-      </div>
-      <div :if={!@disabled} class="ml-4">
-        <.loading loading={@loading}></.loading>
       </div>
       <select
         name={@name}
@@ -1627,9 +1627,7 @@ defmodule AlertsUIWeb.SharedComponents do
       <div class="flex space-x-1 items-baseline hover:cursor-wait">
         <span class="loading-ellipsis">{@loading_text}</span>
         <span class="loading-ellipsis">
-          <span>.</span>
-          <span>.</span>
-          <span>.</span>
+          <span>.</span><span>.</span><span>.</span>
         </span>
       </div>
     <% else %>
