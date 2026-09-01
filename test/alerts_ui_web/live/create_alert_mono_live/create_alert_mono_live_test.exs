@@ -254,6 +254,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
           }
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert view |> element("#trip_end_warning_modal-container") |> render() =~

@@ -245,6 +245,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert view |> element("#review-modal-container", "Bus • Delay") |> has_element?
@@ -265,6 +267,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             facility_ids: ["349"]
           }
         })
+
+        render_async(view)
 
         open_review_modal(view)
 
