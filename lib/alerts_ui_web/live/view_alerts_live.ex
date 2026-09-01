@@ -68,19 +68,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_info({:alerts_updated}, socket) do
-    Phoenix.PubSub.broadcast(
-      AlertsUI.PubSub,
-      "paginating",
-      {:paginate_start}
-    )
+    send(self(), {:paginate_start})
 
     # Whenever an alert is edited or added/deleted, list all the alerts again.
     with {alerts, meta} <- Alerts.list_all_paginated(socket.assigns.meta.flop) do
-      Phoenix.PubSub.broadcast(
-        AlertsUI.PubSub,
-        "paginating",
-        {:paginate_end}
-      )
+      send(self(), {:paginate_end})
 
       {:noreply, assign(socket, meta: meta, alerts: alerts)}
     end
@@ -114,14 +106,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     {:noreply, socket}
   end
 
-  @impl true
   def handle_params(params, url, socket) do
-    Phoenix.PubSub.broadcast(
-      AlertsUI.PubSub,
-      "paginating",
-      {:paginate_start}
-    )
-
+    send(self(), {:paginate_start})
     # default to timeline: current if params have no values
     # (eg no user input has occurred and we're probably in a fresh reload)
     filters = get_filters(params, "current")
@@ -165,11 +151,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
       |> Phoenix.Component.to_form()
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
-      Phoenix.PubSub.broadcast(
-        AlertsUI.PubSub,
-        "paginating",
-        {:paginate_end}
-      )
+      send(self(), {:paginate_end})
 
       {:noreply,
        assign(socket,
@@ -185,21 +167,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_event("paginate-alerts", %{"page" => page}, socket) do
-    Phoenix.PubSub.broadcast(
-      AlertsUI.PubSub,
-      "paginating",
-      {:paginate_start}
-    )
+    send(self(), {:paginate_start})
 
     flop =
       Flop.set_page(socket.assigns.meta.flop, page)
 
     with {alerts, meta} <- Alerts.list_all_paginated(flop) do
-      Phoenix.PubSub.broadcast(
-        AlertsUI.PubSub,
-        "paginating",
-        {:paginate_end}
-      )
+      send(self(), {:paginate_end})
 
       params = Map.merge(socket.assigns.params, %{"page" => page})
 
