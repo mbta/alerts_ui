@@ -169,6 +169,15 @@
               </.button_secondary>
             </:toggle>
             <:menu>
+              <div
+                id={"copy-link-button-#{alert.alert_id}"}
+                class="inline-flex items-center gap-1 leading-6 w-full px-2 hover:bg-bg-elevation-4 cursor-pointer"
+                phx-click={
+                  JS.dispatch("phx:copy", detail: %{text: @url <> "?alert_id=#{alert.alert_id}"})
+                }
+              >
+                <.icon name="hero-link-solid" class="w-4 h-4" /> Copy link
+              </div>
               <.link
                 :if={UserHelpers.author?(@current_user)}
                 id={"duplicate-button-#{alert.alert_id}"}
