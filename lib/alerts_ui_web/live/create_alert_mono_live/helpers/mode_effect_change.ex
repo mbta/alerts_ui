@@ -13,14 +13,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   Helpers for converting an alert's mode or effect type.
   """
 
-  @affected_service_fields [:route_ids, :stop_ids, :trip_ids, :facility_ids, :stop_names_and_ids]
+  @affected_service_fields [
+    :route_ids,
+    :direction,
+    :original_direction_selections,
+    :stop_ids,
+    :trip_ids,
+    :facility_ids,
+    :stop_names_and_ids
+  ]
 
   # All of the form fields we need in order to figure out what to retain
   @form_fields @affected_service_fields ++ [:combination, :route_type, :effect_name]
 
   @full_reset Map.new(@affected_service_fields, fn field -> {field, []} end)
+              |> Map.put(:direction, nil)
 
   # expose @full_reset for the test to use too
+  @spec full_reset() :: %{
+          direction: nil,
+          original_drection_selections: [],
+          facility_ids: [],
+          route_ids: [],
+          stop_ids: [],
+          stop_names_and_ids: [],
+          trip_ids: []
+        }
   def full_reset, do: @full_reset
 
   @spec condensed_form(Phoenix.HTML.Form.t()) :: map()
@@ -134,6 +152,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   defp retain(fields) do
     @affected_service_fields
     |> Enum.filter(fn field -> field not in fields end)
-    |> Map.new(fn field -> {field, []} end)
+    |> Map.new(fn field ->
+      value = if field === :direction, do: nil, else: []
+      {field, value}
+    end)
   end
 end
