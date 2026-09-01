@@ -933,8 +933,8 @@ defmodule AlertsUIWeb.SharedComponents do
       end)
 
     ~H"""
-    <div phx-feedback-for={@name} class={["#{@class}", "overflow-hidden", @hidden && "hidden"]}>
-      <div :if={!@disabled} class="ml-4">
+    <div phx-feedback-for={@name} class={["#{@class}", "relative", @hidden && "hidden"]}>
+      <div :if={!@disabled} class="ml-4 absolute">
         <.loading loading={@loading}></.loading>
       </div>
       <div :if={@modal_filter_id || @label} class="flex flex-row justify-between">
