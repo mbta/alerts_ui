@@ -142,6 +142,34 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         assert log =~ "Error formatting end time"
       end
     end
+
+    @tag :logged_in_user
+    test "a valid alert_id param shows the details modal with route type and effect name",
+         %{conn: conn} do
+      alert =
+        insert(:alert, %{
+          alert_id: "999",
+          header_text: "modal rendering test alert",
+          active_period_start: ~U[2023-10-12 00:01:00Z],
+          closed_timestamp: ~U[2024-10-12 00:01:00Z],
+          severity: 4
+        })
+
+      {:ok, view, _html} = live(conn, "/alerts?alert_id=#{alert.alert_id}")
+
+      html = render_async(view)
+      assert html =~ "Subway"
+      assert html =~ "Station Closure"
+    end
+
+    @tag :logged_in_user
+    test "an alert_id param for a nonexistent alert goes back to view alerts page",
+         %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts?alert_id=999")
+
+      html = render_async(view)
+      assert html =~ ~r/Alerts/
+    end
   end
 
   describe "filtering" do
@@ -1361,7 +1389,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         assert html =~
                  ~s(<span class="hero-ellipsis-vertical w-4 h-4" style="mask-position: center"></span>)
 
+        assert view |> has_element?("#copy-link-button-123")
         assert view |> has_element?("#duplicate-button-123")
+        assert view |> has_element?("#download-history-button-123")
       end
     end
 
@@ -1392,7 +1422,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         assert html =~
                  ~s(<span class="hero-x-mark-solid w-4 h-4" style="mask-position: center"></span>)
 
+        assert view |> has_element?("#copy-link-button-345")
         assert view |> has_element?("#duplicate-button-345")
+        assert view |> has_element?("#download-history-button-345")
       end
     end
 
@@ -1415,6 +1447,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
                  ~s(<span class="hero-ellipsis-vertical w-4 h-4" style="mask-position: center"></span>)
 
         refute view |> has_element?("#duplicate-button-123")
+        assert view |> has_element?("#copy-link-button-123")
         assert view |> has_element?("#download-history-button-123")
       end
     end
@@ -1443,6 +1476,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         refute html =~ ~s(<span class="hero-pencil-solid w-4 h-4"></span>)
         refute html =~ ~s(<span class="hero-x-mark-solid w-4 h-4"></span>)
         refute view |> has_element?("#duplicate-button-345")
+        assert view |> has_element?("#copy-link-button-345")
         assert view |> has_element?("#download-history-button-345")
       end
     end

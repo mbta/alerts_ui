@@ -126,7 +126,7 @@ defmodule AlertsUIWeb.CreateAlertLiveTest do
           |> apply_action(:insert)
 
         send(view.pid, {:step_completed, changeset})
-        rendered_view = render(view)
+        rendered_view = render_async(view)
         assert rendered_view =~ ~s(id="access_service_view")
       end
     end

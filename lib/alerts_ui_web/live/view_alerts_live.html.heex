@@ -1,4 +1,8 @@
-<div id="view_alerts_live_view" class="p-4 md:flex md:flex-col md:h-full md:overflow-hidden">
+<div
+  id="view_alerts_live_view"
+  class="p-4 md:flex md:flex-col md:h-full md:overflow-hidden"
+  phx-hook="OpenDetails"
+>
   <div class="flex flex-col gap-4 lg:flex-row lg:justify-between">
     <.button_primary_link
       :if={UserHelpers.author?(@current_user)}
@@ -165,6 +169,15 @@
               </.button_secondary>
             </:toggle>
             <:menu>
+              <div
+                id={"copy-link-button-#{alert.alert_id}"}
+                class="inline-flex items-center gap-1 leading-6 w-full px-2 hover:bg-bg-elevation-4 cursor-pointer"
+                phx-click={
+                  JS.dispatch("phx:copy", detail: %{text: @url <> "?alert_id=#{alert.alert_id}"})
+                }
+              >
+                <.icon name="hero-link-solid" class="w-4 h-4" /> Copy link
+              </div>
               <.link
                 :if={UserHelpers.author?(@current_user)}
                 id={"duplicate-button-#{alert.alert_id}"}
@@ -203,5 +216,6 @@
     cancel_event_name="close_details"
     target_id="#view_alerts_live_view"
     current_user={@current_user}
+    current_url={@url}
   />
 </div>
