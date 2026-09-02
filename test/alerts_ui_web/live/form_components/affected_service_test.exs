@@ -809,6 +809,8 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
           }
         })
 
+        render_async(view)
+
         assert view
                |> element("select#affected_service_stop_names_and_ids")
                |> render =~

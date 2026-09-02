@@ -245,6 +245,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert view |> element("#review-modal-container", "Bus • Delay") |> has_element?
@@ -265,6 +267,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             facility_ids: ["349"]
           }
         })
+
+        render_async(view)
 
         open_review_modal(view)
 
@@ -583,6 +587,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert view |> element("#review-modal-container") |> render =~ ~r/Timing.*One-time/s
@@ -614,6 +620,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         fill_out_form(view, "form", %{
           alert_data: %{active_period_end_specifier: :when_work_order_is_closed}
         })
+
+        render_async(view)
 
         open_review_modal(view)
 
@@ -709,6 +717,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           }
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert render(view) =~ ~r/Timing.*Recurring/s
@@ -747,6 +757,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           }
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert render(view) =~ ~r/Notification period.*@.*until.*alert is closed/s
@@ -777,6 +789,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
+
+        render_async(view)
 
         open_review_modal(view)
 
@@ -824,6 +838,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           }
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert render(view) =~ ~r{Cause.*Disabled bus}s
@@ -860,6 +876,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
+
+        render_async(view)
 
         open_review_modal(view)
 
@@ -901,6 +919,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           }
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert view |> element("#alert-image") |> has_element?
@@ -935,6 +955,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
+
+        render_async(view)
 
         open_review_modal(view)
 
@@ -1005,6 +1027,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           }
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         # 3 scheduled reminders
@@ -1048,6 +1072,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         refute render(view) =~ ~r[Web Banner Text</p>\s*<p.*Not selected]s
@@ -1086,6 +1112,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           }
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert render(view) =~ ~r[Web Banner Text</p>\s*<p.*Well hello there]s
@@ -1123,6 +1151,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
           }
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         assert render(view) =~
@@ -1152,6 +1182,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
+
+        render_async(view)
 
         open_review_modal(view)
 
@@ -1183,6 +1215,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
         })
+
+        render_async(view)
 
         open_review_modal(view)
 
@@ -1237,6 +1271,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
             stop_ids: [@stop.id]
           }
         })
+
+        render_async(view)
 
         open_review_modal(view)
 

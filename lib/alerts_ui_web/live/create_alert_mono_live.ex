@@ -125,7 +125,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         persisting_alert: false,
         modal_open_map: %{@gtfs_modal_id => false, @change_mode_effect_modal_id => false},
         gtfs_modal_id: @gtfs_modal_id,
-        change_mode_effect_modal_id: @change_mode_effect_modal_id
+        change_mode_effect_modal_id: @change_mode_effect_modal_id,
+        # Used for keeping track of original state of an alert when changing its mode/effect type
+        original_alert_form: nil
       })
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
@@ -263,13 +265,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       ) do
     effect_name = Map.get(params, "value")
     next_route_type = InformedEntity.route_type_mapping(socket.assigns.path_route_type)
+    create? = socket.assigns.form_type === :creating
+
+    # On edit/duplicate, we always compare to the saved form
+    # On create, we compare to the last form the user edited
+    form_to_compare =
+      if create?,
+        do: ModeEffectChange.condensed_form(socket.assigns.form),
+        else: socket.assigns.original_alert_form
 
     form_updates =
-      ModeEffectChange.new_form_values(socket.assigns.form, next_route_type, effect_name)
+      ModeEffectChange.new_form_values(form_to_compare, next_route_type, effect_name)
 
     updated_source =
       change(
-        socket.assigns.form.source,
+        form_to_compare.source,
         Map.merge(
           %{
             route_type: next_route_type,
@@ -775,25 +785,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   """
   # @spec start_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
   def start_socket(socket, params) do
-    case {Map.get(params, "alert_id"), socket.assigns.live_action} do
-      {nil, :new} ->
-        create_new_alert(socket, params)
+    socket =
+      case {Map.get(params, "alert_id"), socket.assigns.live_action} do
+        {nil, :new} ->
+          create_new_alert(socket, params)
 
-      {nil, action}
-      when action in [:edit, :duplicate] and not socket.assigns.allow_changing_mode_effect_type ->
-        raise %ArgumentError{message: "you need an alert id to #{action}"}
+        {nil, action}
+        when action in [:edit, :duplicate] and not socket.assigns.allow_changing_mode_effect_type ->
+          raise %ArgumentError{message: "you need an alert id to #{action}"}
 
-      {alert_id, :new} ->
-        redirect(socket, ~p"/alerts/edit/#{alert_id}")
+        {alert_id, :new} ->
+          redirect(socket, ~p"/alerts/edit/#{alert_id}")
 
-      {alert_id, :edit} ->
-        edit_existing_alert(socket, params, alert_id)
+        {alert_id, :edit} ->
+          edit_existing_alert(socket, params, alert_id)
 
-      {alert_id, :duplicate} ->
-        duplicate_existing_alert(socket, params, alert_id)
+        {alert_id, :duplicate} ->
+          duplicate_existing_alert(socket, params, alert_id)
 
-      {_alert_id, action} ->
-        raise %ArgumentError{message: "no such action #{action}"}
+        {_alert_id, action} ->
+          raise %ArgumentError{message: "no such action #{action}"}
+      end
+
+    if Map.get(socket.assigns, :form) do
+      socket |> assign(:original_alert_form, ModeEffectChange.condensed_form(socket.assigns.form))
+    else
+      socket
     end
   end
 

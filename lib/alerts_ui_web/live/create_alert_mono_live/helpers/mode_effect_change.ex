@@ -13,6 +13,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   Helpers for converting an alert's mode or effect type.
   """
 
+  # All of the form fields we need in order to figure out what to retain
+  @form_fields [
+    :route_ids,
+    :stop_ids,
+    :trip_ids,
+    :facility_ids,
+    :stop_names_and_ids,
+    :combination,
+    :route_type,
+    :effect_name
+  ]
+
   @full_reset %{
     route_ids: [],
     stop_ids: [],
@@ -21,15 +33,29 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     stop_names_and_ids: []
   }
 
+  @spec condensed_form(Phoenix.HTML.Form.t()) :: map()
+  @doc """
+  From a Phoenix Form, return a map of relevant values needed in order to figure out
+  what to retain from switching mode/effect types. This is used so we do not need to
+  store another large form on the socket, and can instead just send around the values
+  we need.
+  """
+  def condensed_form(form) do
+    Map.new(@form_fields, fn field ->
+      {field, form[field].value}
+    end)
+    |> Map.put(:source, form.source)
+  end
+
   @spec new_form_values(Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
   def new_form_values(form, next_route_type, next_effect_name)
 
   def new_form_values(form, next_route_type, next_effect_name) do
-    previous_combination = form[:combination].value
+    previous_combination = form[:combination]
 
     next_combination = combination_for(next_route_type, next_effect_name)
 
-    previous_route_type = form[:route_type].value
+    previous_route_type = form[:route_type]
 
     cond do
       # If the mode changes, wipe all values
@@ -48,7 +74,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   defp same_combination(combination, form, next_route_type, next_effect_name)
 
   defp same_combination(:ACCESS, form, _next_route_type, next_effect_name) do
-    previous_effect_name = form[:effect_name].value
+    previous_effect_name = form[:effect_name]
     previous_facility_types = facility_types(previous_effect_name)
     next_facility_types = facility_types(next_effect_name)
 
@@ -71,10 +97,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     next_single_route? =
       humanize_effect_name(next_route_type, next_effect_name) in get_single_route_effect_names()
 
-    currently_one_route? = length(form[:route_ids].value) === 1
+    currently_one_route? = length(form[:route_ids]) === 1
 
     if next_single_route? and currently_one_route? do
-      %{single_route_id: hd(form[:route_ids].value)}
+      %{single_route_id: hd(form[:route_ids])}
     else
       %{}
     end
