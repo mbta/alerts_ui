@@ -269,7 +269,7 @@ defmodule AlertsUI.AlertBuilder do
     # selected from the form, so we create them here before combo routes are
     # added to our list of routes
 
-    user_selected_directions =
+    original_direction_selections =
       if combination in [:RDS, :RDT, :RDTS] do
         [
           direction_name(selected_routes, pre_combo_routes(selected_routes), direction_id) <>
@@ -277,13 +277,6 @@ defmodule AlertsUI.AlertBuilder do
         ]
       else
         nil
-      end
-
-    original_direction_selections =
-      if user_selected_directions in [[], nil] do
-        Map.get(alert_data, :original_direction_selections)
-      else
-        user_selected_directions
       end
 
     original_route_selections =
