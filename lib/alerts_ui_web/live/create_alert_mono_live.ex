@@ -73,6 +73,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
 
   alias AlertsUI.DBContexts.Users
+  alias MBTAV3API.Stops.Stop
 
   import Ecto.Changeset, only: [change: 2]
 
@@ -595,8 +596,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
 
-    # translated_stop_names_and_ids =
-    #   translate_stop_names_and_ids(socket.assigns.form, new_selections.available_stops)
+    socket = translate_stop_names_and_ids(socket, new_selections.available_stops)
 
     # Always override route_ids — no guard for pre-existing selections; see design spec.
     socket =
@@ -612,13 +612,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     {:noreply, socket}
   end
 
-  # defp translate_stop_names_and_ids(form, available_stops) do
-  #   stop_ids = form[:stop_ids].value
-  #   selected_stops = Enum.filter(available_stops, fn stop -> stop.id in stop_ids end)
-  #   IO.inspect([selected_stops])
-  #   stop_ids
-  # end
-
   @impl true
   def handle_async(_, {:exit, reason}, socket) do
     require Logger
@@ -627,6 +620,36 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     case socket.assigns[:selections] do
       %{loading: _} = sel -> {:noreply, assign(socket, :selections, %{sel | loading: false})}
       _ -> {:noreply, socket}
+    end
+  end
+
+  # In the case of converting an alert with stops to SR, we need to adjust the `stop_names_and_ids` because
+  #  the names will change depending on direction. For example, in a Bus Delay, we would have both
+  # South Station (inbound) and South Station (outbound). But in SR, we would only have South Station.
+  # This uses `stop_ids` as the source of truth, and then adjusts `stop_names_and_ids` to match fetched stops
+  defp translate_stop_names_and_ids(socket, available_stops) do
+    form = socket.assigns.form
+    combination = form[:combination].value
+
+    if combination === :SR do
+      stop_ids = form[:stop_ids].value
+
+      selected_stops =
+        Enum.filter(available_stops, fn stop -> stop.id in stop_ids end)
+        |> Enum.map(fn %Stop{id: id, name: name} -> "#{name}|#{id}" end)
+
+      updated_source =
+        change(
+          form.source,
+          %{stop_names_and_ids: selected_stops}
+        )
+
+      socket
+      |> assign(%{
+        form: Phoenix.Component.to_form(updated_source)
+      })
+    else
+      socket
     end
   end
 
