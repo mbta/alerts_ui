@@ -89,6 +89,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       cast(changeset, %{stop_ids: stop_ids}, [:stop_ids])
     end
 
+    # defp maybe_translate_stop_names_and_ids(
+    #        changeset,
+    #        %{available_stops: available_stops}
+    #      )
+    #      when is_list(available_stops) do
+    #   stop_ids = get_field(changeset, :stop_ids)
+    #   IO.inspect(stop_ids, label: "stop ids")
+    #   selected_stops = Enum.filter(available_stops, fn stop -> stop.id in stop_ids end)
+    #   IO.inspect(selected_stops, label: "selected stops")
+    #   changeset
+    # end
+
+    # defp maybe_translate_stop_names_and_ids(changeset, _), do: changeset
+
     defp maybe_validate_route(changeset) do
       if changeset.errors === [] do
         changeset
@@ -192,7 +206,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       available_stops = CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
 
       stop_ids = Alert.get_original_ids(stop_names_and_ids)
-      IO.inspect(stop_ids, label: "stop ids")
       available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
 
       available_stop_ids = Enum.map(available_stops, fn stop -> stop.id end)
@@ -206,7 +219,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       candidate_stops = previously_selected_stops ++ available_stops
 
       selected_stops = get_selected_stops(candidate_stops, stop_ids)
-      IO.inspect(selected_stops)
 
       modal_route_id_options =
         modal_route_id_options(available_filter_routes, form)

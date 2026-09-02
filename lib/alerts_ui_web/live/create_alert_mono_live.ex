@@ -274,8 +274,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         do: ModeEffectChange.condensed_form(socket.assigns.form),
         else: socket.assigns.original_alert_form
 
-    IO.inspect(form_to_compare, label: "form to compare")
-
     %{new: form_updates, replaced: replaced_values} =
       ModeEffectChange.new_form_values(form_to_compare, next_route_type, effect_name)
 
@@ -597,6 +595,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
 
+    # translated_stop_names_and_ids =
+    #   translate_stop_names_and_ids(socket.assigns.form, new_selections.available_stops)
+
     # Always override route_ids — no guard for pre-existing selections; see design spec.
     socket =
       if is_nil(pending_route_ids) do
@@ -610,6 +611,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
     {:noreply, socket}
   end
+
+  # defp translate_stop_names_and_ids(form, available_stops) do
+  #   stop_ids = form[:stop_ids].value
+  #   selected_stops = Enum.filter(available_stops, fn stop -> stop.id in stop_ids end)
+  #   IO.inspect([selected_stops])
+  #   stop_ids
+  # end
 
   @impl true
   def handle_async(_, {:exit, reason}, socket) do
