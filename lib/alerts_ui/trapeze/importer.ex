@@ -16,6 +16,8 @@ defmodule AlertsUI.Trapeze.Importer do
   alias AlertsUI.Trapeze.SFTP
   alias AlertsUI.Trapeze.WorkOrder
 
+  require Logger
+
   @open_origin "(Opened automatically via Trapeze EAM)"
   @closed_origin "(Closed automatically via Trapeze EAM)"
 
@@ -219,6 +221,9 @@ defmodule AlertsUI.Trapeze.Importer do
        ) do
     # only close if alert was created before the closed timestamp
     if compare_timestamps(created_at, closed_timestamp) in [:gt, :eq] do
+      Logger.info("1")
+      Logger.info("created at timestamp: #{created_at}")
+      Logger.info("closed timestamp: #{closed_timestamp}")
       {:ok, "open -> open: IGNORE can't close automatically"}
     else
       close(alert)
@@ -240,7 +245,9 @@ defmodule AlertsUI.Trapeze.Importer do
   end
 
   # Any other case should be ignored.
-  defp maybe_close(%Alert{closed_timestamp: _}, _) do
+  defp maybe_close(%Alert{closed_timestamp: closed_timestamp}, _) do
+      Logger.info("2")
+      Logger.info("closed timestamp: #{closed_timestamp}")
     {:ok, "open -> open: IGNORE can't close automatically"}
   end
 
