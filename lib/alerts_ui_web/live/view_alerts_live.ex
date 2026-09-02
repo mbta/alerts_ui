@@ -200,6 +200,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   def handle_event("sort-alerts", %{"order" => order}, socket) do
+    send(self(), {:paginate_start})
     params =
       put_order_in_params(socket, order)
       |> Map.delete("page")
