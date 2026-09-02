@@ -1,13 +1,4 @@
 let Hooks = {};
-
-Hooks.OpenDetails = {
-  mounted() {
-    this.handleEvent(`openDetails`, (alert_id) => {
-      this.pushEvent("open_details", { "alert_id": Number(alert_id["alert_id"]) })
-    });
-  }
-}
-
 Hooks.ActivityTracker = {
   throttled: false,
   // 5s throttle

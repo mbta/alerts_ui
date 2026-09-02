@@ -173,7 +173,9 @@
                 id={"copy-link-button-#{alert.alert_id}"}
                 class="inline-flex items-center gap-1 leading-6 w-full px-2 hover:bg-bg-elevation-4 cursor-pointer"
                 phx-click={
-                  JS.dispatch("phx:copy", detail: %{text: @url <> "?alert_id=#{alert.alert_id}"})
+                  JS.dispatch("phx:copy",
+                    detail: %{text: @current_url <> "?alert_id=#{alert.alert_id}"}
+                  )
                 }
               >
                 <.icon name="hero-link-solid" class="w-4 h-4" /> Copy link
@@ -216,6 +218,6 @@
     cancel_event_name="close_details"
     target_id="#view_alerts_live_view"
     current_user={@current_user}
-    current_url={@url}
+    current_url={@current_url}
   />
 </div>
