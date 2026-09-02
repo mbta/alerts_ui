@@ -82,8 +82,8 @@
             persisting_alert={@persisting_alert}
           />
           <.modal
-            :if={obsolete_ids_found?(@obsolete_ids)}
-            id="gtfs-warning-modal"
+            :if={@modal_open_map[@gtfs_modal_id]}
+            id={@gtfs_modal_id}
             class="flex flex-col h-full justify-center w-[600px]"
             header_text=""
             accept_button_text="Continue"
@@ -107,6 +107,23 @@
                 </ul>
               </div>
             </ul>
+          </.modal>
+          <.modal
+            :if={@modal_open_map[@change_mode_effect_modal_id]}
+            id={@change_mode_effect_modal_id}
+            class="flex flex-col h-full justify-center w-[600px]"
+            header_text=""
+            accept_button_text="Continue"
+            cancel_button_text="Cancel"
+            cancel_event_name="cancelled_change_mode_effect_modal"
+            accept_event_name="accepted_change_mode_effect_modal"
+          >
+            <:header>
+              <.warning_icon class="inline text-warning" stroke="#2b3741" fill="currentColor" />
+              Warning: Affected service selections may be omitted
+            </:header>
+            Because you are changing the mode and/or effect of this alert,
+            some affected services may be omitted. Do you still want to continue?
           </.modal>
         </.form>
       </div>

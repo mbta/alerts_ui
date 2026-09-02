@@ -632,6 +632,81 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
                ]
       end
     end
+
+    @tag :logged_in_user
+    test "modal is removed from DOM after user accepts", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _types -> [@route] end,
+           get: fn _id -> @route end,
+           get: fn _id, _opts -> @route end,
+           all: fn _opts -> [@route] end
+         ]},
+        {SchedulesRepo, [],
+         by_route_ids: fn _route_ids, _opts -> [] end,
+         end_of_rating: fn -> Date.add(@todays_date, 7) end},
+        {StopsRepo, [],
+         [
+           all: fn _, _ -> [@stop] end,
+           by_route: fn _route, _direction, _opts -> [@stop] end,
+           get_parent: fn
+             "place-sstat" -> @stop
+             "obsolete_stop" -> %Stop{id: "obsolete_stop", name: "spurious stop"}
+           end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _opts -> [@route_pattern] end,
+           included_stops_by_route_id: fn _route_id, _ -> [@stop] end
+         ]}
+      ]) do
+        alert_params =
+          build(:alert_map, %{
+            alert_id: "123",
+            effect: :OTHER_EFFECT,
+            effect_detail: "DELAY",
+            header_text: "cool header text",
+            severity: 3,
+            severity_level: :WARNING,
+            cause_detail: "UNKNOWN",
+            reminder_times: [],
+            informed_entity: [
+              %{route_type: 3, route_id: "CR-Worcester", direction_id: 0, stop_id: "place-sstat"},
+              %{
+                route_type: 3,
+                route_id: "CR-Worcester",
+                direction_id: 0,
+                stop_id: "obsolete_stop"
+              }
+            ],
+            original_route_selections: [
+              "Framingham/Worcester Line|CR-Worcester",
+              "spurious route|sp_rt"
+            ],
+            original_stop_selections: ["South Station|place-sstat", "spurious stop|obsolete_stop"]
+          })
+
+        {:ok, _} =
+          Alerts.create_or_update_alert(alert_params, build(:user))
+
+        {:ok, view, html} = live(conn, "/alerts/edit/123")
+        render_async(view)
+
+        assert html =~ ~r/Edit Alert/
+
+        rendered_view = view |> element("#gtfs-warning-modal-content") |> render_async(1000)
+        refute rendered_view =~ ~s(aria-hidden=\"true\")
+        assert rendered_view =~ "spurious route [sp_rt]"
+        assert rendered_view =~ "spurious stop [obsolete_stop]"
+
+        render_click(view, "accepted_gtfs_modal")
+
+        refute view
+               |> element("#gtfs-warning-modal")
+               |> has_element?
+      end
+    end
   end
 
   describe "duplicating an alert" do
@@ -902,7 +977,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "changing from a bus delay to a bus notice retains all info", %{conn: conn} do
+    test "changing from a bus delay to a bus notice retains all info and does not show warning modal",
+         %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 
       with_mocks([
@@ -960,6 +1036,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         assert has_element?(view, "div", "Bus • Notice")
         refute has_element?(view, "div", "Bus • Delay")
+
+        refute view
+               |> element("#change-mode-effect-modal")
+               |> has_element?
 
         assert document_has_element?(
                  document,
@@ -1366,7 +1446,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "changing from a bus delay to a ferry delay should wipe everything", %{conn: conn} do
+    test "changing from a bus delay to a ferry delay should wipe everything and trigger the modal",
+         %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 
       with_mocks([
@@ -1405,6 +1486,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         assert has_element?(view, "div", "Ferry • Delay")
         refute has_element?(view, "div", "Bus • Delay")
+
+        rendered_view = view |> element("#change-mode-effect-modal-content") |> render_async()
+        assert rendered_view =~ "some affected services may be omitted"
 
         assert has_element?(view, "#alert_data_route_ids_selector")
         assert has_element?(view, "#alert_data_trip_ids_selector")
@@ -1513,6 +1597,54 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         assert has_element?(view, "#alert_data_active_period_start[value=\"2024-05-10T10:30\"]")
         assert has_element?(view, "#alert_data_active_period_end[value=\"2024-05-10T12:30\"]")
+      end
+    end
+
+    @tag :logged_in_user
+    test "can edit a systemwide delay without error", %{conn: conn} do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-systemwide-edit",
+          effect: :OTHER_EFFECT,
+          effect_detail: "NOTICE",
+          primary_service_type: "systemwide",
+          service_types: [1]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           by_type: fn _, _ -> [@ferry_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-systemwide-edit")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-delay-button")
+        |> render_click()
+
+        render_async(view)
+
+        assert has_element?(view, "div", "Systemwide • Delay")
+        refute has_element?(view, "div", "Systemwide • Notice")
       end
     end
 
