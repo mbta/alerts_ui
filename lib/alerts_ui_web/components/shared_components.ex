@@ -1520,7 +1520,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def pagination(assigns) do
     ~H"""
     <Flop.Phoenix.pagination
-      on_paginate={JS.push("paginate-alerts")}
+      on_paginate={JS.push("paginate_start") |> JS.push("paginate-alerts")}
       disabled_link_attrs={[
         class: "border-secondary-disabled text-secondary-disabled cursor-not-allowed
           hover:bg-transparent hover:text-secondary-disabled hover:border-secondary-disabled
