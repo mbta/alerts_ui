@@ -1319,17 +1319,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         assert has_element?(view, "#alert_data_stop_names_and_ids_selector")
         assert has_element?(view, "#alert_data_route_ids_selector")
 
-        open_browser(view)
-
-        # # Route selector should be disabled because no route is selected
-        # assert has_element?(view, "label", "Impacted routes")
-        # assert has_element?(view, "#alert_data_route_ids[disabled]")
-
-        # assert document_has_element?(
-        #          document,
-        #          "option[value=\"746\"][selected]"
-        #        )
-
         assert document_has_element?(
                  document,
                  "option[value=\"Courthouse|place-crtst\"][selected]"
