@@ -1122,7 +1122,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
               effect: :OTHER_EFFECT,
               effect_detail: "STOP_CLOSURE",
               original_route_selections: ["#{bus_route.name}|#{bus_route.id}"],
-              original_stop_selections: ["#{@stop.name <> " (outgoing)"}|#{@stop.id}"],
+              original_stop_selections: ["#{@stop.name}|#{@stop.id}"],
               reminder_times: [],
               severity: 7,
               cause_detail: "unknown",
@@ -1149,7 +1149,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
         assert view
                |> element("#alert_data_header_text")
                |> render_async() =~
-                 "South Station (outgoing) is closed beginning Thu, Oct 19 at 8:01 PM."
+                 "South Station is closed beginning Thu, Oct 19 at 8:01 PM."
       end
     end
 
