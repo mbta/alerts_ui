@@ -98,12 +98,14 @@ const handleCopy = (event, textToCopy) => {
 
   if ("clipboard" in navigator) {
     navigator.clipboard.writeText(textToCopy).then(() => {
+      // Swap the 'copied' state with the 'default' state
       buttonDefaultState.classList.add("hidden")
       buttonDefaultState.setAttribute("aria-hidden", "true");
       buttonCopiedState.classList.remove("hidden")
       buttonCopiedState.removeAttribute("aria-hidden");
 
       setTimeout(() => {
+        // Revert back to the original state after 2 seconds
         buttonDefaultState.classList.remove("hidden");
         buttonDefaultState.removeAttribute("aria-hidden");
         buttonCopiedState.classList.add("hidden");
