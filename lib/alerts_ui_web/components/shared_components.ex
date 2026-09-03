@@ -472,7 +472,7 @@ defmodule AlertsUIWeb.SharedComponents do
         <span class="hero-square-2-stack-solid w-5 h-5 stroke-3" /> Copy text
       </span>
       <span class="state-copied hidden" aria-hidden="true">
-        <span class="hero-clipboard-document-check-solid w-5 h-5 stroke-3" /> Copied!
+        <span class="hero-clipboard-document-check-solid w-5 h-5 stroke-3" /> Copied
       </span>
     </button>
     """

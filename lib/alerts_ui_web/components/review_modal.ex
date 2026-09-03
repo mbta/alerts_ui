@@ -410,7 +410,7 @@ defmodule AlertsUIWeb.ReviewModal do
                 <.icon name="hero-link-solid" class="w-4 h-4" /> Copy link
               </span>
               <span class="state-copied hidden" aria-hidden="true">
-                <.icon name="hero-check-solid" class="w-4 h-4" /> Copied!
+                <.icon name="hero-check-solid" class="w-4 h-4" /> Copied
               </span>
             </button>
           </div>
