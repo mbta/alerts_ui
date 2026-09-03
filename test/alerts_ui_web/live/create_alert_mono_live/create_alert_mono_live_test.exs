@@ -1817,7 +1817,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
            by_type: fn _ -> [@bus_route] end,
            get: fn _ -> @bus_route end,
            get: fn _, _ -> @bus_route end,
-           all: fn _ -> [@bus_route] end
+           all: fn _ -> [@bus_route] end,
+           by_stop: fn _, _ -> [@bus_route] end
          ]},
         {StopsRepo, [],
          [

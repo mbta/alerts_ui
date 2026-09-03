@@ -66,8 +66,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
 
     previous_route_type = form[:route_type]
 
-    IO.inspect([previous_combination, next_combination, previous_route_type, next_route_type])
-
     new_values =
       cond do
         # If the mode changes, wipe all values
@@ -87,7 +85,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   @spec derive_cleared_values(Phoenix.HTML.Form.t(), map()) :: map()
   defp derive_cleared_values(form, new_values) do
     Map.new(new_values, fn {key, _value} -> {key, form[key]} end)
-    |> Map.reject(fn {_key, value} -> value === [] or is_nil(value) end)
+    # Remove the values that were already "empty"
+    |> Map.reject(fn {key, value} ->
+      value === [] or is_nil(value) or (key === :direction and value === "default")
+    end)
   end
 
   @spec same_combination(atom(), Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
