@@ -310,6 +310,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         }
       })
 
+      render_async(view, 1000)
+
       expected_value =
         @todays_datetime
         |> NaiveDateTime.to_iso8601()

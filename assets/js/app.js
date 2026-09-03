@@ -80,18 +80,40 @@ window.liveSocket = liveSocket
 
 // Copy contents of target to the clipboard
 window.addEventListener("phx:copy_input", (event) => {
-  if ("clipboard" in navigator) {
-    let text = event.target.value;
-    navigator.clipboard.writeText(text)
-  }
+  handleCopy(event, event.target.value)
 })
 
 // Copy given text to the clipboard
-window.addEventListener("phx:copy", (data) => {
-  if ("clipboard" in navigator) {
-    navigator.clipboard.writeText(data["detail"]["text"])
-  }
+window.addEventListener("phx:copy", (event) => {
+  handleCopy(event, event["detail"]["text"])
 })
+
+// Handle copying and setting a timer of showing a 'copied state'
+// Requires that there be two children element, one with state-default, and one with state-copied
+// to represent the two states.
+const handleCopy = (event, textToCopy) => {
+  const button = event.detail.dispatcher;
+  const buttonDefaultState = button.querySelector(".state-default")
+  const buttonCopiedState = button.querySelector(".state-copied")
+
+  if ("clipboard" in navigator) {
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      // Swap the 'copied' state with the 'default' state
+      buttonDefaultState.classList.add("hidden")
+      buttonDefaultState.setAttribute("aria-hidden", "true");
+      buttonCopiedState.classList.remove("hidden")
+      buttonCopiedState.removeAttribute("aria-hidden");
+
+      setTimeout(() => {
+        // Revert back to the original state after 2 seconds
+        buttonDefaultState.classList.remove("hidden");
+        buttonDefaultState.removeAttribute("aria-hidden");
+        buttonCopiedState.classList.add("hidden");
+        buttonCopiedState.setAttribute("aria-hidden", "true");
+      }, 2000);
+    })
+  }
+}
 
 window.addEventListener("phx:show-modal", (e) => {
 

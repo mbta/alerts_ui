@@ -397,14 +397,22 @@ defmodule AlertsUIWeb.ReviewModal do
               {@last_edited_by}
             </p>
           <% end %>
-          <div
-            :if={@alert_id}
-            class="text-primary hover:text-primary-hover hover:underline cursor-pointer"
-            phx-click={
-              JS.dispatch("phx:copy", detail: %{text: @current_url <> "?alert_id=#{@alert_id}"})
-            }
-          >
-            <.icon name="hero-link-solid" class="w-4 h-4" /> Copy link
+          <div>
+            <button
+              :if={@alert_id}
+              class="text-primary hover:text-primary-hover hover:underline"
+              phx-click={
+                JS.dispatch("phx:copy", detail: %{text: @current_url <> "?alert_id=#{@alert_id}"})
+              }
+              aria-live="polite"
+            >
+              <span class="state-default">
+                <.icon name="hero-link-solid" class="w-4 h-4" /> Copy link
+              </span>
+              <span class="state-copied hidden" aria-hidden="true">
+                <.icon name="hero-check-solid" class="w-4 h-4" /> Copied
+              </span>
+            </button>
           </div>
           <.link
             :if={@alert_id}
