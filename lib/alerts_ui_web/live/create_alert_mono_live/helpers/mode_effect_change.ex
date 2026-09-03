@@ -16,7 +16,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   @affected_service_fields [
     :route_ids,
     :direction,
-    :original_direction_selections,
     :stop_ids,
     :trip_ids,
     :facility_ids,
@@ -32,7 +31,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   # expose @full_reset for the test to use too
   @spec full_reset() :: %{
           direction: nil,
-          original_drection_selections: [],
           facility_ids: [],
           route_ids: [],
           stop_ids: [],
@@ -142,8 +140,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     retain([:stop_ids, :stop_names_and_ids])
   end
 
-  # Eventually we can be smarter about what we retain depending on combo changes, i.e.
-  # def different_combination(:RDS, :SR, form) do ...
+  defp different_combination(:RDTS, :SR, _) do
+    retain([:stop_ids, :stop_names_and_ids])
+  end
+
+  defp different_combination(:RDTS, :RDT, _) do
+    retain([:route_ids, :trip_ids, :direction])
+  end
+
+  defp different_combination(:RDT, :RDTS, _) do
+    %{}
+  end
+
+  defp different_combination(:R, :SR, _) do
+    @full_reset
+  end
+
+  defp different_combination(:R, _, _) do
+    %{}
+  end
+
+  defp different_combination(:SR, _, _) do
+    @full_reset
+  end
+
+  defp different_combination(_, :R, _) do
+    retain([:route_ids])
+  end
+
   defp different_combination(_previous_combination, _next_combination, _) do
     @full_reset
   end

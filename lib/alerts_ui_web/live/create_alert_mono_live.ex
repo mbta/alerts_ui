@@ -278,9 +278,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     %{new: form_updates, replaced: replaced_values} =
       ModeEffectChange.new_form_values(form_to_compare, next_route_type, effect_name)
 
-    IO.inspect(form_updates, label: "form updates")
-    IO.inspect(replaced_values, label: "replaced values")
-
     updated_source =
       change(
         form_to_compare.source,
@@ -624,7 +621,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   # In the case of converting an alert with stops to SR, we need to adjust the `stop_names_and_ids` because
-  #  the names will change depending on direction. For example, in a Bus Delay, we would have both
+  # the names will change depending on direction. For example, in a Bus Delay, we would have both
   # South Station (inbound) and South Station (outbound). But in SR, we would only have South Station.
   # This uses `stop_ids` as the source of truth, and then adjusts `stop_names_and_ids` to match fetched stops
   defp translate_stop_names_and_ids(socket, available_stops) do
