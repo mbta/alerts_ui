@@ -80,7 +80,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_info({:paginate_start}, socket) do
-    Logger.info("paginate info")
     {:noreply, assign(socket, loading: true)}
   end
 
@@ -123,7 +122,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   def handle_params(params, url, socket) do
     send(self(), {:paginate_start})
-
     # default to timeline: current if params have no values
     # (eg no user input has occurred and we're probably in a fresh reload)
     filters = get_filters(params, "current")
@@ -184,14 +182,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_event("paginate_start", _params, socket) do
-    Logger.info("paginate event")
     {:noreply, assign(socket, loading: true)}
   end
 
   @impl true
   def handle_event("paginate-alerts", %{"page" => page}, socket) do
-    # send(self(), {:paginate_start})
-
     flop =
       Flop.set_page(socket.assigns.meta.flop, page)
 
@@ -208,8 +203,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   def handle_event("sort-alerts", %{"order" => order}, socket) do
-    send(self(), {:paginate_start})
-
     params =
       put_order_in_params(socket, order)
       |> Map.delete("page")
