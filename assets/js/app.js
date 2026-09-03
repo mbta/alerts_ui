@@ -46,7 +46,6 @@ let liveSocket = new LiveSocket(
   }
 )
 sessionStorage.setItem("phx:fallback:LongPoll", false);
-console.log("longpoll is " + sessionStorage.getItem("phx:fallback:LongPoll"));
 
 // Add the connection error handler after 2 sec
 setTimeout(() => {

@@ -91,7 +91,7 @@ defmodule AlertsUIWeb.CoreComponents do
     <.flash kind={:error} title={Flash.get(@flash, :title) || "Error!"} flash={@flash} />
     <.flash
       id="client-error"
-      class="delay-[1s]"
+      class="delay-[2s]"
       kind={:error}
       title="We can't find the internet"
       phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
