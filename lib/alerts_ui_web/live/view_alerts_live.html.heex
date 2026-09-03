@@ -39,7 +39,7 @@
       :if={!@loading}
       items={@alerts}
       meta={@meta}
-      on_sort={JS.push("sort-alerts")}
+      on_sort={JS.push("paginate_start") |> JS.push("sort-alerts")}
       opts={[
         no_results_content: "No alerts found",
         symbol_asc: sort_icon(:asc),
