@@ -309,7 +309,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       })
       |> sync_socket(%{})
 
-    if form_updates !== %{} do
+    # When we persist a single route to a new alert that only allows for one route,
+    # we do not need to raise the modal since we are not really removing user selections
+    single_route_change? =
+      match?(%{single_route_id: _route}, form_updates) and map_size(form_updates) === 1
+
+    if form_updates !== %{} and not single_route_change? do
       send(self(), {:changing_mode_effect, form_updates})
     end
 

@@ -99,10 +99,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
 
     currently_one_route? = length(form[:route_ids]) === 1
 
-    if next_single_route? and currently_one_route? do
-      %{single_route_id: hd(form[:route_ids])}
-    else
-      %{}
+    cond do
+      # ex: going from Bus Delay with one route selected to a Bus Detour can persist the one route
+      next_single_route? and currently_one_route? ->
+        %{single_route_id: hd(form[:route_ids])}
+
+      # ex: going from Bus Delay with multiple routes selected to a Bus Detour wipes all routes
+      next_single_route? and not currently_one_route? ->
+        %{route_ids: []}
+
+      true ->
+        %{}
     end
   end
 
