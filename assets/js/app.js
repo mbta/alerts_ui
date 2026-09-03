@@ -80,12 +80,23 @@ window.liveSocket = liveSocket
 
 // Copy contents of target to the clipboard
 window.addEventListener("phx:copy_input", (event) => {
+  handleCopy(event, event.target.value)
+})
+
+// Copy given text to the clipboard
+window.addEventListener("phx:copy", (event) => {
+  handleCopy(event, event["detail"]["text"])
+})
+
+// Handle copying and setting a timer of showing a 'copied state'
+// Requires that there be two children element, one with state-default, and one with state-copied
+// to represent the two states.
+const handleCopy = (event, textToCopy) => {
   const button = event.detail.dispatcher;
   const buttonDefaultState = button.querySelector(".state-default")
   const buttonCopiedState = button.querySelector(".state-copied")
 
   if ("clipboard" in navigator) {
-    const textToCopy = event.target.value;
     navigator.clipboard.writeText(textToCopy).then(() => {
       buttonDefaultState.classList.add("hidden")
       buttonDefaultState.setAttribute("aria-hidden", "true");
@@ -100,14 +111,7 @@ window.addEventListener("phx:copy_input", (event) => {
       }, 2000);
     })
   }
-})
-
-// Copy given text to the clipboard
-window.addEventListener("phx:copy", (data) => {
-  if ("clipboard" in navigator) {
-    navigator.clipboard.writeText(data["detail"]["text"])
-  }
-})
+}
 
 window.addEventListener("phx:show-modal", (e) => {
 

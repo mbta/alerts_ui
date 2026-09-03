@@ -169,7 +169,7 @@
               </.button_secondary>
             </:toggle>
             <:menu>
-              <div
+              <button
                 id={"copy-link-button-#{alert.alert_id}"}
                 class="inline-flex items-center gap-1 leading-6 w-full px-2 hover:bg-bg-elevation-4 cursor-pointer"
                 phx-click={
@@ -177,9 +177,15 @@
                     detail: %{text: @current_url <> "?alert_id=#{alert.alert_id}"}
                   )
                 }
+                aria-live="polite"
               >
-                <.icon name="hero-link-solid" class="w-4 h-4" /> Copy link
-              </div>
+                <span class="state-default">
+                  <.icon name="hero-link-solid" class="w-4 h-4" /> Copy link
+                </span>
+                <span class="state-copied hidden" aria-hidden="true">
+                  <.icon name="hero-check-solid" class="w-4 h-4" /> Copied!
+                </span>
+              </button>
               <.link
                 :if={UserHelpers.author?(@current_user)}
                 id={"duplicate-button-#{alert.alert_id}"}
