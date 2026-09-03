@@ -466,8 +466,14 @@ defmodule AlertsUIWeb.SharedComponents do
       phx-click={JS.dispatch("phx:copy_input", to: @copy_id)}
       title={@title}
       type="button"
+      aria-live="polite"
     >
-      <span class="hero-square-2-stack-solid w-5 h-5 stroke-3" /> Copy text
+      <span class="state-default">
+        <span class="hero-square-2-stack-solid w-5 h-5 stroke-3" /> Copy text
+      </span>
+      <span class="state-copied hidden" aria-hidden="true">
+        <span class="hero-clipboard-document-check-solid w-5 h-5 stroke-3" /> Copied!
+      </span>
     </button>
     """
   end

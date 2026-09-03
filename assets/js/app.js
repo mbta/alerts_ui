@@ -80,9 +80,25 @@ window.liveSocket = liveSocket
 
 // Copy contents of target to the clipboard
 window.addEventListener("phx:copy_input", (event) => {
+  const button = event.detail.dispatcher;
+  const buttonDefaultState = button.querySelector(".state-default")
+  const buttonCopiedState = button.querySelector(".state-copied")
+
   if ("clipboard" in navigator) {
-    let text = event.target.value;
-    navigator.clipboard.writeText(text)
+    const textToCopy = event.target.value;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      buttonDefaultState.classList.add("hidden")
+      buttonDefaultState.setAttribute("aria-hidden", "true");
+      buttonCopiedState.classList.remove("hidden")
+      buttonCopiedState.removeAttribute("aria-hidden");
+
+      setTimeout(() => {
+        buttonDefaultState.classList.remove("hidden");
+        buttonDefaultState.removeAttribute("aria-hidden");
+        buttonCopiedState.classList.add("hidden");
+        buttonCopiedState.setAttribute("aria-hidden", "true");
+      }, 2000);
+    })
   }
 })
 
