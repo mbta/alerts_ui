@@ -388,7 +388,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     arrival = get_trip_arrival_time(selected_schedules)
 
     {departure, start_specifier} =
-      if NaiveDateTime.compare(now, departure) == :gt do
+      if safe_datetime_compare(now, departure) == :gt do
         {now, :now}
       else
         {departure, :custom}
@@ -397,7 +397,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     changeset
     |> force_change(:active_period_start_specifier, start_specifier)
     |> force_change(:active_period_start, departure)
-    |> force_change(:active_period_start_date, departure |> NaiveDateTime.to_date())
+    |> force_change(:active_period_start_date, safe_datetime_to_date(departure))
     |> force_change(:active_period_end_specifier, :custom)
     |> force_change(:active_period_end, NaiveDateTime.add(arrival, 1, :hour))
     |> force_change(:active_period_end_date, arrival |> NaiveDateTime.to_date())
@@ -770,4 +770,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     effect_name = Map.get(alert_data, :effect_name) || Map.get(alert_data, "effect_name")
     effect_name in ["elevator_closure", "escalator_closure"]
   end
+
+  defp safe_datetime_to_date(%NaiveDateTime{} = datetime) do
+    NaiveDateTime.to_date(datetime)
+  end
+
+  defp safe_datetime_to_date(_), do: nil
+
+  defp safe_datetime_compare(%NaiveDateTime{} = start_datetime, %NaiveDateTime{} = end_datetime) do
+    NaiveDateTime.compare(start_datetime, end_datetime)
+  end
+
+  defp safe_datetime_compare(_, _), do: nil
 end
