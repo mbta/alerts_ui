@@ -159,12 +159,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     specifier = get_field(changeset, :active_period_start_specifier)
     timing = get_field(changeset, :alert_timing)
 
-    validate_recurring_start(now, specifier, changeset, timing)
+    validate_start(now, specifier, changeset, timing)
   end
 
   def validate_start_is_after_now(changeset, _, _), do: changeset
 
-  defp validate_recurring_start(now, specifier, changeset, timing)
+  defp validate_start(now, specifier, changeset, timing)
        when timing in [:"one-time", "one-time"] do
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
@@ -195,7 +195,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     )
   end
 
-  defp validate_recurring_start(now, specifier, changeset, timing)
+  defp validate_start(now, specifier, changeset, timing)
        when timing in [:recurring, "recurring"] do
     start_date = get_field(changeset, :active_period_start_date)
     start_time = get_field(changeset, :active_period_start_time)
@@ -219,7 +219,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators do
     end
   end
 
-  defp validate_recurring_start(_, _, changeset, _timing), do: changeset
+  defp validate_start(_, _, changeset, _timing), do: changeset
 
   def validate_at_least_one_recurrence(changeset) do
     timing = get_field(changeset, :alert_timing)
