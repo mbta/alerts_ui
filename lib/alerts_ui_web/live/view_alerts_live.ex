@@ -181,9 +181,12 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
-  def handle_event("paginate-alerts", %{"page" => page}, socket) do
-    send(self(), {:paginate_start})
+  def handle_event("paginate_start", _params, socket) do
+    {:noreply, assign(socket, loading: true)}
+  end
 
+  @impl true
+  def handle_event("paginate-alerts", %{"page" => page}, socket) do
     flop =
       Flop.set_page(socket.assigns.meta.flop, page)
 

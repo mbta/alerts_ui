@@ -1,7 +1,6 @@
 <div
   id="view_alerts_live_view"
   class="p-4 md:flex md:flex-col md:h-full md:overflow-hidden"
-  phx-hook="OpenDetails"
 >
   <div class="flex flex-col gap-4 lg:flex-row lg:justify-between">
     <.button_primary_link
@@ -39,7 +38,7 @@
       :if={!@loading}
       items={@alerts}
       meta={@meta}
-      on_sort={JS.push("sort-alerts")}
+      on_sort={JS.push("paginate_start") |> JS.push("sort-alerts")}
       opts={[
         no_results_content: "No alerts found",
         symbol_asc: sort_icon(:asc),
