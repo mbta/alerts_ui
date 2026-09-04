@@ -219,8 +219,7 @@ defmodule AlertsUI.Trapeze.Importer do
          }
        ) do
     # do not close if alert was manually created after the closed timestamp
-    if compare_timestamps(created_at, closed_timestamp) in [:gt, :eq] and
-         source == :ALERTS_MANAGER do
+    if compare_timestamps(created_at, closed_timestamp) == :gt and source == :ALERTS_MANAGER do
       {:ok,
        "open -> open: IGNORE - manual creation time after closed timestamp - can't close automatically"}
     else

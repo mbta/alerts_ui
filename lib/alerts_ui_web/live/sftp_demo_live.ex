@@ -53,12 +53,11 @@ defmodule AlertsUIWeb.SFTPDemoLive do
 
     case SFTP.fetch(config) do
       {:ok, {data, nil}} ->
-        ["Unable to load filestat, but that's ok." | data]
-        |> Enum.join("\n")
+        Enum.join(data, "\n\n")
 
       {:ok, {data, mtime}} ->
         [NaiveDateTime.to_iso8601(mtime) | data]
-        |> Enum.join("\n")
+        |> Enum.join("\n\n")
 
       {:error, reason} ->
         "ERROR: #{inspect(reason)}"
