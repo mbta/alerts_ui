@@ -1,5 +1,5 @@
 # --- Set up Elixir build ---
-FROM hexpm/elixir:1.20.2-erlang-29.0.3-debian-bullseye-20260713-slim as elixir-builder
+FROM hexpm/elixir:1.20.4-erlang-29.0.6-debian-trixie-20260824-slim as elixir-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
@@ -50,7 +50,7 @@ RUN mix assets.deploy
 RUN mix release
 
 # --- Set up runtime container ---
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 
 ENV LANG=C.UTF-8 MIX_ENV=prod REPLACE_OS_VARS=true
 
