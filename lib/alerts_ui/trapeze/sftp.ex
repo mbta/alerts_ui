@@ -8,7 +8,8 @@ defmodule AlertsUI.Trapeze.SFTP do
           port: integer() | nil,
           user: String.t() | nil,
           password: String.t() | nil,
-          filename: String.t() | nil
+          filename: String.t() | nil,
+          user_dir: String.t() | nil
         }
 
   @spec source_description(map()) :: source_description_t()
@@ -18,7 +19,9 @@ defmodule AlertsUI.Trapeze.SFTP do
       port: port(),
       user: user(),
       password: password(),
-      filename: filename()
+      filename: filename(),
+      # workaround for client being unable to find known hosts in debian-trixie
+      user_dir: System.tmp_dir()
     }
     |> Map.merge(override)
   end

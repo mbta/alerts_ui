@@ -8,15 +8,16 @@ defmodule AlertsUI.Trapeze.SFTPTest do
 
   test "source_description/1" do
     with_mock(AlertsUI, [:passthrough], config: fn a -> Atom.to_string(a) end) do
-      assert SFTP.source_description(%{
-               port: 34
-             }) == %{
+      assert %{
                host: "trapeze_sftp_host",
                port: 34,
                user: "trapeze_sftp_user",
                password: "trapeze_sftp_password",
                filename: "trapeze_sftp_filename"
-             }
+             } =
+               SFTP.source_description(%{
+                 port: 34
+               })
     end
   end
 
