@@ -1,5 +1,5 @@
 # --- Set up Elixir build ---
-FROM hexpm/elixir:1.20.4-erlang-29.0.6-debian-trixie-20260824-slim as elixir-builder
+FROM hexpm/elixir:1.20.4-erlang-29.0.6-debian-trixie-20260824-slim AS elixir-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
@@ -14,7 +14,7 @@ ADD . .
 RUN mix deps.get --only prod
 
 # --- Build NPM assets ---
-FROM node:20.10.0-alpine3.19 as assets-builder
+FROM node:20.10.0-alpine3.19 AS assets-builder
 
 WORKDIR /root
 ADD . .
@@ -28,7 +28,7 @@ RUN apk add --no-cache --update python3 build-base
 RUN npm --prefix assets ci
 
 # --- Build Elixir release ---
-FROM elixir-builder as app-builder
+FROM elixir-builder AS app-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 RUN apt-get update --allow-releaseinfo-change
