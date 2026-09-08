@@ -1066,7 +1066,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "changing from a bus delay with one route to a bus detour retains the route and stops",
+    test "changing from a bus delay with one route to a bus detour retains the route and stops and does not show warning modal",
          %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 
@@ -1107,6 +1107,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         assert has_element?(view, "div", "Bus • Detour")
         refute has_element?(view, "div", "Bus • Delay")
 
+        refute view
+               |> element("#change-mode-effect-modal")
+               |> has_element?
+
         assert document_has_element?(
                  document,
                  "option[value=\"746\"][selected]"
@@ -1120,9 +1124,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "changing from a bus delay with >1 route to a bus detour clears all routes and stops", %{
-      conn: conn
-    } do
+    test "changing from a bus delay with >1 route to a bus detour clears all routes and stops and shows warning modal",
+         %{
+           conn: conn
+         } do
       alert_params =
         build(:alert_map, %{
           alert_id: "test-bus-delay-multiroute",
@@ -1179,6 +1184,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         assert has_element?(view, "div", "Bus • Detour")
         refute has_element?(view, "div", "Bus • Delay")
+
+        assert view
+               |> element("#change-mode-effect-modal")
+               |> has_element?
 
         refute document_has_element?(
                  document,
