@@ -318,16 +318,23 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     end_of_rating = SchedulesRepo.end_of_rating()
 
-    schedules =
+    schedule_tasks =
       Date.range(today, end_of_rating)
-      |> Enum.flat_map(fn date ->
-        route_ids
-        |> get_schedules(direction, date)
-        |> Enum.group_by(& &1.trip.id)
-        |> Enum.map(fn {_k, [first_schedule, last_schedule]} ->
-          update_schedule(first_schedule, last_schedule)
+      |> Enum.map(fn date ->
+        Task.async(fn ->
+          route_ids
+          |> get_schedules(direction, date)
+          |> Enum.group_by(& &1.trip.id)
+          |> Enum.map(fn {_k, [first_schedule, last_schedule]} ->
+            update_schedule(first_schedule, last_schedule)
+          end)
+          |> List.flatten()
         end)
       end)
+
+    schedules =
+      Task.await_many(schedule_tasks, 50_000)
+      |> List.flatten()
       |> Enum.uniq_by(&{&1.trip.id, DateTime.to_time(&1.departure_time), &1.trip.name})
       |> Enum.sort_by(&(&1.departure_time |> DateTime.to_time()), Time)
 
