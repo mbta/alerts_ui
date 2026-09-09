@@ -6,9 +6,10 @@
       </option>
     </select>
     <input name="password" class="text-black m-2 p-2" value={@password} placeholder="Password" />
-    <button type="submit" class="m-2 p-2">Update</button>
+    <button type="submit" class="m-2 p-2">Submit</button>
     <section id="sftp_output" class="whitespace-pre font-mono overflow-auto">
-      {@output}
+      <span>file_process_datetime | equipment_id | asset_id | description | lines | work_order_id | create_datetime | update_datetime | start_datetime | end_datetime | status</span>
+      <br />{@output}
     </section>
   </form>
 </div>

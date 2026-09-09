@@ -211,15 +211,17 @@ defmodule AlertsUI.Trapeze.Importer do
          %Alert{
            closed_timestamp: nil,
            can_close_automatically: true,
-           created_at: created_at
+           created_at: created_at,
+           source: source
          } = alert,
          %{
            closed_timestamp: closed_timestamp
          }
        ) do
-    # only close if alert was created before the closed timestamp
-    if compare_timestamps(created_at, closed_timestamp) in [:gt, :eq] do
-      {:ok, "open -> open: IGNORE can't close automatically"}
+    # do not close if alert was manually created after the closed timestamp
+    if compare_timestamps(created_at, closed_timestamp) == :gt and source == :ALERTS_MANAGER do
+      {:ok,
+       "open -> open: IGNORE - manual creation time after closed timestamp - can't close automatically"}
     else
       close(alert)
     end
@@ -241,7 +243,7 @@ defmodule AlertsUI.Trapeze.Importer do
 
   # Any other case should be ignored.
   defp maybe_close(%Alert{closed_timestamp: _}, _) do
-    {:ok, "open -> open: IGNORE can't close automatically"}
+    {:ok, "open -> open: IGNORE - fallback case - can't close automatically"}
   end
 
   defp close(alert) do
