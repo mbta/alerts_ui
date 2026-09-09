@@ -1319,6 +1319,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         assert has_element?(view, "#alert_data_stop_names_and_ids_selector")
         assert has_element?(view, "#alert_data_route_ids_selector")
 
+        refute document_has_element?(
+                 document,
+                 "option[value=\"746\"][selected]"
+               )
+
         assert document_has_element?(
                  document,
                  "option[value=\"Courthouse|place-crtst\"][selected]"
