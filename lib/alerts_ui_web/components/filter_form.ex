@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.FilterForm do
     <.form
       for={@form}
       id="alert-filter-form"
-      phx-submit="apply_filter"
+      phx-submit={JS.push("apply_filter") |> JS.push("paginate_start")}
       phx-change="edit_filter"
       class="md:ml-auto"
     >

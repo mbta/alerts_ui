@@ -80,6 +80,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_info({:paginate_start}, socket) do
+    IO.inspect("here")
     {:noreply, assign(socket, loading: true)}
   end
 
@@ -121,7 +122,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   def handle_params(params, url, socket) do
-    send(self(), {:paginate_start})
     # default to timeline: current if params have no values
     # (eg no user input has occurred and we're probably in a fresh reload)
     filters = get_filters(params, "current")
@@ -174,7 +174,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
          alerts: alerts,
          form: form,
          params: params,
-         loading: false,
          current_url: current_url
        )}
     end
