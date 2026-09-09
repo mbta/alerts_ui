@@ -215,8 +215,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
       stop_id_options =
         stop_id_options(candidate_stops, form)
 
-      # IO.inspect(Enum.find(stop_id_options, fn option -> option[:key] === "South Station" end))
-
       filter_title_value = filter_title_value(modal_route_id, available_filter_routes)
 
       pending_auto_select_route_ids =
