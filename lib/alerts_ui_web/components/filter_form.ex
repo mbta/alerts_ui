@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.FilterForm do
     <.form
       for={@form}
       id="alert-filter-form"
-      phx-submit={JS.push("apply_filter") |> JS.push("paginate_start")}
+      phx-submit="apply_filter"
       phx-change="edit_filter"
       class="md:ml-auto"
     >
@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.FilterForm do
           selected={@form[:timeline].value}
           default="current"
           values={timeline_options()}
-          on_change="update_timeline_filter"
+          on_change={JS.push("update_timeline_filter") |> JS.push("paginate_start")}
         />
         <.text_input
           field={@form[:multi_column_search]}
@@ -54,7 +54,7 @@ defmodule AlertsUIWeb.FilterForm do
           placeholder="Search alerts"
           icon="hero-magnifying-glass-mini"
           class="h-[2.375rem] w-full"
-          phx-change="apply_filter"
+          phx-change={JS.push("apply_filter") |> JS.push("paginate_start")}
           action_icon="hero-x-circle-solid"
           action_event="reset_text_filter"
           action_name="Clear"
