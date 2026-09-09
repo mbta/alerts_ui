@@ -1,5 +1,5 @@
 # --- Set up Elixir build ---
-FROM hexpm/elixir:1.20.2-erlang-29.0.3-debian-bullseye-20260713-slim as elixir-builder
+FROM hexpm/elixir:1.20.4-erlang-29.0.6-debian-trixie-20260824-slim AS elixir-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
@@ -14,7 +14,7 @@ ADD . .
 RUN mix deps.get --only prod
 
 # --- Build NPM assets ---
-FROM node:20.10.0-alpine3.19 as assets-builder
+FROM node:20.10.0-alpine3.19 AS assets-builder
 
 WORKDIR /root
 ADD . .
@@ -28,7 +28,7 @@ RUN apk add --no-cache --update python3 build-base
 RUN npm --prefix assets ci
 
 # --- Build Elixir release ---
-FROM elixir-builder as app-builder
+FROM elixir-builder AS app-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 RUN apt-get update --allow-releaseinfo-change
@@ -50,12 +50,12 @@ RUN mix assets.deploy
 RUN mix release
 
 # --- Set up runtime container ---
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 
 ENV LANG=C.UTF-8 MIX_ENV=prod REPLACE_OS_VARS=true
 
 RUN apt-get update --allow-releaseinfo-change \
-    && apt-get install --no-install-recommends --yes dumb-init ca-certificates \
+    && apt-get install --no-install-recommends --yes dumb-init ca-certificates adduser \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user

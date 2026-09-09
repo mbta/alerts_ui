@@ -8,7 +8,8 @@ defmodule AlertsUI.Trapeze.SFTP do
           port: integer() | nil,
           user: String.t() | nil,
           password: String.t() | nil,
-          filename: String.t() | nil
+          filename: String.t() | nil,
+          user_dir: String.t() | nil
         }
 
   @spec source_description(map()) :: source_description_t()
@@ -44,7 +45,11 @@ defmodule AlertsUI.Trapeze.SFTP do
   @spec fetch(source_description_t()) ::
           {:ok, {[String.t()], NaiveDateTime.t() | nil}} | {:error, Exception.t()}
   def fetch(%{filename: filename} = source_description) do
-    connection_arguments = Map.delete(source_description, :filename)
+    connection_arguments =
+      Map.delete(source_description, :filename)
+      # Without this, in debian-trixie, we get an error that the default user dir cannot be found
+      # Since we user user/password to login, we do not actually need a user dir
+      |> Map.put_new(:user_dir, System.tmp_dir())
 
     SFTPClient.connect(connection_arguments, fn conn ->
       mtime =
