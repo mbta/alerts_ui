@@ -80,7 +80,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_info({:paginate_start}, socket) do
-    IO.inspect("here")
     {:noreply, assign(socket, loading: true)}
   end
 

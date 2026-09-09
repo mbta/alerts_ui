@@ -803,22 +803,35 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
     @tag :logged_in_user
     test "past timeline filter renders end date desc, and reversing sort works", %{conn: conn} do
-      {:ok, view, html} = live(conn, "/alerts?filter[timeline]=past")
+      {:ok, view, _html} = live(conn, "/alerts?filter[timeline]=past")
 
-      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render_async() =~
                "hero-arrow-down"
 
-      assert get_alert_id_order(html) == ["11600", "11500", "10700", "11300", "11700", "11200"]
+      assert get_alert_id_order(render_async(view)) == [
+               "11600",
+               "11500",
+               "10700",
+               "11300",
+               "11700",
+               "11200"
+             ]
 
-      html =
-        view
-        |> element("th[aria-sort='descending'] a", "End")
-        |> render_click()
+      view
+      |> element("th[aria-sort='descending'] a", "End")
+      |> render_click()
 
-      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render_async() =~
                "hero-arrow-up"
 
-      assert get_alert_id_order(html) == ["11200", "11700", "11300", "10700", "11500", "11600"]
+      assert get_alert_id_order(render_async(view)) == [
+               "11200",
+               "11700",
+               "11300",
+               "10700",
+               "11500",
+               "11600"
+             ]
     end
 
     @tag :logged_in_user
@@ -851,28 +864,40 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     test "reversing the sort for end time maintains proper order", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts")
 
-      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render_async() =~
                "hero-arrow-up"
 
-      html =
-        view
-        |> element("a", "End")
-        |> render_click()
+      view
+      |> element("a", "End")
+      |> render_click()
 
-      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render_async() =~
                "hero-arrow-down"
 
-      assert get_alert_id_order(html) == ["10000", "10100", "10900", "10600", "10500", "10300"]
+      assert get_alert_id_order(render_async(view)) == [
+               "10000",
+               "10100",
+               "10900",
+               "10600",
+               "10500",
+               "10300"
+             ]
 
-      html =
-        view
-        |> element("a", "End")
-        |> render_click()
+      view
+      |> element("a", "End")
+      |> render_click()
 
-      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render_async() =~
                "hero-arrow-up"
 
-      assert get_alert_id_order(html) == ["10300", "10500", "10600", "10900", "10100", "10000"]
+      assert get_alert_id_order(render_async(view)) == [
+               "10300",
+               "10500",
+               "10600",
+               "10900",
+               "10100",
+               "10000"
+             ]
     end
 
     @tag :logged_in_user
@@ -881,57 +906,87 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     } do
       {:ok, view, _html} = live(conn, "/alerts")
 
-      html =
-        view
-        |> element("a", "ID")
-        |> render_click()
+      view
+      |> element("a", "ID")
+      |> render_click()
 
-      refute get_alert_id_order(html) == ["10300", "10500", "10600", "10900", "10100", "10000"]
+      refute get_alert_id_order(render_async(view)) == [
+               "10300",
+               "10500",
+               "10600",
+               "10900",
+               "10100",
+               "10000"
+             ]
 
-      html =
-        view
-        |> element("a", "End")
-        |> render_click()
+      view
+      |> element("a", "End")
+      |> render_click()
 
-      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render_async() =~
                "hero-arrow-up"
 
-      assert get_alert_id_order(html) == ["10300", "10500", "10600", "10900", "10100", "10000"]
+      assert get_alert_id_order(render_async(view)) == [
+               "10300",
+               "10500",
+               "10600",
+               "10900",
+               "10100",
+               "10000"
+             ]
 
-      html =
-        view
-        |> element("a", "End")
-        |> render_click()
+      view
+      |> element("a", "End")
+      |> render_click()
 
-      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render_async() =~
                "hero-arrow-down"
 
-      assert get_alert_id_order(html) == ["10000", "10100", "10900", "10600", "10500", "10300"]
+      assert get_alert_id_order(render_async(view)) == [
+               "10000",
+               "10100",
+               "10900",
+               "10600",
+               "10500",
+               "10300"
+             ]
     end
 
     @tag :logged_in_user
     test "sorting by service type orders as expected", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts")
 
-      html =
-        view
-        |> element("a", "Service")
-        |> render_click()
+      view
+      |> element("a", "Service")
+      |> render_click()
 
-      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='ascending'] span.order-direction") |> render_async() =~
                "hero-arrow-up"
 
-      assert get_alert_id_order(html) == ["10900", "10600", "10500", "10300", "10100", "10000"]
+      assert get_alert_id_order(render_async(view)) == [
+               "10900",
+               "10600",
+               "10500",
+               "10300",
+               "10100",
+               "10000"
+             ]
 
-      html =
-        view
-        |> element("a", "Service")
-        |> render_click()
+      view
+      |> element("a", "Service")
+      |> render_click()
 
-      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render_async() =~
                "hero-arrow-down"
 
-      assert get_alert_id_order(html) == ["10000", "10300", "10100", "10500", "10600", "10900"]
+      assert get_alert_id_order(render_async(view)) == [
+               "10000",
+               "10300",
+               "10100",
+               "10500",
+               "10600",
+               "10900"
+             ]
     end
 
     @tag :logged_in_user
@@ -943,39 +998,44 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       |> element("a", "ID")
       |> render_click()
 
-      html =
-        view
-        |> element("a", "ID")
-        |> render_click()
+      view
+      |> element("a", "ID")
+      |> render_click()
 
       assert_patch(
         view,
         ~p"/alerts?filter[timeline]=current&order_by=integer_alert_id&order_direction=desc"
       )
 
-      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render_async() =~
                "hero-arrow-down"
 
-      assert get_alert_id_order(html) == ["10900", "10600", "10500", "10300", "10100", "10000"]
+      assert get_alert_id_order(render_async(view)) == [
+               "10900",
+               "10600",
+               "10500",
+               "10300",
+               "10100",
+               "10000"
+             ]
 
       # search in the search bar and make sure we are still in sort desc order
-      html =
-        view
-        |> element("input[name='view_alerts_live[multi_column_search]']")
-        |> render_change(%{
-          "view_alerts_live" => %{
-            "multi_column_search" => "red line"
-          }
-        })
+      view
+      |> element("input[name='view_alerts_live[multi_column_search]']")
+      |> render_change(%{
+        "view_alerts_live" => %{
+          "multi_column_search" => "red line"
+        }
+      })
 
-      assert get_alert_id_order(html) == ["10300", "10100"]
+      assert get_alert_id_order(render_async(view)) == ["10300", "10100"]
 
       assert_patch(
         view,
         ~p"/alerts?filter[multi_column_search]=red+line&filter[timeline]=current&order_by=integer_alert_id&order_direction=desc"
       )
 
-      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render_async() =~
                "hero-arrow-down"
     end
 
@@ -988,33 +1048,38 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       |> element("a", "ID")
       |> render_click()
 
-      html =
-        view
-        |> element("a", "ID")
-        |> render_click()
+      view
+      |> element("a", "ID")
+      |> render_click()
 
       assert_patch(
         view,
         ~p"/alerts?filter[timeline]=current&order_by=integer_alert_id&order_direction=desc"
       )
 
-      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render() =~
+      assert element(view, "th[aria-sort='descending'] span.order-direction") |> render_async() =~
                "hero-arrow-down"
 
-      assert get_alert_id_order(html) == ["10900", "10600", "10500", "10300", "10100", "10000"]
+      assert get_alert_id_order(render_async(view)) == [
+               "10900",
+               "10600",
+               "10500",
+               "10300",
+               "10100",
+               "10000"
+             ]
 
       # filter in the modal for just buses (3)
-      html =
-        view
-        |> element("#alert-filter-form")
-        |> render_submit(%{
-          "view_alerts_live" => %{
-            # bus
-            "service_type" => ["3"]
-          }
-        })
+      view
+      |> element("#alert-filter-form")
+      |> render_submit(%{
+        "view_alerts_live" => %{
+          # bus
+          "service_type" => ["3"]
+        }
+      })
 
-      assert get_alert_id_order(html) == ["10900", "10600", "10100"]
+      assert get_alert_id_order(render_async(view)) == ["10900", "10600", "10100"]
 
       assert_patch(
         view,
@@ -1065,12 +1130,11 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     test "pagination is navigable", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts?filter[timeline]=past")
 
-      html =
-        view
-        |> element("button[aria-label='Go to page 2']", "2")
-        |> render_click()
+      view
+      |> element("button[aria-label='Go to page 2']", "2")
+      |> render_click()
 
-      assert get_alert_id_order(html) == Enum.map(51..90, fn i -> "#{i}" end)
+      assert get_alert_id_order(render_async(view)) == Enum.map(51..90, fn i -> "#{i}" end)
     end
 
     @tag :logged_in_user
@@ -1085,12 +1149,11 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       |> element("label:has(input[aria-label='Current'])")
       |> render_click()
 
-      html =
-        view
-        |> element("label:has(input[aria-label='Past'])")
-        |> render_click()
+      view
+      |> element("label:has(input[aria-label='Past'])")
+      |> render_click()
 
-      assert get_alert_id_order(html) == Enum.map(1..50, fn i -> "#{i}" end)
+      assert get_alert_id_order(render_async(view)) == Enum.map(1..50, fn i -> "#{i}" end)
     end
 
     @tag :logged_in_user
