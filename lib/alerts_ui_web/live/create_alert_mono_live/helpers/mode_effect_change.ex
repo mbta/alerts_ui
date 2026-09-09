@@ -26,6 +26,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   ]
 
   @full_reset %{
+    direction: nil,
     route_ids: [],
     stop_ids: [],
     trip_ids: [],

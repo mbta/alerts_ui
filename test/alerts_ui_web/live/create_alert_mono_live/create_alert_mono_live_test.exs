@@ -918,6 +918,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
                         direction_id: 0
                       }
                     ],
+                    original_direction_selections: ["Both|default"],
                     original_route_selections: ["SLW|746"],
                     original_stop_selections: ["Courthouse (outbound)|place-crtst"]
                   })
@@ -1283,7 +1284,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
            by_type: fn _ -> [@bus_route] end,
            get: fn _ -> @bus_route end,
            get: fn _, _ -> @bus_route end,
-           all: fn _ -> [@bus_route] end
+           all: fn _ -> [@bus_route] end,
+           by_stop: fn _, _ -> [@bus_route] end
          ]},
         {StopsRepo, [],
          [
@@ -1328,8 +1330,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         refute document_has_element?(
                  document,
-                 "option[value=\"Courthouse (outbound)|place-crtst\"][selected]"
+                 "option[value=\"Courthouse|place-crtst\"][selected]"
                )
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Courthouse|place-crtst"]
+          }
+        })
+
+        render_async(view)
+
+        open_review_modal(view)
+        # Make sure that the direction has cleared out too
+        refute has_element?(view, "#review-modal-container", "Direction")
       end
     end
 
