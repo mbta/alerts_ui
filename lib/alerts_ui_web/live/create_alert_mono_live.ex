@@ -73,6 +73,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
 
   alias AlertsUI.DBContexts.Users
+  alias MBTAV3API.Stops.Stop
 
   import Ecto.Changeset, only: [change: 2]
 
@@ -274,7 +275,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         do: ModeEffectChange.condensed_form(socket.assigns.form),
         else: socket.assigns.original_alert_form
 
-    form_updates =
+    %{new: form_updates, replaced: replaced_values} =
       ModeEffectChange.new_form_values(form_to_compare, next_route_type, effect_name)
 
     updated_source =
@@ -309,13 +310,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       })
       |> sync_socket(%{})
 
-    # When we persist a single route to a new alert that only allows for one route,
-    # we do not need to raise the modal since we are not really removing user selections
-    single_route_change? =
-      match?(%{single_route_id: _route}, form_updates) and map_size(form_updates) === 1
-
-    if form_updates !== %{} and not single_route_change? do
-      send(self(), {:changing_mode_effect, form_updates})
+    if not Enum.empty?(replaced_values) do
+      send(self(), {:changing_mode_effect, replaced_values})
     end
 
     {:noreply, socket}
@@ -592,6 +588,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
 
+    socket = translate_stop_names_and_ids(socket, new_selections)
+
     # Always override route_ids — no guard for pre-existing selections; see design spec.
     socket =
       if is_nil(pending_route_ids) do
@@ -616,6 +614,38 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       _ -> {:noreply, socket}
     end
   end
+
+  # In the case of converting an alert with stops to SR, we need to adjust the `stop_names_and_ids` because
+  # the names will change depending on direction. For example, in a Bus Delay, we would have both
+  # South Station (inbound) and South Station (outbound). But in SR, we would only have South Station.
+  # This uses `stop_ids` as the source of truth, and then adjusts `stop_names_and_ids` to match fetched stops
+  defp translate_stop_names_and_ids(socket, %{available_stops: available_stops}) do
+    form = socket.assigns.form
+    combination = form[:combination].value
+
+    if combination === :SR do
+      stop_ids = form[:stop_ids].value
+
+      selected_stops =
+        Enum.filter(available_stops, fn stop -> stop.id in stop_ids end)
+        |> Enum.map(fn %Stop{id: id, name: name} -> "#{name}|#{id}" end)
+
+      updated_source =
+        change(
+          form.source,
+          %{stop_names_and_ids: selected_stops}
+        )
+
+      socket
+      |> assign(%{
+        form: Phoenix.Component.to_form(updated_source)
+      })
+    else
+      socket
+    end
+  end
+
+  defp translate_stop_names_and_ids(socket, _), do: socket
 
   defp handle_obsolete_ids(socket, new_selections) do
     form = socket.assigns.form
@@ -754,7 +784,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
-  def handle_info({:changing_mode_effect, _form_updates}, socket) do
+  def handle_info({:changing_mode_effect, _replaced_values}, socket) do
     socket =
       socket
       |> set_modal_open(@change_mode_effect_modal_id, true)

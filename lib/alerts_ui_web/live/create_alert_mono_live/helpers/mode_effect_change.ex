@@ -13,26 +13,31 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
   Helpers for converting an alert's mode or effect type.
   """
 
-  # All of the form fields we need in order to figure out what to retain
-  @form_fields [
+  @affected_service_fields [
     :route_ids,
+    :direction,
     :stop_ids,
     :trip_ids,
     :facility_ids,
-    :stop_names_and_ids,
-    :combination,
-    :route_type,
-    :effect_name
+    :stop_names_and_ids
   ]
 
-  @full_reset %{
-    direction: nil,
-    route_ids: [],
-    stop_ids: [],
-    trip_ids: [],
-    facility_ids: [],
-    stop_names_and_ids: []
-  }
+  # All of the form fields we need in order to figure out what to retain
+  @form_fields @affected_service_fields ++ [:combination, :route_type, :effect_name]
+
+  @full_reset Map.new(@affected_service_fields, fn field -> {field, []} end)
+              |> Map.put(:direction, nil)
+
+  # expose @full_reset for the test to use too
+  @spec full_reset() :: %{
+          direction: nil,
+          facility_ids: [],
+          route_ids: [],
+          stop_ids: [],
+          stop_names_and_ids: [],
+          trip_ids: []
+        }
+  def full_reset, do: @full_reset
 
   @spec condensed_form(Phoenix.HTML.Form.t()) :: map()
   @doc """
@@ -48,7 +53,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     |> Map.put(:source, form.source)
   end
 
-  @spec new_form_values(Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
+  @spec new_form_values(Phoenix.HTML.Form.t(), integer(), String.t()) :: %{
+          new: map(),
+          replaced: map()
+        }
   def new_form_values(form, next_route_type, next_effect_name)
 
   def new_form_values(form, next_route_type, next_effect_name) do
@@ -58,17 +66,29 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
 
     previous_route_type = form[:route_type]
 
-    cond do
-      # If the mode changes, wipe all values
-      next_route_type !== previous_route_type ->
-        @full_reset
+    new_values =
+      cond do
+        # If the mode changes, wipe all values
+        next_route_type !== previous_route_type ->
+          @full_reset
 
-      previous_combination === next_combination ->
-        same_combination(previous_combination, form, next_route_type, next_effect_name)
+        previous_combination === next_combination ->
+          same_combination(previous_combination, form, next_route_type, next_effect_name)
 
-      true ->
-        different_combination(previous_combination, next_combination, form)
-    end
+        true ->
+          different_combination(previous_combination, next_combination, form)
+      end
+
+    %{new: new_values, replaced: derive_cleared_values(form, new_values)}
+  end
+
+  @spec derive_cleared_values(Phoenix.HTML.Form.t(), map()) :: map()
+  defp derive_cleared_values(form, new_values) do
+    Map.new(new_values, fn {key, _value} -> {key, form[key]} end)
+    # Remove the values that were already "empty"
+    |> Map.reject(fn {key, value} ->
+      value === [] or is_nil(value) or (key === :direction and value === "default")
+    end)
   end
 
   @spec same_combination(atom(), Phoenix.HTML.Form.t(), integer(), String.t()) :: map()
@@ -114,9 +134,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     end
   end
 
-  # Eventually we can be smarter about what we retain depending on combo changes, i.e.
-  # def different_combination(:RDS, :SR, form) do ...
+  @spec different_combination(:atom, :atom, Phoenix.HTML.Form.t()) :: map()
+  defp different_combination(previous_combination, next_combination, form)
+
+  defp different_combination(:RDS, :SR, _) do
+    retain([:stop_ids, :stop_names_and_ids])
+  end
+
+  defp different_combination(:RDTS, :SR, _) do
+    retain([:stop_ids, :stop_names_and_ids])
+  end
+
+  defp different_combination(:RDTS, :RDT, _) do
+    retain([:route_ids, :trip_ids, :direction])
+  end
+
+  defp different_combination(:RDT, :RDTS, _) do
+    %{}
+  end
+
+  defp different_combination(:R, :SR, _) do
+    @full_reset
+  end
+
+  defp different_combination(:R, _, _) do
+    %{}
+  end
+
+  defp different_combination(:SR, _, _) do
+    @full_reset
+  end
+
+  defp different_combination(_, :R, _) do
+    retain([:route_ids])
+  end
+
   defp different_combination(_previous_combination, _next_combination, _) do
     @full_reset
+  end
+
+  @spec retain([atom()]) :: map()
+  defp retain(fields) do
+    @affected_service_fields
+    |> Enum.filter(fn field -> field not in fields end)
+    |> Map.new(fn field ->
+      value = if field === :direction, do: nil, else: []
+      {field, value}
+    end)
   end
 end

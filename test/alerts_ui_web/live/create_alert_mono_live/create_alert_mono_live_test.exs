@@ -1275,7 +1275,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "changing from RDS to SR should wipe everything", %{conn: conn} do
+    test "changing from RDS to SR only retains selected stops", %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 
       with_mocks([
@@ -1319,16 +1319,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         assert has_element?(view, "#alert_data_stop_names_and_ids_selector")
         assert has_element?(view, "#alert_data_route_ids_selector")
 
-        # Route selector should be disabled because no route is selected
-        assert has_element?(view, "label", "Impacted routes")
-        assert has_element?(view, "#alert_data_route_ids[disabled]")
-
         refute document_has_element?(
                  document,
                  "option[value=\"746\"][selected]"
                )
 
-        refute document_has_element?(
+        assert document_has_element?(
                  document,
                  "option[value=\"Courthouse|place-crtst\"][selected]"
                )
@@ -1826,7 +1822,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
            by_type: fn _ -> [@bus_route] end,
            get: fn _ -> @bus_route end,
            get: fn _, _ -> @bus_route end,
-           all: fn _ -> [@bus_route] end
+           all: fn _ -> [@bus_route] end,
+           by_stop: fn _, _ -> [@bus_route] end
          ]},
         {StopsRepo, [],
          [
