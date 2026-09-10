@@ -318,24 +318,20 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     end_of_rating = SchedulesRepo.end_of_rating()
 
-    schedule_tasks =
+    schedules =
       Date.range(today, end_of_rating)
-      |> Enum.map(fn date ->
-        Task.async(fn ->
-          route_ids
-          |> get_schedules(direction, date)
-          |> Enum.group_by(& &1.trip.id)
-          |> Enum.map(fn {_k, [first_schedule, last_schedule]} ->
-            update_schedule(first_schedule, last_schedule)
-          end)
-          |> List.flatten()
+      |> Task.async_stream(fn date ->
+        route_ids
+        |> get_schedules(direction, date)
+        |> Enum.group_by(& &1.trip.id)
+        |> Enum.map(fn {_k, [first_schedule, last_schedule]} ->
+          update_schedule(first_schedule, last_schedule)
         end)
       end)
-
-    schedules =
-      Task.await_many(schedule_tasks, 50_000)
-      |> List.flatten()
-      |> Enum.uniq_by(&{&1.trip.id, DateTime.to_time(&1.departure_time), &1.trip.name})
+      |> Stream.filter(fn {result, _item} -> result == :ok end)
+      |> Stream.flat_map(fn {:ok, item} -> item end)
+      |> Stream.uniq_by(&{&1.trip.id, DateTime.to_time(&1.departure_time), &1.trip.name})
+      |> Enum.to_list()
       |> Enum.sort_by(&(&1.departure_time |> DateTime.to_time()), Time)
 
     # get a map (by {departure time, trip name}) of all schedules whose combination of
