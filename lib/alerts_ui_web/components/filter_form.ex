@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.FilterForm do
           selected={@form[:timeline].value}
           default="current"
           values={timeline_options()}
-          on_change="update_timeline_filter"
+          on_change={JS.push("paginate_start") |> JS.push("update_timeline_filter")}
         />
         <.text_input
           field={@form[:multi_column_search]}
@@ -54,9 +54,9 @@ defmodule AlertsUIWeb.FilterForm do
           placeholder="Search alerts"
           icon="hero-magnifying-glass-mini"
           class="h-[2.375rem] w-full"
-          phx-change="apply_filter"
+          phx-change={JS.push("paginate_start") |> JS.push("apply_filter")}
           action_icon="hero-x-circle-solid"
-          action_event="reset_text_filter"
+          action_event={JS.push("paginate_start") |> JS.push("reset_text_filter")}
           action_name="Clear"
         />
       </div>
@@ -200,7 +200,8 @@ defmodule AlertsUIWeb.FilterForm do
               type="submit"
               phx-remove={hide_modal("alerts-filter-modal")}
               phx-click={
-                JS.push("apply_filter")
+                JS.push("paginate_start")
+                |> JS.push("apply_filter")
                 |> JS.exec("phx-remove")
               }
             >
@@ -223,7 +224,7 @@ defmodule AlertsUIWeb.FilterForm do
         <span
           :if={@filter_count > 0}
           class={[@button_classes, @active_button_classes, "ms-px"]}
-          phx-click="reset_modal_filters"
+          phx-click={JS.push("paginate_start") |> JS.push("reset_modal_filters")}
           title="Clear filters"
         >
           <AlertsUIWeb.CoreComponents.icon name="hero-x-circle-solid" />
