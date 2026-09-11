@@ -320,7 +320,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     schedules =
       Date.range(today, end_of_rating)
-      |> Enum.flat_map(fn date ->
+      |> Task.async_stream(fn date ->
         route_ids
         |> get_schedules(direction, date)
         |> Enum.group_by(& &1.trip.id)
@@ -328,7 +328,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
           update_schedule(first_schedule, last_schedule)
         end)
       end)
-      |> Enum.uniq_by(&{&1.trip.id, DateTime.to_time(&1.departure_time), &1.trip.name})
+      |> Stream.filter(fn {result, _item} -> result == :ok end)
+      |> Stream.flat_map(fn {:ok, item} -> item end)
+      |> Stream.uniq_by(&{&1.trip.id, DateTime.to_time(&1.departure_time), &1.trip.name})
+      |> Enum.to_list()
       |> Enum.sort_by(&(&1.departure_time |> DateTime.to_time()), Time)
 
     # get a map (by {departure time, trip name}) of all schedules whose combination of
