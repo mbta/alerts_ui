@@ -19,7 +19,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     :stop_ids,
     :trip_ids,
     :facility_ids,
-    :stop_names_and_ids
+    :stop_names_and_ids,
+    :service_types
   ]
 
   # All of the form fields we need in order to figure out what to retain
@@ -35,7 +36,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
           route_ids: [],
           stop_ids: [],
           stop_names_and_ids: [],
-          trip_ids: []
+          trip_ids: [],
+          service_types: []
         }
   def full_reset, do: @full_reset
 

@@ -1632,7 +1632,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
           effect: :OTHER_EFFECT,
           effect_detail: "NOTICE",
           primary_service_type: "systemwide",
-          service_types: [1]
+          service_types: [1],
+          original_mode_selections: [1],
+          informed_entity: [
+            %{
+              route_type: 1,
+              activities: ["BOARD", "EXIT", "RIDE"],
+              agency_id: "1"
+            }
+          ]
         })
 
       {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
@@ -1669,6 +1677,92 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         assert has_element?(view, "div", "Systemwide • Delay")
         refute has_element?(view, "div", "Systemwide • Notice")
+      end
+    end
+
+    @tag :logged_in_user
+    test "editing a systemwide delay to another mode removes service types and triggers the modal",
+         %{conn: conn} do
+      id = "test-systemwide-to-bus"
+
+      alert_params =
+        build(:alert_map, %{
+          alert_id: id,
+          effect: :OTHER_EFFECT,
+          effect_detail: "NOTICE",
+          primary_service_type: "systemwide",
+          service_types: [1],
+          original_mode_selections: [1],
+          informed_entity: [
+            %{
+              route_type: 1,
+              activities: ["BOARD", "EXIT", "RIDE"],
+              agency_id: "1"
+            }
+          ]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           by_type: fn _, _ -> [@ferry_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end,
+           all: fn _, _ -> [@stop, @stop_2] end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]}
+      ]) do
+        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
+
+        {:ok, view, _html} = live(conn, "/alerts/edit/#{id}")
+        assert %{original_mode_selections: [1]} = Alerts.get_by_alert_id(id)
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#route-type-bus-button")
+        |> render_click()
+
+        view
+        |> element("#effect-name-delay-button")
+        |> render_click()
+
+        render_async(view)
+
+        assert has_element?(view, "div", "Bus • Delay")
+        refute has_element?(view, "div", "Systemwide • Notice")
+
+        assert view
+               |> element("#change-mode-effect-modal")
+               |> has_element?
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@bus_route.id]}
+        })
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        flash = assert_redirect(view, "/")
+        assert flash["info"] =~ "Alert ##{id} updated"
+
+        assert %{original_mode_selections: []} = Alerts.get_by_alert_id(id)
       end
     end
 

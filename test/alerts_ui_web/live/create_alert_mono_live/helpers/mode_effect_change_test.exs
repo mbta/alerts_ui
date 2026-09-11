@@ -21,7 +21,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChangeTest do
                facility_ids: [],
                route_ids: [],
                trip_ids: [],
-               direction: nil
+               direction: nil,
+               service_types: []
              }
 
       assert replaced_values == %{route_ids: ["1", "2", "3"]}
@@ -44,7 +45,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChangeTest do
                facility_ids: [],
                route_ids: [],
                trip_ids: [],
-               direction: nil
+               direction: nil,
+               service_types: []
              }
 
       assert replaced_values == %{
@@ -113,7 +115,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChangeTest do
       assert new_values === %{
                stop_ids: [],
                stop_names_and_ids: [],
-               facility_ids: []
+               facility_ids: [],
+               service_types: []
              }
 
       assert replaced_values == %{
@@ -175,7 +178,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChangeTest do
                  trip_ids: [],
                  direction: nil,
                  stop_ids: [],
-                 stop_names_and_ids: []
+                 stop_names_and_ids: [],
+                 service_types: []
                }
 
         assert replaced_values == data
