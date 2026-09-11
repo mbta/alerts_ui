@@ -171,7 +171,6 @@ config :laboratory,
   features: [
     {:show_alerts_table, "Show Alerts Table",
      "Shows menu link to a page with the alerts DB table"},
-    {:show_created_alert, "Show Created Alert", "Makes created alert visible on success screen"},
     {:show_components_page, "Show Components Style Guide page",
      "Shows the menu link to a page showing a guide to our components"},
     {:show_stop_ids, "Show stop ids", "Show a list of selected stop ids in the form."},

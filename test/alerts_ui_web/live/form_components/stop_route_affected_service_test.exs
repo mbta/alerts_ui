@@ -753,8 +753,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            included_stops_by_route_id: fn _route_id, _direction -> [] end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_created_alert", "true")
-
         {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         view
@@ -890,8 +888,6 @@ defmodule AlertsUIWeb.FormComponents.StopRouteAffectedServiceTest do
            included_stops_by_route_id: fn _route_id, _direction -> [] end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_created_alert", "true")
-
         {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 
         view

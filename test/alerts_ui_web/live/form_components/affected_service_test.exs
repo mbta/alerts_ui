@@ -1292,7 +1292,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedServiceTest do
            get_by_type: fn _facility_types, _opts -> [@facility] end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_created_alert", "true")
         trip = build(:trip_descriptor, %{trip_id: @schedule.trip.id})
 
         ie =
