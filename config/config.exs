@@ -25,8 +25,9 @@ config :alerts_ui,
   trapeze_sftp_password: System.get_env("TRAPEZE_SFTP_PASSWORD", ""),
   trapeze_sftp_filename: System.get_env("TRAPEZE_SFTP_FILENAME", ""),
   sentry_env: System.get_env("SENTRY_ENV"),
+  ## Environment level flags
   # Whether to use translated strings for `cause_detail` and `effect_detail`
-  translated_cause_effect_detail: false
+  translated_cause_effect_detail?: false
 
 config :alerts_ui, :phoenix_swagger,
   swagger_files: %{

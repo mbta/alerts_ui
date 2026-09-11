@@ -130,7 +130,7 @@ defmodule AlertsUI.FeedOutput.CreateOutputAlert do
   end
 
   defp maybe_build_translated_cause_effect_detail_string(input_string) do
-    if Application.get_env(:alerts_ui, :translated_cause_effect_detail) == true do
+    if Application.get_env(:alerts_ui, :translated_cause_effect_detail?) == true do
       build_translated_string(input_string)
     else
       input_string
