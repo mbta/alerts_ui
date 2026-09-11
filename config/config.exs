@@ -27,7 +27,9 @@ config :alerts_ui,
   sentry_env: System.get_env("SENTRY_ENV"),
   ## Environment level flags
   # Whether to use translated strings for `cause_detail` and `effect_detail`
-  translated_cause_effect_detail?: false
+  translated_cause_effect_detail?: false,
+  # Whether to import from trapeze
+  trapeze_import?: true
 
 config :alerts_ui, :phoenix_swagger,
   swagger_files: %{

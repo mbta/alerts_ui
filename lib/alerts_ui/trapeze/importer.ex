@@ -5,7 +5,6 @@ defmodule AlertsUI.Trapeze.Importer do
   import Ecto.Query
 
   alias AlertsUI.AlertBuilder
-  alias AlertsUI.FeatureFlags
   alias AlertsUI.FeedOutput.GTFSProtobufDefinition.TransitRealtime.Alert
   use Oban.Worker
 
@@ -40,7 +39,7 @@ defmodule AlertsUI.Trapeze.Importer do
           Monitor.result({:warning, "Missing Configuration"})
 
         not enabled?() ->
-          Monitor.result({:warning, "\"Trapeze Import\" Feature Flag Disabled"})
+          Monitor.result({:warning, "\"trapeze_import?\" Environment Flag Disabled"})
 
         true ->
           try do
@@ -265,7 +264,7 @@ defmodule AlertsUI.Trapeze.Importer do
         SFTP.source_description().password in [nil, ""] ||
         SFTP.source_description().filename in [nil, ""]
 
-  defp enabled?, do: FeatureFlags.enabled?("Trapeze Import")
+  defp enabled?, do: Application.get_env(:alerts_ui, :trapeze_import?) == true
 
   defp compare_timestamps(%DateTime{} = created_at, %NaiveDateTime{} = closed_timestamp) do
     closed_timestamp =

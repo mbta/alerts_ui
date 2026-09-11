@@ -174,7 +174,8 @@ cond do
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
       dev_api_key: System.fetch_env!("DEV_API_KEY"),
-      translated_cause_effect_detail?: true
+      translated_cause_effect_detail?: true,
+      trapeze_import?: false
 
     config :sentry,
       # Prevents sentry reporting in local environments
