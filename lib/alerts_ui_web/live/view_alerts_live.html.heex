@@ -1,7 +1,6 @@
 <div
   id="view_alerts_live_view"
   class="p-4 md:flex md:flex-col md:h-full md:overflow-hidden"
-  phx-hook="OpenDetails"
 >
   <div class="flex flex-col gap-4 lg:flex-row lg:justify-between">
     <.button_primary_link
@@ -152,7 +151,10 @@
             title="Close alert"
             phx-click={
               JS.push("opening_close_modal",
-                value: %{send_all_clear?: !is_nil(alert.last_push_notification_timestamp)}
+                value: %{
+                  send_all_clear?: !is_nil(alert.last_push_notification_timestamp),
+                  alert_id: alert.alert_id
+                }
               )
               |> show_modal("close-alert-modal-#{alert.alert_id}")
             }
@@ -207,6 +209,7 @@
             </:menu>
           </.button_menu>
           <AlertsUIWeb.ReviewModal.confirm_close_modal
+            :if={@current_close_modal == alert.alert_id}
             alert_id={alert.alert_id}
             send_all_clear?={@send_all_clear?}
           />
