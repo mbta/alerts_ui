@@ -365,11 +365,11 @@ defmodule AlertsUIWeb.ReviewModal do
 
           <p class="font-bold">Created by</p>
           <%= if @form_type in  [:creating, :duplicating] && @current_user do %>
-            <p class="pb-3">
+            <p class="pb-3 fs-mask">
               {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
             </p>
           <% else %>
-            <p :if={@created_by} class="pb-3">
+            <p :if={@created_by} class="pb-3 fs-mask">
               {@created_by}
             </p>
           <% end %>
