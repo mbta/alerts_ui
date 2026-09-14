@@ -209,7 +209,7 @@
             </:menu>
           </.button_menu>
           <AlertsUIWeb.ReviewModal.confirm_close_modal
-            :if={@current_close_modal == alert.alert_id}
+            send_close_on_esc?={@current_close_modal == alert.alert_id}
             alert_id={alert.alert_id}
             send_all_clear?={@send_all_clear?}
           />

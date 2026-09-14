@@ -1576,7 +1576,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         |> render_click()
 
         view
-        |> element("button", "Close now")
+        |> element("#close-alert-modal-345 button", "Close now")
         |> render_click()
 
         :timer.sleep(5)
@@ -1993,7 +1993,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       |> render_click()
 
       view
-      |> element("button", "Close now")
+      |> element("#close-alert-modal-345 button", "Close now")
       |> render_click()
 
       html1 = render_async(view)
