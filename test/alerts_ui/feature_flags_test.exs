@@ -9,13 +9,12 @@ defmodule AlertsUI.FeatureFlagsTest do
   def get(name), do: Repo.one(from ff in FeatureFlag, where: ff.name == ^name)
 
   describe "enabled?/2" do
-    test "creates the flag (disabled) if it does not already exist" do
+    test "returns false if the flag does not exist" do
       before_flag = get("Test Flag")
-      FeatureFlags.enabled?("Test Flag")
-      after_flag = get("Test Flag")
+      enabled? = FeatureFlags.enabled?("Test Flag")
 
       assert nil == before_flag
-      assert %FeatureFlag{name: "Test Flag", enabled: false} = after_flag
+      assert enabled? == false
     end
 
     test "returns the enabled value of a flag that already exists" do
@@ -27,13 +26,12 @@ defmodule AlertsUI.FeatureFlagsTest do
   end
 
   describe "enable/1" do
-    test "creates the flag (enabled) if it does not already exist" do
+    test "returns false if the flag does not already exist" do
       before_flag = get("Test Flag")
-      FeatureFlags.enable("Test Flag")
-      after_flag = get("Test Flag")
+      flag = FeatureFlags.enable("Test Flag")
 
       assert nil == before_flag
-      assert %FeatureFlag{name: "Test Flag", enabled: true} = after_flag
+      assert flag == false
     end
 
     test "enables an existing flag" do
@@ -48,13 +46,12 @@ defmodule AlertsUI.FeatureFlagsTest do
   end
 
   describe "disable/1" do
-    test "creates the flag (disabled) if it does not already exist" do
+    test "returns false if the flag does not already exist" do
       before_flag = get("Test Flag")
-      FeatureFlags.disable("Test Flag")
-      after_flag = get("Test Flag")
+      flag = FeatureFlags.disable("Test Flag")
 
       assert nil == before_flag
-      assert %FeatureFlag{name: "Test Flag", enabled: false} = after_flag
+      assert flag == false
     end
 
     test "disables an existing flag" do
