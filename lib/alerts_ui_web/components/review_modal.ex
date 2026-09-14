@@ -614,12 +614,17 @@ defmodule AlertsUIWeb.ReviewModal do
     default: "",
     doc: "The ID of the element that should receive this modal's events"
 
+  attr :send_close_on_esc?, :boolean,
+    default: true,
+    doc: "if this is false the component should not send a close event on the user hitting escape"
+
   attr :rest, :global, include: ~w(on_cancel on_accept)
 
   def confirm_close_modal(assigns) do
     ~H"""
     <.modal
       id={"#{@id}-#{@alert_id}"}
+      send_close_on_esc?={@send_close_on_esc?}
       header_text="Close alert"
       cancel_event_name="cancelled_close_modal"
       accept_event_name="close_alert"

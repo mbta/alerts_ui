@@ -62,7 +62,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
        send_all_clear?: false,
        alerts: [],
        loading: false,
-       current_url: ""
+       current_url: "",
+       current_close_modal: nil
      )}
   end
 
@@ -420,7 +421,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_event("cancelled_close_modal", _params, socket) do
-    {:noreply, assign(socket, scroll_to_top: false, send_all_clear?: false)}
+    {:noreply,
+     assign(socket, scroll_to_top: false, send_all_clear?: false, current_close_modal: nil)}
   end
 
   @impl true
@@ -464,8 +466,12 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   end
 
   @impl true
-  def handle_event("opening_close_modal", %{"send_all_clear?" => send_all_clear?}, socket) do
-    {:noreply, assign(socket, send_all_clear?: send_all_clear?)}
+  def handle_event(
+        "opening_close_modal",
+        %{"send_all_clear?" => send_all_clear?, "alert_id" => alert_id},
+        socket
+      ) do
+    {:noreply, assign(socket, send_all_clear?: send_all_clear?, current_close_modal: alert_id)}
   end
 
   ### END View Alerts handlers section ###

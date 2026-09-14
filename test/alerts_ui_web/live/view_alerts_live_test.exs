@@ -41,7 +41,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     header_text: "this is the first alert",
     effect_detail: "DETOUR",
     original_route_selections: ["1", "2"],
-    duration_certainty: :UNKNOWN
+    duration_certainty: :UNKNOWN,
+    severity: 4
   }
 
   describe "alerts list page" do
@@ -1553,21 +1554,25 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         insert(:alert, %{
           alert_id: "345",
           active_period: [
-            build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]}),
-            build(:active_period, %{start: ~U[2023-10-13 00:01:00Z]})
+            build(:active_period, %{start: ~U[2023-10-12 00:01:00Z]})
           ],
           active_period_start: ~U[2023-10-12 00:01:00Z],
           duration_certainty: :UNKNOWN,
           header_text: "this is the third alert",
           effect_detail: "DETOUR",
           original_route_selections: ["1", "2"],
-          last_push_notification_timestamp: nil
+          last_push_notification_timestamp: nil,
+          severity: 4
         })
 
         {:ok, view, _html} = live(conn, "/alerts")
 
+        view |> element("td[phx-click]", "345") |> render_click()
+
+        render_async(view)
+
         view
-        |> element("#all-clear-checkbox-close-alert-modal-345")
+        |> element("#all-clear-checkbox-close-alert-nested-modal-345")
         |> render_click()
 
         view
@@ -1979,8 +1984,12 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
       {:ok, view, _html} = live(conn, "/alerts")
       {:ok, view2, _html} = live(conn, "/alerts")
 
+      view |> element("td[phx-click]", "345") |> render_click()
+
+      render_async(view)
+
       view
-      |> element("#all-clear-checkbox-close-alert-modal-345")
+      |> element("#all-clear-checkbox-close-alert-nested-modal-345")
       |> render_click()
 
       view

@@ -633,6 +633,11 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :value, :string, default: "", doc: "data to pass to event handler on accept"
 
+  attr :send_close_on_esc?, :boolean,
+    default: true,
+    doc:
+      "if this is false the component should not send a close event on the user hitting escape. used to keep multiple modals from emitting an event."
+
   slot :header
   slot :inner_block, required: true
   slot :footer
@@ -662,8 +667,10 @@ defmodule AlertsUIWeb.SharedComponents do
             <.focus_wrap
               id={"#{@id}-container"}
               phx-window-keydown={
-                JS.push(@cancel_event_name, target: @target_id)
-                |> JS.exec("data-cancel", to: "##{@id}")
+                if @send_close_on_esc? do
+                  JS.push(@cancel_event_name, target: @target_id)
+                  |> JS.exec("data-cancel", to: "##{@id}")
+                end
               }
               phx-key="escape"
               phx-click-away={
