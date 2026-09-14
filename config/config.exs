@@ -115,7 +115,7 @@ config :alerts_ui, Oban,
        # Log checksum of published S3 files every minute
        {"*/1 * * * *", AlertsUI.Jobs.FeedChecker, max_attempts: 1},
        # Read the Trapeze Elevator/Escalator feed, every minute
-       {"*/1 * * * *", AlertsUI.Trapeze.Importer, max_attempts: 1},
+       # {"*/1 * * * *", AlertsUI.Trapeze.Importer, max_attempts: 1},
        # Update recurring alerts every day at 3:01 am EST
        {"1 8 * * *", AlertsUI.Jobs.RecurringAlertUpdater},
        # Validate alerts against production every day at 4:00 am EST
