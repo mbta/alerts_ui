@@ -48,4 +48,27 @@ defmodule AlertsUI.FeedReader do
     do: :error
 
   defp convert_newlines(text), do: String.replace(text, "\r\n", "\n")
+
+  @doc """
+  Fetch the Dev Orange feed from S3
+  """
+  def dev_orange_json do
+    make_request_fn = AlertsUI.config(:make_request_fn, &ExAws.request!/1)
+
+    skate_feed()
+    |> make_request_fn.()
+    |> parse_response()
+  end
+
+  defp skate_feed do
+    get_obj_fn = AlertsUI.config(:get_obj_fn, &ExAws.S3.get_object/2)
+
+    get_obj_fn.(skate_bucket_name(), skate_file_path())
+  end
+
+  defp skate_bucket_name,
+    do: AlertsUI.config(:skate_bucket_name)
+
+  defp skate_file_path,
+    do: AlertsUI.config(:skate_file_path)
 end
