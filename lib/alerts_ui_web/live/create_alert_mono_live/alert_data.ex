@@ -106,6 +106,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :trip_search_term, :string
     field :service_types, {:array, :integer}
     field :work_order_id, :string
+    field :skate_detour_id, :integer
 
     # time range
     field :alert_timing, Ecto.Enum, values: @alert_timing_values, default: :"one-time"
