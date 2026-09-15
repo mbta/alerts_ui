@@ -36,7 +36,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     :stop_search_term,
     :trip_ids,
     :trip_search_term,
-    :form_type
+    :form_type,
+    :skate_detour_id
   ]
 
   defmodule Selections do
