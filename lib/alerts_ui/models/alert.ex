@@ -83,6 +83,7 @@ defmodule AlertsUI.Models.Alert do
   plaintext_reminder_selections
   primary_service_type
   work_order_id
+  skate_detour_id
   source
   recurring
   can_close_automatically)a
@@ -148,6 +149,7 @@ defmodule AlertsUI.Models.Alert do
           url: String.t() | nil,
           user_id: User.id(),
           work_order_id: String.t() | nil,
+          skate_detour_id: integer() | nil,
           recurring: boolean()
         }
 
@@ -249,6 +251,7 @@ defmodule AlertsUI.Models.Alert do
     field :primary_service_type, :string
     field :source, Ecto.Enum, values: @sources, default: :ALERTS_MANAGER
     field :work_order_id, :string
+    field :skate_detour_id, :integer
     field :recurring, :boolean
 
     field :recurrence_days, {:array, Ecto.Enum},

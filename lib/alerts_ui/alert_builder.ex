@@ -69,6 +69,7 @@ defmodule AlertsUI.AlertBuilder do
           source: atom() | nil,
           closed_timestamp: NaiveDateTime.t() | nil,
           work_order_id: String.t() | nil,
+          skate_detour_id: integer() | nil,
           status: nil | :open | :closed | :pending | :work_finished
         }
   @type direction_t :: 0 | 1
@@ -103,6 +104,7 @@ defmodule AlertsUI.AlertBuilder do
       :created_timestamp,
       :closed_timestamp,
       :work_order_id,
+      :skate_detour_id,
       :can_close_automatically
     ]
 
