@@ -31,11 +31,13 @@
             effect_name={AlertDataHelpers.humanize_effect_name(@form)}
             icon_name=""
           />
-          <ServiceSliceDispatcher.render
+          <AlertsUIWeb.CreateAlertMonoLive.rendered_service_slice
             form={@form}
             selections={@selections}
             show_stop_ids={@show_stop_ids}
             first_async_load={@first_async_load}
+            skate_detours={@skate_detours}
+            show_new_bus_detours={@show_new_bus_detours}
           />
           <TimeRangeSlice.render
             form={@form}

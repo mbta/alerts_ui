@@ -44,6 +44,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     AccessAffectedServiceSlice,
     AffectedServiceSlice,
     AlertDetailsSlice,
+    BusDetourServiceSlice,
     DeliverySlice,
     NotificationPeriodSlice,
     ReminderTimesSlice,
@@ -74,6 +75,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   alias AlertsUI.DBContexts.Users
   alias MBTAV3API.Stops.Stop
+  alias Phoenix.LiveView.AsyncResult
 
   import Ecto.Changeset, only: [change: 2]
 
@@ -121,6 +123,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         stops_touched?: false,
         image_preview_size: nil,
         first_async_load: true,
+        skate_detours: %AsyncResult{},
         steps: @steps,
         change_type: false,
         persisting_alert: false,
@@ -906,39 +909,33 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   def sync_socket(socket, _), do: socket
 
+  def rendered_service_slice(assigns) do
+    service_slice(assigns).render(assigns)
+  end
+
   def service_slice(assigns) do
-    service_slice_by_combination(assigns.form[:combination].value).render(assigns)
+    form = Map.get(assigns, :form)
+
+    if is_nil(form) do
+      SystemwideServiceSlice
+    else
+      route_type = form[:route_type].value
+      effect = form[:effect_name].value
+
+      if route_type == 3 and effect == "detour" and assigns.show_new_bus_detours do
+        BusDetourServiceSlice
+      else
+        service_slice_by_combination(assigns.form[:combination].value)
+      end
+    end
   end
 
   defp strip_on_duplicate(alert), do: alert
 
-  defp service_slice_by_combination(:SR), do: StopRouteServiceSlice
-  defp service_slice_by_combination(:ACCESS), do: AccessAffectedServiceSlice
-  defp service_slice_by_combination(nil), do: SystemwideServiceSlice
-  defp service_slice_by_combination(_), do: AffectedServiceSlice
-
-  defmodule ServiceSliceDispatcher do
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
-      AccessAffectedServiceSlice,
-      AffectedServiceSlice,
-      StopRouteServiceSlice,
-      SystemwideServiceSlice
-    }
-
-    def affected_service_component(combination) do
-      case combination do
-        :SR -> StopRouteServiceSlice
-        :ACCESS -> AccessAffectedServiceSlice
-        nil -> SystemwideServiceSlice
-        _ -> AffectedServiceSlice
-      end
-    end
-
-    def render(assigns) do
-      combination = assigns.form[:combination].value
-      affected_service_component(combination).render(assigns)
-    end
-  end
+  def service_slice_by_combination(:SR), do: StopRouteServiceSlice
+  def service_slice_by_combination(:ACCESS), do: AccessAffectedServiceSlice
+  def service_slice_by_combination(nil), do: SystemwideServiceSlice
+  def service_slice_by_combination(_), do: AffectedServiceSlice
 
   defp display_errors(%{assigns: %{form: form}} = socket), do: display_errors(socket, form.errors)
 

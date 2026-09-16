@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   @moduledoc """
-  Slice that manages affected-service selection for single-route alerts:
+  Slice that manages affected-service selection for alerts:
   routes, stops, directions, trips, and service-date filtering. Asynchronously
   loads schedules and renders the route/stop/trip picker for the details step.
   """
