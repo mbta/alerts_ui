@@ -181,7 +181,8 @@ config :laboratory,
     {:show_bulk_download_page, "Show Commuter Rail download page", "Shows a page where you
     can download bulk Commuter Rail alerts."},
     {:allow_changing_mode_effect_type, "Allow changing an alert's mode or effect type",
-     "Allows changing an alert's mode or effect type when editing or duplicating"}
+     "Allows changing an alert's mode or effect type when editing or duplicating"},
+    {:show_new_bus_detours, "Show New Bus Detours", "Makes bus detours w skate available"}
   ],
   cookie: [
     # one month,

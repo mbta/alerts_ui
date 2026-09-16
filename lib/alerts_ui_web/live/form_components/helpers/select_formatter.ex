@@ -4,6 +4,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   """
 
   alias AlertsUI.Models.EnhancedSchedule
+  alias AlertsUI.Models.SkateDetour
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
@@ -93,9 +94,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     end
   end
 
-  @spec apply_search(list(), String.t() | nil, [String.t()]) :: list()
+  @spec apply_search(list() | any(), String.t() | nil, [String.t()]) :: list()
   def apply_search(options, nil, _), do: options
   def apply_search(options, "", _), do: options
+
+  def apply_search(options, search_term, value) when not is_list(value) do
+    apply_search(options, search_term, [value])
+  end
 
   def apply_search(options, search_term, values_to_keep) do
     search_term = String.downcase(search_term || "")
@@ -111,7 +116,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     end)
   end
 
-  @spec sort_order(Stop.t() | Route.t() | EnhancedSchedule.t() | Facility.t()) ::
+  @spec sort_order(Stop.t() | Route.t() | EnhancedSchedule.t() | Facility.t() | SkateDetour.t()) ::
           non_neg_integer() | nil
   # keep original order from API
   def sort_order(%Stop{}), do: nil
@@ -121,7 +126,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   def sort_order(_), do: nil
 
   @spec name_for_option(
-          Stop.t() | Route.t() | Facility.t() | EnhancedSchedule.t(),
+          Stop.t() | Route.t() | Facility.t() | EnhancedSchedule.t() | SkateDetour.t(),
           integer() | nil
         ) ::
           String.t()
@@ -173,6 +178,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     "#{trip_name} (#{DateTimeFormatters.friendly_time(departure_time)} from #{stop_name})"
   end
 
+  def name_for_option(
+        %SkateDetour{
+          nearest_intersection: nearest_intersection,
+          missed_stops: missed_stops
+        },
+        _route_type
+      ) do
+    if nearest_intersection do
+      "Start: #{nearest_intersection} "
+    else
+      plural = if length(missed_stops) > 1, do: "s", else: ""
+      "Affected stop#{plural}: #{Enum.join(missed_stops, ",")}"
+    end
+  end
+
   def name_for_option({name, _value}, nil), do: name
 
   def name_for_option(_, nil), do: ""
@@ -181,13 +201,17 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
   If first arg is a stop struct and the second arg is true, return a combo of stop name and id
   Otherwise this returns the IDs
   """
-  @spec id_for_option(Stop.t() | Route.t() | EnhancedSchedule.t() | Facility.t(), boolean()) ::
+  @spec id_for_option(
+          Stop.t() | Route.t() | EnhancedSchedule.t() | Facility.t() | SkateDetour.t(),
+          boolean()
+        ) ::
           String.t()
   def id_for_option(%Stop{name: name, id: id}, true), do: "#{name}|#{id}"
   def id_for_option(%Stop{id: id}, false), do: id
   def id_for_option(%Route{id: id}, _), do: id
   def id_for_option(%Facility{id: id}, _), do: id
   def id_for_option(%EnhancedSchedule{trip: %Trip{id: id}}, _), do: id
+  def id_for_option(%SkateDetour{id: id}, _), do: id
   def id_for_option(option, _), do: option |> elem(1) |> to_string()
 
   @spec formatted_direction_options([String.t()] | nil, map()) :: keyword(String.t())
@@ -219,12 +243,20 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     case object do
       %Stop{} -> true
       %EnhancedSchedule{} -> true
+      %SkateDetour{} -> true
       _ -> false
     end
   end
 
   defp tooltip_content(%EnhancedSchedule{} = object) do
     insert_newline_in_long_tooltip("Trip ID #{id_for_option(object, false)}")
+  end
+
+  defp tooltip_content(%SkateDetour{} = detour) do
+    plural = if length(detour.missed_stops) > 1, do: "s", else: ""
+
+    last_updated = DateTimeFormatters.timestamp_date_time(detour.updated_at)
+    "Last updated: #{last_updated}. (#{length(detour.missed_stops)} affected stop#{plural})"
   end
 
   defp tooltip_content(object) do

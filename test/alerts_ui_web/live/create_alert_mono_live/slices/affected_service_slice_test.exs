@@ -1425,15 +1425,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/edit/test-cr-edit")
         render_async(view)
-
-        {:ok, document} = view |> render() |> Floki.parse_document()
+        open_browser(view)
+        {:ok, document} = view |> render_async() |> Floki.parse_document()
 
         assert document_has_element?(
                  document,
                  "option[value=\"CR-Worcester\"][selected]"
                )
 
-        assert render(view) =~ "Filter: All future trips"
+        assert render_async(view) =~ "Filter: All future trips"
       end
     end
 

@@ -14,7 +14,6 @@ defmodule AlertsUI.Models.Source do
     do: [
       :ALERTS_MANAGER,
       :IBI,
-      :TRAPEZE,
-      :SKATE
+      :TRAPEZE
     ]
 end
