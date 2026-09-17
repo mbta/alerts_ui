@@ -112,20 +112,37 @@ You can access your server on your phone by making the following changes:
 - dev-green
   - sandbox environment, anything can be deployed here
   - main is automatically pushed here
-  - pointed toward: keycloak dev, API dev
+  - pointed toward:
+    - Skate dev
+    - Trapeze test
+    - Keycloak dev
+    - API dev-green
 - dev-orange
   - currently used for test alerts and QA
   - main is automatically pushed here
-  - pointed toward: keycloak dev, API dev
+  - pointed toward: 
+    - Skate prod
+    - Trapeze prod
+    - Keycloak dev
+    - API dev
 - staging
   - supposed to be as production-like as possible
   - main is automatically pushed here
   - used by MBTA teams to make test alerts
-  - pointed toward: keycloak staging, API prod
+  - pointed toward: 
+    - Skate dev
+    - Trapeze prod
+    - Keycloak staging
+    - API prod
 - prod
   - this is production
   - deployed automatically when a release is created and approved via [GitHub's release page](https://github.com/mbta/alerts_ui/releases).
   - If you need to roll back you can create a release for a previous tag
-  - pointed toward: keycloak prod, API prod
+  - pointed toward: 
+    - Skate prod
+    - Trapeze prod
+    - Keycloak prod
+    - API prod
+
   
 You can use the `SENTRY_ENV` environment variable to find out the name of the current environment. Note that `prod.exs` in `/config` runs for all deployed environments, so if you want a config that is just for a subset of deployed environments, you have to specify that.
