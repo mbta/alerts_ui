@@ -462,9 +462,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.BusDetourServiceSlice do
             field={@form[:skate_detour_id]}
             filter_field={@form[:skate_search_term]}
             options={
-              if Enum.empty?(@skate_detour_options),
-                do: ["No active detours in Skate"],
-                else: @skate_detour_options
+              cond do
+                is_nil(@form[:single_route_id].value) -> []
+                Enum.empty?(@skate_detour_options) -> ["No active detours in Skate"]
+                true -> @skate_detour_options
+              end
             }
             disabled={Enum.empty?(@skate_detour_options)}
             class="h-full mr-6"
