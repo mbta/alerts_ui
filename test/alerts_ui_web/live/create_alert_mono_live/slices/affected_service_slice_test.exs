@@ -1483,7 +1483,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/edit/test-cr-edit")
         render_async(view)
-        open_browser(view)
+
         {:ok, document} = view |> render_async() |> Floki.parse_document()
 
         assert document_has_element?(
