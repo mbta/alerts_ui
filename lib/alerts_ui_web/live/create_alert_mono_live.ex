@@ -952,29 +952,35 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     service_slice(assigns).render(assigns)
   end
 
-  def service_slice(assigns) do
-    form = Map.get(assigns, :form)
-
-    if is_nil(form) do
-      SystemwideServiceSlice
+  def service_slice(combination, route_type, effect_name, show_new_bus_detours) do
+    # skate detours flag
+    # when this flag is no longer needed, also remove it from AlertsUIWeb.CreateAlertMonoLive.AlertData.slices/4
+    # which will no longer need the fourth argument
+    if route_type == 3 and effect_name == "detour" and show_new_bus_detours do
+      BusDetourServiceSlice
     else
-      route_type = form[:route_type].value
-      effect = form[:effect_name].value
-
-      if route_type == 3 and effect == "detour" and assigns.show_new_bus_detours do
-        BusDetourServiceSlice
-      else
-        service_slice_by_combination(assigns.form[:combination].value)
-      end
+      service_slice_by_combination(combination)
     end
   end
 
-  defp strip_on_duplicate(alert), do: alert
+  def service_slice(assigns) do
+    # skate detours flag
+    form = Map.get(assigns, :form)
+
+    if form[:route_type].value == 3 and form[:effect_name].value == "detour" and
+         assigns.show_new_bus_detours do
+      BusDetourServiceSlice
+    else
+      service_slice_by_combination(form[:combination].value)
+    end
+  end
 
   def service_slice_by_combination(:SR), do: StopRouteServiceSlice
   def service_slice_by_combination(:ACCESS), do: AccessAffectedServiceSlice
   def service_slice_by_combination(nil), do: SystemwideServiceSlice
   def service_slice_by_combination(_), do: AffectedServiceSlice
+
+  defp strip_on_duplicate(alert), do: alert
 
   defp display_errors(%{assigns: %{form: form}} = socket), do: display_errors(socket, form.errors)
 
