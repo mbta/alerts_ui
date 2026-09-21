@@ -5,16 +5,24 @@
 
   <.h3>Primitive Colors</.h3>
 
-  <div class="inline-grid gap-4 grid-flow-col">
+  <div class="inline-grid gap-6 grid-flow-col">
     <.color_block name="primary" class="bg-primary" />
+    <.color_block name="primary-hover" class="bg-primary-hover" />
+    <.color_block name="primary-active" class="bg-primary-active" />
+    <.color_block name="primary-disabled" class="bg-primary-disabled" />
     <.color_block name="secondary" class="bg-secondary" />
+    <.color_block name="secondary-hover" class="bg-secondary-hover" />
+    <.color_block name="secondary-active" class="bg-secondary-active" />
+    <.color_block name="secondary-focus-shadow" class="bg-secondary-focus-shadow" />
+    <.color_block name="secondary-disabled" class="bg-secondary-disabled" />
     <.color_block name="success" class="bg-success" />
+    <.color_block name="warning" class="bg-warning" />
     <.color_block name="danger" class="bg-danger" />
   </div>
 
   <.h3>Background Colors</.h3>
 
-  <div class="inline-grid gap-4 grid-flow-col">
+  <div class="inline-grid gap-6 grid-flow-col">
     <.color_block name="bg-primary" class="bg-bg-primary" />
     <.color_block name="bg-secondary" class="bg-bg-secondary" />
     <.color_block name="bg-elevation-3" class="bg-bg-elevation-3" />
@@ -30,22 +38,27 @@
 
   <.h3>Border Colors</.h3>
 
-  <div class="inline-grid gap-4 grid-flow-col">
+  <div class="inline-grid gap-6 grid-flow-col">
     <.color_block name="border-primary" class="bg-border-primary" />
+    <.color_block name="primary-border-hover" class="bg-primary-border-hover" />
     <.color_block name="border-focus" class="bg-border-focus" />
     <.color_block name="border-disabled" class="bg-border-disabled" />
+    <.color_block name="secondary-border" class="bg-secondary-border" />
+    <.color_block name="secondary-hover-border" class="bg-secondary-hover-border" />
+    <.color_block name="secondary-focus-borde" class="bg-secondary-focus-border" />
   </div>
 
   <.h3>Menu Colors</.h3>
-  <div class="inline-grid gap-4 grid-flow-col">
+  <div class="inline-grid gap-6 grid-flow-col">
     <.color_block name="menu-active" class="bg-menu-active" />
   </div>
 
   <.h3>Text Colors</.h3>
 
-  <div class="inline-grid gap-4 grid-flow-col">
+  <div class="inline-grid gap-6 grid-flow-col">
     <.color_block name="text-primary" class="bg-text-primary" />
     <.color_block name="text-secondary" class="bg-text-secondary" />
+    <.color_block name="text-danger" class="bg-text-danger" />
     <.color_block name="text-primary-disabled" class="bg-text-primary-disabled" />
     <.color_block name="text-danger-disabled" class="bg-text-danger-disabled" />
     <.color_block name="text-toggle-disabled" class="bg-text-toggle-disabled" />
@@ -59,7 +72,7 @@
 
   <.h3>MBTA Service Colors</.h3>
 
-  <div class="inline-grid gap-4 grid-rows-2 grid-cols-5">
+  <div class="inline-grid gap-6 grid-flow-col">
     <.color_block name="mbta-commuter-rail" class="bg-mbta-commuter-rail" />
     <.color_block name="mbta-subway" class="bg-mbta-subway" />
     <.color_block name="mbta-bus" class="bg-mbta-bus" />
@@ -151,6 +164,14 @@
       prompt="All"
       disabled={true}
       class="max-w-[16rem] mb-8"
+    />
+    <.select
+      label="Warning Select"
+      field={@form[:single_select]}
+      options={single_select_options()}
+      prompt="All"
+      class="max-w-[16rem] mb-8"
+      warning={true}
     />
     <.select
       label="Errored Select"
