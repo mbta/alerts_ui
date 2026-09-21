@@ -1075,7 +1075,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         render_async(view)
 
         open_review_modal(view)
-
+        assert render(view) =~ ~r[Send Notifications</p>\s*<p.*Yes]s
         refute render(view) =~ ~r[Web Banner Text</p>\s*<p.*Not selected]s
       end
     end
@@ -1187,6 +1187,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
 
+        assert render(view) =~ ~r[Send Notifications</p>\s*<p.*No]s
         refute render(view) =~ ~r[Web Banner Text</p>\s*<p.*Not selected]s
       end
     end
@@ -1427,6 +1428,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       image_url: nil,
       notification_period_start: nil,
       notification_specifier: :same_as_effect_period,
+      notification_toggle: true,
       severity: 4,
       reminder_times: [],
       recurrence_days: [],
