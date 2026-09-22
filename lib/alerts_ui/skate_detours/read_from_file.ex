@@ -14,14 +14,9 @@ defmodule AlertsUI.SkateDetours.ReadFromS3 do
 
   @spec read() :: {:ok, binary()} | {:error, any()}
   def read do
-  require Logger;
-  Logger.info("bucket name:")
-  Logger.info(get_bucket_name())
-  Logger.info("file path:")
-  Logger.info(get_file_path())
     case ExAws.S3.get_object(get_bucket_name(), get_file_path())
          |> ExAws.request() do
-      {:ok, term} -> {:ok, term}
+      {:ok, %{:body => term}} -> {:ok, term}
       {:error, reason} -> {:error, reason}
     end
   end
