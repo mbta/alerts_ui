@@ -315,6 +315,52 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
+    test "Prediction suppression modal appears on the first review click when editing an existing alert",
+         %{conn: conn} do
+      with_mocks([
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _opts -> [@stop] end, all: fn _, _ -> [] end]},
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]},
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+
+        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+
+        view
+        |> element("form")
+        |> render_change(%{"alert_data" => %{"route_ids" => [@route.id]}})
+
+        open_review_modal(view)
+        dismiss_prediction_warning(view)
+        submit_alert(view)
+
+        alert = parse_alert_created_output(view)
+
+        # Simulate finding and editing the same alert later: the edit route
+        # (/alerts/edit/:alert_id) does not carry the route_type/effect_name
+        # URL segments that /alerts/new does, so this reproduces the bug
+        # where the warning modal was skipped on the first "Review and
+        # submit" click after opening an existing alert.
+        {:ok, edit_view, _html} = live(conn, "/alerts/edit/#{alert.alert_id}")
+
+        render_async(edit_view)
+
+        open_review_modal(edit_view)
+
+        assert render_async(edit_view) =~ ~s(id="check_predictions_modal-container"),
+               "prediction modal should render on the first review click when editing"
+
+        assert edit_view |> element("#check_predictions_modal-container") |> render() =~
+                 ~s(Warning: Predictions will be suppressed)
+      end
+    end
+
+    @tag :logged_in_user
     test "shows correct affected service for access combination", %{conn: conn} do
       with_mocks([
         {RoutePatternsRepo, [], [included_stops_by_route_id: fn _route_id, _direction -> [] end]},
