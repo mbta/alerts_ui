@@ -1076,6 +1076,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
 
         open_review_modal(view)
         assert render(view) =~ ~r[Send Notifications</p>\s*<p.*Yes]s
+        assert render(view) =~ "Warning: Notifications will be sent to alert subscribers."
         refute render(view) =~ ~r[Web Banner Text</p>\s*<p.*Not selected]s
       end
     end
@@ -1180,13 +1181,18 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
-          alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
+          alert_data: %{
+            route_ids: ["CR-Worcester"],
+            stop_ids: ["place-aqucl"],
+            notification_toggle: false
+          }
         })
 
         render_async(view)
 
         open_review_modal(view)
 
+        refute render(view) =~ "Warning: Notifications will be sent to alert subscribers."
         assert render(view) =~ ~r[Send Notifications</p>\s*<p.*No]s
         refute render(view) =~ ~r[Web Banner Text</p>\s*<p.*Not selected]s
       end

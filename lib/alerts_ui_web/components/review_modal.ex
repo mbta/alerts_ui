@@ -145,8 +145,15 @@ defmodule AlertsUIWeb.ReviewModal do
       header_text="Create new alert"
       cancel_button_text="Keep editing"
       accept_button_text={if @send_notifications, do: submit_with_notifications(), else: "Submit"}
+      accept_button_classes="whitespace-nowrap"
+      cancel_button_classes="whitespace-nowrap"
       inner_class="!p-0"
       target_id={@target_id}
+      footer_warning_text={
+        if @send_notifications,
+          do: "Warning: Notifications will be sent to alert subscribers.",
+          else: nil
+      }
       {@rest}
     >
       <:header>
