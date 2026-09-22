@@ -15,6 +15,9 @@ defmodule AlertsUI.SkateDetours.GetDetours do
         # filter out text-only detours
         |> Enum.reject(&is_nil(&1.missed_stops))
 
+      {:http_error, reason} ->
+        Logger.error("Could not read Skate Detours" <> reason)
+        {:http_error, reason}
       {:error, reason} ->
         Logger.error("Could not read Skate Detours" <> reason)
         {:error, reason}
