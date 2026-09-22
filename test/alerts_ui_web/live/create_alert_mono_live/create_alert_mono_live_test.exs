@@ -318,9 +318,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     test "Prediction suppression modal appears on the first review click when editing an existing alert",
          %{conn: conn} do
       with_mocks([
-        {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _route_ids, _opts -> [] end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
         {StopsRepo, [], [by_route: fn _, _, _opts -> [@stop] end, all: fn _, _ -> [] end]},
-        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
+        {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]},
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
