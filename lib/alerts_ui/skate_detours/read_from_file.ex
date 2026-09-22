@@ -12,11 +12,11 @@ defmodule AlertsUI.SkateDetours.ReadFromS3 do
   """
   @behaviour AlertsUI.SkateDetours.ReadFile
 
-  @spec read() :: {:ok, binary()} | {:error, any()}
+  @spec read() :: {:error, any()} | {:ok, any()}
   def read do
     case ExAws.S3.get_object(get_bucket_name(), get_file_path())
          |> ExAws.request() do
-      {:ok, term} -> {:ok, term}
+      {:ok, %{:body => term}} -> {:ok, term}
       {:error, reason} -> {:error, reason}
     end
   end
@@ -37,7 +37,7 @@ defmodule AlertsUI.SkateDetours.ReadLocal do
   @behaviour AlertsUI.SkateDetours.ReadFile
 
   # sobelow_skip ["Traversal.FileModule"]
-  @spec read() :: {:ok, binary()} | {:error, any()}
+  @spec read() :: {:error, atom()} | {:ok, binary()}
   def read do
     path = "./test/support/fixtures/active.ndjson"
     File.read(path)

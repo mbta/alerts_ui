@@ -129,6 +129,7 @@ cond do
       full_story_org_id: System.get_env("FULLSTORY_ORG_ID"),
       api_url: String.replace_trailing(System.get_env("API_URL"), "/", ""),
       api_key: get_api_key.(),
+      skate_bucket_name: System.get_env("SKATE_BUCKET_NAME", ""),
       trapeze_sftp_host: System.get_env("TRAPEZE_SFTP_HOST", ""),
       trapeze_sftp_port: System.get_env("TRAPEZE_SFTP_PORT", ""),
       trapeze_sftp_user: System.get_env("TRAPEZE_SFTP_USER", ""),
