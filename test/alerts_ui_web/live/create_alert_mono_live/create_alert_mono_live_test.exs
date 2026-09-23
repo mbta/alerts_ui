@@ -55,8 +55,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
                |> DateTime.shift_zone!("America/New_York")
                |> DateTime.to_date()
 
-  @edit_mode_effect_flag "allow_changing_mode_effect_type"
-
   @bus_route %Route{
     direction_names: %{1 => "Inbound", 0 => "Outbound"},
     sort_order: 3,
@@ -990,7 +988,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
         render_async(view)
 
@@ -1051,7 +1048,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
            included_stops_by_route_id: fn _route_id, _ -> [@stop] end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
         render_async(view)
         assert has_element?(view, "div", "Bus • Delay")
@@ -1132,7 +1128,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
         render_async(view)
 
@@ -1210,7 +1205,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay-multiroute")
         render_async(view)
 
@@ -1286,7 +1280,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-detour")
         render_async(view)
 
@@ -1340,7 +1333,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
         render_async(view)
 
@@ -1414,9 +1406,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
           ["PARKING_AREA", "PICK_DROP"], _ -> [@parking_facility]
         end
       ) do
-        conn =
-          put_resp_cookie(conn, @edit_mode_effect_flag, "true")
-          |> put_resp_cookie("show_stop_ids", "true")
+        conn = put_resp_cookie(conn, "show_stop_ids", "true")
 
         {:ok, view, _html} = live(conn, "/alerts/edit/test-access-edit")
         render_async(view)
@@ -1479,8 +1469,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
           _, _ -> [@bike_facility, @parking_facility]
         end
       ) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
-
         {:ok, view, _html} = live(conn, "/alerts/edit/test-access-edit")
         render_async(view)
         assert has_element?(view, "div", "Facility • Bike Issue")
@@ -1536,7 +1524,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
         render_async(view)
 
@@ -1644,7 +1631,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/123")
         render_async(view)
 
@@ -1707,7 +1693,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-systemwide-edit")
         render_async(view)
 
@@ -1768,8 +1753,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
         {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [@route_pattern] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
-
         {:ok, view, _html} = live(conn, "/alerts/edit/#{id}")
         assert %{original_mode_selections: [1]} = Alerts.get_by_alert_id(id)
         render_async(view)
@@ -1832,7 +1815,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
         render_async(view)
 
@@ -1886,7 +1868,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
         render_async(view)
         assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"false\"]")
@@ -1929,7 +1910,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]},
         {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/duplicate/test-bus-delay")
         render_async(view)
         assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"false\"]")
@@ -1978,7 +1958,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
            included_stops_by_route_id: fn _route_id, _ -> [@stop] end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
         render_async(view)
         assert has_element?(view, "div", "Bus • Delay")
@@ -2075,7 +2054,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
            included_stops_by_route_id: fn _route_id, _ -> [@stop] end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, @edit_mode_effect_flag, "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
         render_async(view)
