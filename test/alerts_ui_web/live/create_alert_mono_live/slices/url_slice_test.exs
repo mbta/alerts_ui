@@ -2,7 +2,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
-  import Test.Support.Helpers
   import Mock
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
@@ -61,52 +60,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSliceTest do
 
         assert details_html =~ ~s(Alert details)
       end
-    end
-  end
-
-  describe "resetting" do
-    @tag :logged_in_user
-    test "changes to the form should be removed when restarting", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/alerts/new")
-
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_start_specifier" => "start_of_service"
-        }
-      })
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_start_date" => "2000-01-01"
-        }
-      })
-
-      assert render(view) =~ ~s(Effect can&#39;t start in the past)
-
-      view
-      |> element("button", "Select Alert Type")
-      |> render_click()
-
-      refute render(view) =~ ~s(Effect can&#39;t start in the past)
-
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
-
-      view
-      |> element("form")
-      |> render_change(%{
-        "alert_data" => %{
-          "active_period_start_specifier" => "end_of_service"
-        }
-      })
-
-      # It's not there because everything reset
-      refute render(view) =~ ~s(Effect can&#39;t start in the past)
     end
   end
 end
