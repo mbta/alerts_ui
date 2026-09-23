@@ -18,7 +18,8 @@ defmodule AlertsUI.Models.ModeEffectStruct do
     :prediction_suppression_warning,
     :path_name,
     send_push_notification_on_create: true,
-    min_stops: 1
+    min_stops: 1,
+    allow_all_stops?: true
   ]
 
   @type t :: %{
@@ -29,7 +30,8 @@ defmodule AlertsUI.Models.ModeEffectStruct do
           send_push_notification_on_edit: boolean(),
           prediction_suppression_warning: boolean(),
           path_name: String.t(),
-          min_stops: integer()
+          min_stops: integer(),
+          allow_all_stops?: boolean()
         }
 end
 
@@ -114,7 +116,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false,
-        path_name: "station_bypass"
+        path_name: "station_bypass",
+        allow_all_stops?: false
       },
       "Station Closure" => %ModeEffectStruct{
         combination: :SR,
@@ -217,7 +220,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: true,
         prediction_suppression_warning: false,
-        path_name: "station_bypass"
+        path_name: "station_bypass",
+        allow_all_stops?: false
       },
       "Station Closure" => %ModeEffectStruct{
         combination: :SR,
@@ -384,7 +388,8 @@ defmodule AlertsUI.Configs.ModeEffect do
         send_push_notification_on_create: true,
         send_push_notification_on_edit: false,
         prediction_suppression_warning: false,
-        path_name: "dock_bypass"
+        path_name: "dock_bypass",
+        allow_all_stops?: false
       },
       "Dock Closure" => %ModeEffectStruct{
         combination: :SR,
