@@ -1075,7 +1075,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         render_async(view)
 
         open_review_modal(view)
-        assert render(view) =~ ~r[Send Notifications</p>\s*<p.*Yes]s
+        assert render(view) =~ ~r[Send notifications</p>\s*<p.*Yes]s
         assert render(view) =~ "Warning: Notifications will be sent to alert subscribers."
         refute render(view) =~ ~r[Web Banner Text</p>\s*<p.*Not selected]s
       end
@@ -1193,7 +1193,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         open_review_modal(view)
 
         refute render(view) =~ "Warning: Notifications will be sent to alert subscribers."
-        assert render(view) =~ ~r[Send Notifications</p>\s*<p.*No]s
+        assert render(view) =~ ~r[Send notifications</p>\s*<p.*No]s
         refute render(view) =~ ~r[Web Banner Text</p>\s*<p.*Not selected]s
       end
     end

@@ -324,7 +324,7 @@ defmodule AlertsUIWeb.ReviewModal do
                 </p>
               </div>
             <% end %>
-            <p :if={!is_nil(@form_type)} class="font-bold pb-1">Send Notifications</p>
+            <p :if={!is_nil(@form_type)} class="font-bold pb-1">Send notifications</p>
             <p :if={!is_nil(@form_type)} class="pb-4">
               {if @send_notifications, do: "Yes", else: "No"}
             </p>
