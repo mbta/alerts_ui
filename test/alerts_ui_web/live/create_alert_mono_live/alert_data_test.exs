@@ -8,10 +8,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertDataTest do
   alias AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText
 
   describe "slices/1" do
-    test "Returns non-empty list when form is nil" do
+    test "AC-1: slices/1 returns non-empty list when form is nil" do
       # Build a minimal socket-like map with no :form key (simulates socket
       # before the first AlertData.init call, when :form is not yet assigned)
-      bare_socket = %{assigns: %{show_new_bus_detours: false}}
+      bare_socket = %{assigns: %{}}
 
       slices = AlertData.slices(bare_socket)
 

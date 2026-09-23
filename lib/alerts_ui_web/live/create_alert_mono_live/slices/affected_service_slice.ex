@@ -7,7 +7,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
   use AlertsUIWeb, :html
+  alias AlertsUI.Alerts
   alias AlertsUI.Models.ActivePeriod
+  alias AlertsUI.SkateDetours.GetDetours
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertMonoLive.AlertData
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
@@ -37,7 +39,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     :stop_search_term,
     :trip_ids,
     :trip_search_term,
-    :form_type
+    :form_type,
+    :skate_search_term,
+    :skate_detour_id
   ]
 
   defmodule Selections do
@@ -62,6 +66,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   defimpl Slice, for: __MODULE__ do
+    alias AlertsUI.SkateDetours.GetDetours
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice.Selections
 
@@ -84,6 +89,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     def transform(_service_data, changeset, params, socket) do
       changeset
+      |> AffectedServiceSlice.apply_detour(socket, params)
       |> AffectedServiceSlice.transform_changeset(params)
       |> AffectedServiceSlice.build_trip_information(socket)
     end
@@ -107,6 +113,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         |> AffectedServiceSlice.clear_stops_touched_on_route_change(params)
         |> AffectedServiceSlice.async_assign_selections(params)
 
+      form = socket.assigns.form
+
+      bus_detour? =
+        AffectedServiceSlice.bus_detour?(
+          form[:route_type].value,
+          form[:effect_name].value,
+          socket.assigns.show_new_bus_detours
+        )
+
+      socket =
+        if is_nil(socket.assigns.skate_detours.loading) and bus_detour? do
+          AffectedServiceSlice.async_assign_detours(socket, params)
+        else
+          socket
+        end
+
       # We do not want to let the user select both "All trips" and an individual trip
       # We push the data to the client (hooks.js) to filter for us
       maybe_needs_adjusting = %{
@@ -116,6 +138,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
       push_event(socket, "adjustSelections", maybe_needs_adjusting)
     end
+  end
+
+  def apply_detour(changeset, socket, %{"_target" => ["alert_data", "skate_detour_id"]}) do
+    detours = socket.assigns.skate_detours.result || []
+    skate_detour_id = Changeset.get_field(changeset, :skate_detour_id)
+    skate_detour = Enum.find(detours, &(&1.id == skate_detour_id))
+
+    stops =
+      socket.assigns.selections.available_stops
+      |> Enum.filter(&(&1.id in skate_detour.missed_stops))
+      |> Enum.map(&SelectFormatter.id_for_option(&1, true))
+
+    changeset
+    |> Changeset.cast(%{direction: Integer.to_string(skate_detour.direction_id)}, [:direction])
+    |> Changeset.cast(%{stop_names_and_ids: stops}, [:stop_names_and_ids])
+  end
+
+  def apply_detour(changeset, _socket, _params) do
+    changeset
   end
 
   def build_trip_information(changeset, socket) do
@@ -271,6 +312,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   def async_assign_selections(socket, _params), do: socket
+
+  def async_assign_detours(socket, params) do
+    single_route_id = params["alert_data"]["single_route_id"]
+
+    Phoenix.LiveView.assign_async(socket, [:skate_detours], fn ->
+      detours = GetDetours.get_detours() |> Enum.filter(&(&1.route_id == single_route_id))
+      used_detour_ids = Alerts.get_matching_skate_ids(Enum.map(detours, & &1.id))
+
+      detours = Enum.reject(detours, &(&1.id in used_detour_ids))
+
+      {:ok,
+       %{
+         skate_detours: detours
+       }}
+    end)
+  end
 
   defp update_selections(
          socket,
@@ -443,7 +500,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     "route_search_term",
     "single_route_id",
     "stop_search_term",
-    "trip_search_term"
+    "trip_search_term",
+    "skate_search_term"
   ]
 
   # update selections when a user interacts with one of our fields...
@@ -511,12 +569,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         %{
           stop_names_and_ids: [],
           stop_ids: [],
-          trip_ids: []
+          trip_ids: [],
+          skate_detour_id: nil
         },
         [
           :stop_names_and_ids,
           :stop_ids,
-          :trip_ids
+          :trip_ids,
+          :skate_detour_id
         ]
       )
     else
@@ -613,6 +673,39 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     %{selections | service_dates: service_dates(), loading: true, today: today()}
   end
 
+  defp build_detour_options(skate_detour_result, form) do
+    skate_detours =
+      if skate_detour_result.ok? do
+        skate_detour_result.result
+      else
+        []
+      end
+
+    {outbound, inbound} = Enum.split_with(skate_detours, &(&1.direction_id == 0))
+
+    [outbound_options, inbound_options] =
+      Enum.map(
+        [outbound, inbound],
+        &SelectFormatter.formatted_select_options(%SelectFormatter{
+          options: &1,
+          search_term: form[:skate_search_term].value,
+          route_type: 3,
+          values_to_keep: form[:skate_detour_id].value || [],
+          option_prefix: "detour-selector"
+        })
+      )
+
+    if Enum.empty?(skate_detours) do
+      []
+    else
+      %{
+        Inbound: inbound_options,
+        Outbound: outbound_options
+      }
+      |> Enum.reject(fn {_k, v} -> Enum.empty?(v) end)
+    end
+  end
+
   def service_dates do
     0..6
     |> Enum.to_list()
@@ -640,16 +733,43 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     |> elem(0)
   end
 
+  @spec bus_detour?(integer(), binary(), boolean() | nil) :: boolean()
+  def bus_detour?(3, "detour", true), do: true
+
+  def bus_detour?(_, _, _), do: false
+
   def render(assigns) do
-    single_route_effect? = humanize_effect_name(assigns.form) in get_single_route_effect_names()
+    form = assigns.form
+    single_route_effect? = humanize_effect_name(form) in get_single_route_effect_names()
+
+    disable_stop_input? =
+      disable_stop_input?(form[:route_ids].value) or !is_nil(form[:skate_detour_id].value)
 
     route_field =
-      if single_route_effect?, do: assigns.form[:single_route_id], else: assigns.form[:route_ids]
+      if single_route_effect?, do: form[:single_route_id], else: form[:route_ids]
+
+    bus_detour? =
+      bus_detour?(
+        form[:route_type].value,
+        form[:effect_name].value,
+        assigns.show_new_bus_detours
+      )
+
+    skate_detour_options =
+      if bus_detour? do
+        build_detour_options(assigns.skate_detours, form)
+      else
+        []
+      end
 
     assigns =
       assign(assigns,
         single_route_effect?: single_route_effect?,
-        route_field: route_field
+        route_field: route_field,
+        detours_loading?: assigns.skate_detours.loading,
+        disable_stop_input?: disable_stop_input?,
+        bus_detour?: bus_detour?,
+        skate_detour_options: skate_detour_options
       )
 
     ~H"""
@@ -724,9 +844,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             modal_filter_title={"Filter: #{@selections.filter_title_value || default_filter_title()}"}
             modal_filter_active={date_filter_active?(@form[:modal_date].value, today())}
             options={@selections.direction_options}
-            disabled={disable_stop_input?(@form[:route_ids].value)}
+            disabled={@disable_stop_input?}
             modal_filter_disabled={@form[:route_ids].value in [nil, []]}
-            prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+            prompt={if @disable_stop_input?, do: "", else: "Both Directions"}
             target_id="#alert_form"
           />
           <.filtered_select
@@ -743,6 +863,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             prompt={if disable_trip_input?(@form[:route_ids].value), do: nil, else: "All Trips"}
           />
         </div>
+        <div :if={@bus_detour?} class="flex flex-col justify-start w-full md:w-[30%]">
+          <.filtered_select
+            label="Detours from Skate"
+            field={@form[:skate_detour_id]}
+            filter_field={@form[:skate_search_term]}
+            options={
+              cond do
+                is_nil(@form[:single_route_id].value) -> []
+                Enum.empty?(@skate_detour_options) -> ["No active detours in Skate"]
+                true -> @skate_detour_options
+              end
+            }
+            disabled={Enum.empty?(@skate_detour_options)}
+            class="h-full mr-6"
+            loading={@detours_loading?}
+            multiple={false}
+          />
+        </div>
         <div class="flex flex-col justify-start w-full md:w-[25%]">
           <.select
             :if={
@@ -752,8 +890,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             label={if show_stops_input?(@form[:combination].value), do: "Stops", else: "Direction"}
             field={@form[:direction]}
             options={@selections.direction_options}
-            disabled={disable_stop_input?(@form[:route_ids].value)}
-            prompt={if disable_stop_input?(@form[:route_ids].value), do: "", else: "Both Directions"}
+            disabled={@disable_stop_input?}
+            prompt={if @disable_stop_input?, do: "", else: "Both Directions"}
           />
           <div
             :if={show_stops_input?(@form[:combination].value)}
@@ -774,10 +912,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
                   !disable_stop_input?(@form[:route_ids].value)
               }
               class="min-w-full h-full"
-              disabled={disable_stop_input?(@form[:route_ids].value)}
+              disabled={@disable_stop_input?}
               prompt={
                 cond do
-                  disable_stop_input?(@form[:route_ids].value) ->
+                  @disable_stop_input?->
                     nil
 
                   !AffectedServiceSlice.allow_selecting_all_stops?(@form.source) ->
@@ -791,12 +929,31 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           </div>
         </div>
       </div>
+      <div
+        :if={@form[:skate_detour_id].value}
+        class="p-2 rounded-sm max-w-[48rem] text-bold"
+      >
+        <p>
+          <.icon name="hero-information-circle-solid" /> Selecting a detour from Skate will
+          automatically:
+        </p>
+        <ul class="list-disc ml-8">
+          <li>select a direction</li>
+          <li>select missed stops</li>
+          <li>
+            set this alert to close when the detour is
+            closed in Skate
+          </li>
+        </ul>
+      </div>
       <p :if={@show_stop_ids}>
         Selected stop ids: {(@form[:stop_ids].value || []) |> Enum.join(", ")} Selected route ids: {(@form[
                                                                                                        :route_ids
                                                                                                      ].value ||
                                                                                                        [])
-        |> Enum.join(", ")} Selected trip ids: {(@form[:trip_ids].value || []) |> Enum.join(", ")}
+        |> Enum.join(", ")} Selected trip ids: {(@form[:trip_ids].value || []) |> Enum.join(", ")} Selected skate detour: {@form[
+          :skate_detour_id
+        ].value}
       </p>
       <hr class="mt-4" />
     </div>

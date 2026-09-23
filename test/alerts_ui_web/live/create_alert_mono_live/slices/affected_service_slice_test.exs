@@ -149,6 +149,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     name: "SLW"
   }
 
+  @detour_bus_route %Route{
+    direction_names: %{0 => "Outbound", 1 => "Inbound"},
+    sort_order: 1,
+    id: "1",
+    type: 3,
+    name: "1"
+  }
+
+  @detour_stop %Stop{
+    id: "72",
+    type: 3,
+    name: "Mass Ave at Pearl St"
+  }
+
   @ferry_route %Route{
     direction_names: %{0 => "Outbound", 1 => "Inbound"},
     sort_order: 1,
@@ -3008,6 +3022,168 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
       assert Ecto.Changeset.get_field(result, :stop_names_and_ids) == []
       assert Ecto.Changeset.get_field(result, :trip_ids) == []
+    end
+  end
+
+  describe "skate detours" do
+    @tag :logged_in_user
+    test "detour select is disabled until route is selected", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _, _ -> @bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@detour_stop] end]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+
+        refute view |> element("#alert_data_skate_detour_id_selector") |> render_async =~
+                 "No active detours in Skate"
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"route_ids" => ["2"], "single_route_id" => "2"}
+        })
+
+        assert view |> element("#alert_data_skate_detour_id_selector") |> render_async =~
+                 "No active detours in Skate"
+      end
+    end
+
+    @tag :logged_in_user
+    test "detour select is displayed if one matches selected route", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@detour_bus_route] end,
+           get: fn _, _ -> @detour_bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@detour_stop] end]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"route_ids" => ["1"], "single_route_id" => "1"}
+        })
+
+        assert view |> element("#alert_data_skate_detour_id_selector") |> render_async =~
+                 "Inbound"
+
+        assert view |> element("#alert_data_skate_detour_id_selector") |> render_async =~
+                 "Massachusetts"
+      end
+    end
+
+    @tag :logged_in_user
+    test "selecting a detour selects its direction and stop, and disables those selectors", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@detour_bus_route] end,
+           get: fn _, _ -> @detour_bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@detour_stop] end]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"route_ids" => ["1"], "single_route_id" => "1"}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "skate_detour_id"],
+          "alert_data" => %{"skate_detour_id" => 7}
+        })
+
+        render_async(view)
+
+        assert view |> element("#alert_data_direction") |> render_async =~ ~s(disabled="")
+
+        assert view |> element("#alert_data_direction") |> render_async =~
+                 ~s(<option selected="" value="1">Inbound</option>)
+
+        assert view |> element("#alert_data_stop_names_and_ids_selector") |> render_async =~
+                 ~s(disabled="")
+
+        assert view |> element("#alert_data_stop_names_and_ids_selector") |> render_async =~
+                 ~s(title="Stop ID 72" selected="" value="Mass Ave at Pearl St \(inbound\)|72">Mass Ave at Pearl St \(inbound\))
+
+        assert view |> element("#alert_data_header_text") |> render_async =~
+                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St (inbound). The closest stops with service are ___ and ___."
+      end
+    end
+
+    @tag :logged_in_user
+    test "if a skate detour is selected, the skate detour id is persisted", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@detour_bus_route] end,
+           get: fn _, _ -> @detour_bus_route end
+         ]},
+        {StopsRepo, [],
+         [by_route: fn _, _, _ -> [@detour_stop] end, all: fn _, _ -> [@detour_stop] end]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _, _ -> [] end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"route_ids" => ["1"], "single_route_id" => "1"}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "skate_detour_id"],
+          "alert_data" => %{"skate_detour_id" => 7}
+        })
+
+        render_async(view)
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        new_alert = parse_alert_created_output(view)
+
+        assert new_alert.skate_detour_id == 7
+      end
     end
   end
 end

@@ -44,7 +44,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     AccessAffectedServiceSlice,
     AffectedServiceSlice,
     AlertDetailsSlice,
-    BusDetourServiceSlice,
     DeliverySlice,
     NotificationPeriodSlice,
     ReminderTimesSlice,
@@ -913,29 +912,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     service_slice(assigns).render(assigns)
   end
 
-  def service_slice(combination, route_type, effect_name, show_new_bus_detours) do
-    # skate detours flag
-    # when this flag is no longer needed, also remove it from AlertsUIWeb.CreateAlertMonoLive.AlertData.slices/4
-    # which will no longer need the fourth argument
-    if route_type == 3 and effect_name == "detour" and show_new_bus_detours do
-      BusDetourServiceSlice
-    else
-      service_slice_by_combination(combination)
-    end
+  def service_slice(combination) when is_atom(combination) do
+    service_slice_by_combination(combination)
   end
 
   def service_slice(assigns) do
-    # skate detours flag
     form = Map.get(assigns, :form)
-
-    if form[:route_type].value == 3 and form[:effect_name].value == "detour" and
-         assigns.show_new_bus_detours do
-      BusDetourServiceSlice
-    else
-      service_slice_by_combination(form[:combination].value)
-    end
+    service_slice_by_combination(form[:combination].value)
   end
 
+  @spec service_slice_by_combination(any()) ::
+          AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
+          | AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+          | AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
+          | AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice
   def service_slice_by_combination(:SR), do: StopRouteServiceSlice
   def service_slice_by_combination(:ACCESS), do: AccessAffectedServiceSlice
   def service_slice_by_combination(nil), do: SystemwideServiceSlice

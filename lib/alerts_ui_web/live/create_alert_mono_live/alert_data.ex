@@ -2,7 +2,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   @moduledoc """
   Alert data v2
   """
-  alias AlertsUI.Models.{Alert, InformedEntity}
+  alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
   alias AlertsUIWeb.CreateAlertMonoLive
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
@@ -270,12 +270,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         )
 
     {extracted_params, socket} =
-      slices(
-        initial_combination,
-        InformedEntity.route_type_mapping(initial_route_type),
-        effect_name,
-        socket.assigns.show_new_bus_detours
-      )
+      slices(initial_combination)
       |> Enum.map(fn slice_module ->
         slice_module
         |> struct(Map.from_struct(base))
@@ -337,9 +332,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   end
 
   def transform(%Changeset{} = changeset, params, socket) do
-    route_type = get_field(changeset, :route_type)
-    effect_name = get_field(changeset, :effect_name)
-
     combination =
       combination_for(
         get_field(changeset, :route_type),
@@ -348,7 +340,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       )
 
     Enum.reduce(
-      slices(combination, route_type, effect_name, socket.assigns.show_new_bus_detours),
+      slices(combination),
       changeset,
       fn slice_module, changeset ->
         changeset
@@ -360,12 +352,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
   def validate(%Changeset{} = changeset, params, socket) do
     combination = get_field(changeset, :combination)
-    route_type = get_field(changeset, :route_type)
-    effect_name = get_field(changeset, :effect_name)
 
     # Restart validation from a clean slate
     Enum.reduce(
-      slices(combination, route_type, effect_name, socket.assigns.show_new_bus_detours),
+      slices(combination),
       %{changeset | errors: [], valid?: true},
       fn slice_module, changeset ->
         changeset
@@ -394,25 +384,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     struct(slice_module, as_map)
   end
 
-  def slices(socket),
-    do:
-      slices(
-        combination_from_socket(socket),
-        route_type_from_socket(socket),
-        effect_name_from_socket(socket),
-        socket.assigns.show_new_bus_detours
-      )
-
-  def slices(combination, route_type, effect_name, show_new_bus_detours) do
+  def slices(combination) when is_atom(combination) do
     [
       TimelineSlice,
       UrlSlice,
-      CreateAlertMonoLive.service_slice(
-        combination,
-        route_type,
-        effect_name,
-        show_new_bus_detours
-      ),
+      CreateAlertMonoLive.service_slice(combination),
       TimeRangeSlice,
       AlertDetailsSlice,
       NotificationPeriodSlice,
@@ -422,24 +398,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     ]
   end
 
+  def slices(socket), do: slices(combination_from_socket(socket))
+
   defp combination_from_socket(socket) do
     case Map.get(socket.assigns, :form) do
       nil -> nil
       _ -> socket.assigns.form[:combination].value
-    end
-  end
-
-  defp route_type_from_socket(socket) do
-    case Map.get(socket.assigns, :form) do
-      nil -> nil
-      _ -> socket.assigns.form[:route_type].value
-    end
-  end
-
-  defp effect_name_from_socket(socket) do
-    case Map.get(socket.assigns, :form) do
-      nil -> nil
-      _ -> socket.assigns.form[:effect_name].value
     end
   end
 
