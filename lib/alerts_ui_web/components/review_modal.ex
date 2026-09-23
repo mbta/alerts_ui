@@ -390,10 +390,10 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
 
             <p class="font-bold">Last edited by</p>
-            <p :if={@form_type == :editing && @current_user} class="pb-3">
+            <p :if={@form_type == :editing && @current_user} class="pb-3 fs-mask">
               {Map.get(@current_user, :first_name, "")} {Map.get(@current_user, :last_name, "")}
             </p>
-            <p :if={@form_type != :editing && @last_edited_by} class="pb-3">
+            <p :if={@form_type != :editing && @last_edited_by} class="pb-3 fs-mask">
               {@last_edited_by}
             </p>
           <% end %>
