@@ -178,9 +178,7 @@ config :laboratory,
     {:use_legacy_form, "Use legacy form",
      "When enabled, goes back to the legacy version of the form, not the new refactor"},
     {:show_bulk_download_page, "Show Commuter Rail download page", "Shows a page where you
-    can download bulk Commuter Rail alerts."},
-    {:allow_changing_mode_effect_type, "Allow changing an alert's mode or effect type",
-     "Allows changing an alert's mode or effect type when editing or duplicating"}
+    can download bulk Commuter Rail alerts."}
   ],
   cookie: [
     # one month,

@@ -29,25 +29,27 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSliceTest do
     end
 
     @tag :logged_in_user
-    test "can't go back when editing", %{conn: conn} do
+    test "can go back when editing", %{conn: conn} do
       params = build(:alert_map, %{alert_id: "tl-edit"})
       {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
 
       {:ok, view, _html} = live(conn, "/alerts/edit/tl-edit")
 
-      # can't click timeline to go back to first page
-      assert has_element?(view, "#route_type_and_effect[disabled]")
+      # can click timeline to go back to first page
+      view |> element("#route_type_and_effect") |> render_click
+      assert render(view) =~ ~s(Alert type)
     end
 
     @tag :logged_in_user
-    test "can't go back when duplicating", %{conn: conn} do
+    test "can go back when duplicating", %{conn: conn} do
       params = build(:alert_map, %{alert_id: "tl-dup"})
       {:ok, _} = Alerts.create_or_update_alert(params, build(:user))
 
       {:ok, view, _html} = live(conn, "/alerts/duplicate/tl-dup")
 
-      # can't click timeline to go back to first page
-      assert has_element?(view, "#route_type_and_effect[disabled]")
+      # can click timeline to go back to first page
+      view |> element("#route_type_and_effect") |> render_click
+      assert render(view) =~ ~s(Alert type)
     end
   end
 end

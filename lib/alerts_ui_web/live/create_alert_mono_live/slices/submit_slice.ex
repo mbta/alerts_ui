@@ -39,11 +39,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
     def assigns(_slice_data, socket, params) do
       reviewing = Map.get(params, "review", false)
 
-      assign(socket,
-        back:
-          socket.assigns.form_type == :creating or socket.assigns.allow_changing_mode_effect_type,
-        show: reviewing in ["true", true]
-      )
+      assign(socket, show: reviewing in ["true", true])
     end
   end
 
@@ -112,7 +108,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
         current_user={@current_user}
       />
       <.button_secondary
-        :if={Map.get(assigns, :back, true)}
         class="mt-8 self-center border-none py-2 px-3"
         name="back"
         phx-click="move_progress"
