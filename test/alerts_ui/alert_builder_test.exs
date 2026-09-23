@@ -57,6 +57,7 @@ defmodule AlertsUI.AlertBuilderTest do
           notification_period_start: ~N[2024-04-30 05:52:00],
           notification_specifier: :now,
           severity: 3,
+          skate_detour_id: 3,
           reminder_times: [
             %{id: "1234", time: ~N[2024-04-30 12:04:00]},
             %{id: "1235", time: ~N[2024-04-30 12:14:00]},
@@ -120,6 +121,7 @@ defmodule AlertsUI.AlertBuilderTest do
                  source: nil,
                  notification_duration_certainty: nil,
                  work_order_id: nil,
+                 skate_detour_id: 3,
                  recurring: false,
                  can_close_automatically: false
                }

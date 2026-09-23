@@ -74,6 +74,9 @@ config :phoenix_live_view,
 # function for writing feed output files
 config :alerts_ui, file_write_module: AlertsUI.FeedOutput.WriteLocal
 
+# function for reading S3 files
+config :alerts_ui, file_read_module: AlertsUI.SkateDetours.ReadLocal
+
 config :ueberauth, Ueberauth,
   providers: [
     keycloak: {Ueberauth.Strategy.FakeKeycloak, [issuer: :keycloak_issuer]}
