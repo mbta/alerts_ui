@@ -5,6 +5,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   loads schedules and renders the route/stop/trip picker for the details step.
   """
 
+  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
   use AlertsUIWeb, :html
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.CreateAlertLive
@@ -228,12 +229,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   # Some effects (i.e. Bypass) must have stops selected and cannot be 'All Stops'
   defp validate_stops_selected(changeset) do
-    {route_type, effect_name} = parse_route_effect_from_changeset(changeset)
-
-    allow_all_stops? =
-      GetKeyForModeEffect.get_value_of_key(:allow_all_stops?, route_type, effect_name)
-
-    if not allow_all_stops? do
+    if not allow_selecting_all_stops?(changeset) do
       always_validate_required(changeset, :stop_names_and_ids, "Select stop(s)")
     else
       changeset
@@ -246,6 +242,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     humanized_effect_name = humanize_effect_name(route_type, effect_name)
 
     {route_type, humanized_effect_name}
+  end
+
+  def allow_selecting_all_stops?(changeset) do
+    {route_type, effect_name} = parse_route_effect_from_changeset(changeset)
+
+    GetKeyForModeEffect.get_value_of_key(:allow_all_stops?, route_type, effect_name)
   end
 
   @route_fields ["route_ids", "single_route_id"]
@@ -774,9 +776,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               class="min-w-full h-full"
               disabled={disable_stop_input?(@form[:route_ids].value)}
               prompt={
-                if disable_stop_input?(@form[:route_ids].value),
-                  do: nil,
-                  else: "All Stops"
+                cond do
+                  disable_stop_input?(@form[:route_ids].value) ->
+                    nil
+
+                  !AffectedServiceSlice.allow_selecting_all_stops?(@form.source) ->
+                    nil
+
+                  true ->
+                    "All Stops"
+                end
               }
             />
           </div>
