@@ -86,6 +86,6 @@ export class CreateAlertPage {
     }
 
     async submit() {
-        await this.reviewModal().getByRole('button', { name: /^submit$/i }).click();
+        await this.reviewModal().getByRole('button', { name: /^submit/i }).click();
     }
 }

@@ -626,6 +626,8 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :inner_class, :string, default: "", doc: "classes to add on the inner_block"
   attr :container_class, :string, default: "", doc: "classes to add on the container focus_wrap"
 
+  attr :footer_warning_text, :string, default: nil, doc: "If present, adds warning text to footer"
+
   attr :id, :string, required: true
   attr :show, :boolean, default: false
   attr :on_accept, JS, default: %JS{}
@@ -712,6 +714,12 @@ defmodule AlertsUIWeb.SharedComponents do
                 {render_slot(@footer)}
               <% else %>
                 <div class="flex-none flex flex-col md:flex-row md:justify-end px-3 py-3 gap-2">
+                  <div
+                    :if={@footer_warning_text}
+                    class="mr-4 self-center text-warning order-last md:order-first"
+                  >
+                    {@footer_warning_text}
+                  </div>
                   <.button_secondary
                     :if={@cancel_event_name}
                     type="button"
@@ -1428,8 +1436,9 @@ defmodule AlertsUIWeb.SharedComponents do
           checked={@checked}
           class={[
             "[appearance:none] hover:bg-primary-hover w-4 h-4 checked:bg-primary
-            rounded bg-bg-input-default before:content-['✓'] [&:not(:checked)]:text-transparent
-            font-bold leading-none",
+            rounded bg-bg-input-default font-bold leading-none text-text-dark
+            before:content-['✓'] [&:not(:checked)]:text-transparent [&:not(:checked)]:border border-text-primary border-rounded
+            ",
             @check_class,
             if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")
           ]}

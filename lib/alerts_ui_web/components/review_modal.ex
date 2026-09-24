@@ -134,7 +134,8 @@ defmodule AlertsUIWeb.ReviewModal do
         created_by: Map.get(assigns.alert_data, :created_by),
         last_edited_at: Map.get(assigns.alert_data, :last_edited_at),
         last_edited_by: Map.get(assigns.alert_data, :last_edited_by),
-        reminder_times: reminder_times
+        reminder_times: reminder_times,
+        send_notifications: assigns.alert_data.notification_toggle
       )
 
     ~H"""
@@ -143,9 +144,16 @@ defmodule AlertsUIWeb.ReviewModal do
       show={true}
       header_text="Create new alert"
       cancel_button_text="Keep editing"
-      accept_button_text="Submit"
+      accept_button_text={if @send_notifications, do: submit_with_notifications(), else: "Submit"}
+      accept_button_classes="whitespace-nowrap"
+      cancel_button_classes="whitespace-nowrap"
       inner_class="!p-0"
       target_id={@target_id}
+      footer_warning_text={
+        if @send_notifications,
+          do: "Warning: Notifications will be sent to alert subscribers.",
+          else: nil
+      }
       {@rest}
     >
       <:header>
@@ -316,7 +324,10 @@ defmodule AlertsUIWeb.ReviewModal do
                 </p>
               </div>
             <% end %>
-
+            <p :if={!is_nil(@form_type)} class="font-bold pb-1">Send notifications</p>
+            <p :if={!is_nil(@form_type)} class="pb-4">
+              {if @send_notifications, do: "Yes", else: "No"}
+            </p>
             <p class="font-bold pb-1">Reminders</p>
             <%= if @reminder_times != [] do %>
               <div class="pb-4">
@@ -526,6 +537,14 @@ defmodule AlertsUIWeb.ReviewModal do
 
   defp reminder_time(reminder) do
     Map.get(reminder, :time, Map.get(reminder, :reminder_time))
+  end
+
+  defp submit_with_notifications do
+    assigns = %{}
+
+    ~H"""
+    <.icon name="hero-paper-airplane-solid" class="h-4 w-4 mr-1" />Submit and notify
+    """
   end
 
   attr :alert_data, :map

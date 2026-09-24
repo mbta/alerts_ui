@@ -107,13 +107,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Delivery
       </.h5>
-      <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
         <div class="flex flex-row">
           <.checkbox field={@form[:notification_toggle]} id="notification-toggle" />
 
           <span class="ml-4">
-            Send notification to alert subscribers
+            Send notifications to alert subscribers
           </span>
+        </div>
+        <div class="text-warning min-h-[1.5rem] mb-4 ml-8">
+          {if @form[:notification_toggle].value,
+            do: "Warning: Notifications will be sent to alert subscribers.",
+            else: ""}
         </div>
         <div id="banner_div" class="flex flex-col">
           <div class="flex flex-row mb-2">
