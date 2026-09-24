@@ -82,7 +82,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
       end
     end
 
-    test "that in the right env it completes" do
+    test "completes" do
       with_mocks([
         {FacilitiesRepo, [], [get: fn _ -> nil end]},
         {SFTP, [],
@@ -93,15 +93,34 @@ defmodule AlertsUI.Trapeze.ImporterTest do
            fetch: fn _ -> {:ok, {[], nil}} end
          ]}
       ]) do
-        reassign_env(:alerts_ui, :environment_name, "test")
         before_monitor = latest_monitor()
-        AlertsUI.FeatureFlags.enable("Trapeze Import")
 
         with_log(fn -> Importer.perform([], %{}) end)
 
         after_monitor = latest_monitor()
         assert before_monitor == nil
         assert after_monitor != nil
+      end
+    end
+
+    test "can be disabled with config env" do
+      with_mocks([
+        {FacilitiesRepo, [], [get: fn _ -> nil end]},
+        {SFTP, [],
+         [
+           source_description: fn ->
+             %{host: "host", port: 22, user: "user", filename: "filename", password: "password"}
+           end,
+           fetch: fn _ -> {:ok, {[], nil}} end
+         ]}
+      ]) do
+        reassign_env(:alerts_ui, :trapeze_import?, false)
+        {result, log} = with_log(fn -> Importer.perform([], %{}) end)
+
+        assert log =~
+                 ~r/Environment Flag Disabled/
+
+        assert result == {:ok, "\"trapeze_import?\" Environment Flag Disabled"}
       end
     end
   end

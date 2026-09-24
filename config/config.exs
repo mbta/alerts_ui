@@ -26,8 +26,11 @@ config :alerts_ui,
   trapeze_sftp_password: System.get_env("TRAPEZE_SFTP_PASSWORD", ""),
   trapeze_sftp_filename: System.get_env("TRAPEZE_SFTP_FILENAME", ""),
   sentry_env: System.get_env("SENTRY_ENV"),
+  ## Environment level flags
   # Whether to use translated strings for `cause_detail` and `effect_detail`
-  translated_cause_effect_detail: false
+  translated_cause_effect_detail?: false,
+  # Whether to import from trapeze
+  trapeze_import?: true
 
 config :alerts_ui, :phoenix_swagger,
   swagger_files: %{
@@ -169,7 +172,6 @@ config :laboratory,
   features: [
     {:show_alerts_table, "Show Alerts Table",
      "Shows menu link to a page with the alerts DB table"},
-    {:show_created_alert, "Show Created Alert", "Makes created alert visible on success screen"},
     {:show_components_page, "Show Components Style Guide page",
      "Shows the menu link to a page showing a guide to our components"},
     {:show_stop_ids, "Show stop ids", "Show a list of selected stop ids in the form."},

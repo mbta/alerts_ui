@@ -49,7 +49,7 @@ cond do
       api_key: "",
       dev_api_url: "https://api-dev.mbtace.com",
       dev_api_key: "",
-      translated_cause_effect_detail: true
+      translated_cause_effect_detail?: true
 
     config :mbta_v3_api,
       base_url: "https://api-dev.mbtace.com/",
@@ -138,7 +138,7 @@ cond do
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
       dev_api_key: System.fetch_env!("DEV_API_KEY"),
-      translated_cause_effect_detail: get_translated_cause_effect_detail.()
+      translated_cause_effect_detail?: get_translated_cause_effect_detail.()
 
     config :mbta_v3_api,
       base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
@@ -175,7 +175,8 @@ cond do
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
       dev_api_key: System.fetch_env!("DEV_API_KEY"),
-      translated_cause_effect_detail: true
+      translated_cause_effect_detail?: true,
+      trapeze_import?: false
 
     config :sentry,
       # Prevents sentry reporting in local environments

@@ -1080,7 +1080,6 @@ defmodule AlertsUIWeb.FormComponents.TimeRangeTest do
            end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_created_alert", "true")
         trip = build(:trip_descriptor, %{trip_id: @schedule.trip.id})
         ap = build(:active_period, %{start: ~U[2024-05-10 14:30:54Z]})
 
