@@ -313,12 +313,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def async_assign_selections(socket, _params), do: socket
 
-  def async_assign_detours(socket, params) do
-    single_route_id = params["alert_data"]["single_route_id"]
+  def async_assign_detours(socket, _params) do
+    single_route_id = socket.assigns.form[:single_route_id].value
+    existing_skate_id = socket.assigns.form[:skate_detour_id].value
 
     Phoenix.LiveView.assign_async(socket, [:skate_detours], fn ->
       detours = GetDetours.get_detours() |> Enum.filter(&(&1.route_id == single_route_id))
-      used_detour_ids = Alerts.get_matching_skate_ids(Enum.map(detours, & &1.id))
+
+      # if we're editing and have an existing id, don't remove it from the list
+      used_detour_ids =
+        Alerts.get_matching_skate_ids(Enum.map(detours, & &1.id)) -- [existing_skate_id]
 
       detours = Enum.reject(detours, &(&1.id in used_detour_ids))
 
@@ -740,13 +744,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def render(assigns) do
     form = assigns.form
-    single_route_effect? = humanize_effect_name(form) in get_single_route_effect_names()
-
-    disable_stop_input? =
-      disable_stop_input?(form[:route_ids].value) or !is_nil(form[:skate_detour_id].value)
-
-    route_field =
-      if single_route_effect?, do: form[:single_route_id], else: form[:route_ids]
 
     bus_detour? =
       bus_detour?(
@@ -754,6 +751,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         form[:effect_name].value,
         assigns.show_new_bus_detours
       )
+
+    single_route_effect? = humanize_effect_name(form) in get_single_route_effect_names()
+
+    skate_id_selected? = bus_detour? and !is_nil(form[:skate_detour_id].value)
+
+    disable_stop_input? =
+      disable_stop_input?(form[:route_ids].value, skate_id_selected?)
+
+    route_field =
+      if single_route_effect?, do: form[:single_route_id], else: form[:route_ids]
 
     skate_detour_options =
       if bus_detour? do
@@ -769,7 +776,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         detours_loading?: assigns.skate_detours.loading,
         disable_stop_input?: disable_stop_input?,
         bus_detour?: bus_detour?,
-        skate_detour_options: skate_detour_options
+        skate_detour_options: skate_detour_options,
+        skate_id_selected?: skate_id_selected?
       )
 
     ~H"""
@@ -875,8 +883,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
                 true -> @skate_detour_options
               end
             }
-            disabled={Enum.empty?(@skate_detour_options)}
-            class="h-full mr-6"
+            disabled={Enum.empty?(@form[:route_ids].value)}
+            class="h-full md:mr-6"
             loading={@detours_loading?}
             multiple={false}
           />
@@ -909,7 +917,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               loading={@selections.loading}
               no_results={
                 Enum.empty?(@selections.stop_id_options) &&
-                  !disable_stop_input?(@form[:route_ids].value)
+                  !@disable_stop_input?
               }
               class="min-w-full h-full"
               disabled={@disable_stop_input?}
@@ -930,7 +938,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         </div>
       </div>
       <div
-        :if={@form[:skate_detour_id].value}
+        :if={@skate_id_selected?}
         class="p-2 rounded-sm max-w-[48rem] text-bold"
       >
         <p>
@@ -974,9 +982,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defp date_filter_active?(filter_value, today) when filter_value == today, do: false
   defp date_filter_active?(_, _), do: true
 
-  defp disable_stop_input?(nil), do: true
-  defp disable_stop_input?(route_ids) when is_list(route_ids), do: length(route_ids) !== 1
-  defp disable_stop_input?(_route_ids), do: true
+  defp disable_stop_input?(_, true), do: true
+  defp disable_stop_input?(nil, _), do: true
+  defp disable_stop_input?(route_ids, _) when is_list(route_ids), do: length(route_ids) !== 1
+  defp disable_stop_input?(_, _), do: true
 
   defp disable_trip_input?(route_ids) when is_list(route_ids), do: Enum.empty?(route_ids)
   defp disable_trip_input?(_route_ids), do: true
