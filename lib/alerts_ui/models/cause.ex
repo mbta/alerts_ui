@@ -143,19 +143,17 @@ defmodule AlertsUI.Models.Cause do
           "DEMONSTRATION" => :DEMONSTRATION,
           "DISABLED_BUS" => :TECHNICAL_PROBLEM,
           "DRAWBRIDGE_BEING_RAISED" => :OTHER_CAUSE,
-          "ELECTRICAL_WORK" => :MAINTENANCE,
           "FIRE" => :TECHNICAL_PROBLEM,
           "HAZMAT_CONDITION" => :OTHER_CAUSE,
           "HOLIDAY" => :HOLIDAY,
-          "HURRICANE" => :WEATHER,
           "MAINTENANCE" => :MAINTENANCE,
           "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
           "PARADE" => :OTHER_CAUSE,
           "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
           "SNOW" => :WEATHER,
           "SPECIAL_EVENT" => :OTHER_CAUSE,
-          "TIE_REPLACEMENT" => :MAINTENANCE,
           "TRAFFIC" => :OTHER_CAUSE,
+          "UTILITY_WORK" => :CONSTRUCTION,
           "WEATHER" => :WEATHER
         }
 
@@ -163,8 +161,8 @@ defmodule AlertsUI.Models.Cause do
         %{
           "ACCIDENT" => :ACCIDENT,
           "COAST_GUARD_RESTRICTION" => :OTHER_CAUSE,
-          "FIRE" => :TECHNICAL_PROBLEM,
           "FOG" => :WEATHER,
+          "HIGH_RIDERSHIP" => :OTHER_CAUSE,
           "HIGH_WINDS" => :WEATHER,
           "HOLIDAY" => :HOLIDAY,
           "ICE_IN_HARBOR" => :WEATHER,
@@ -172,7 +170,11 @@ defmodule AlertsUI.Models.Cause do
           "MECHANICAL_PROBLEM" => :TECHNICAL_PROBLEM,
           "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
           "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
-          "SEVERE_WEATHER" => :WEATHER
+          "PRESENCE_OF_WHALES" => :OTHER_CAUSE,
+          "ROUGH_SEAS" => :OTHER_CAUSE,
+          "SEVERE_WEATHER" => :WEATHER,
+          "VESSEL_SUBSTITUTION" => :OTHER_CAUSE,
+          "VESSEL_TRAFFIC" => :OTHER_CAUSE
         }
 
       :ACCESS ->
