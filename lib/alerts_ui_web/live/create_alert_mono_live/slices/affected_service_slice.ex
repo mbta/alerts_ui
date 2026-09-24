@@ -191,7 +191,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       |> validate_route_required()
 
     # Only if route is valid do we then validate stops
-    if length(changeset.errors) > 0 do
+    if changeset.errors != [] do
       changeset
     else
       changeset
@@ -229,10 +229,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   # Some effects (i.e. Bypass) must have stops selected and cannot be 'All Stops'
   defp validate_stops_selected(changeset) do
-    if not allow_selecting_all_stops?(changeset) do
-      always_validate_required(changeset, :stop_names_and_ids, "Select stop(s)")
-    else
+    if allow_selecting_all_stops?(changeset) do
       changeset
+    else
+      always_validate_required(changeset, :stop_names_and_ids, "Select stop(s)")
     end
   end
 
