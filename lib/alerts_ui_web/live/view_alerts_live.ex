@@ -446,7 +446,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     |> Alerts.get_by_alert_id()
     |> Alerts.close(socket.assigns.current_user, socket.assigns.send_all_clear?)
 
-    socket = assign(socket, scroll_to_top: false)
+    socket =
+      assign(socket, scroll_to_top: false, selected_alert_data: nil, selected_alert_id: nil)
+
     {:noreply, socket}
   end
 
