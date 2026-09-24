@@ -421,8 +421,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   @impl true
   def handle_event("cancelled_close_modal", _params, socket) do
-    {:noreply,
-     assign(socket, scroll_to_top: false, send_all_clear?: false, current_close_modal: nil)}
+    {:noreply, assign(socket, scroll_to_top: false, current_close_modal: nil)}
   end
 
   @impl true
