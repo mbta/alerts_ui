@@ -35,4 +35,15 @@ test.describe('View alerts page @mutating', () => {
             await page.getByRole('cell', { name: `test alert ${alertId2}` }).click()
             await expect(page.locator("#review-modal-container")).toBeVisible()
         });
+
+    test("send notification checkbox stays checked after closing modal", async ({ page }) => {
+        const listPage = new AlertsListPage(page);
+        await listPage.goto()
+        await page.getByRole('cell', { name: `test alert ${alertId2}` }).click()
+        await page.getByRole('button', { name: 'Close alert' }).click()
+        await expect(page.getByRole('checkbox')).toBeChecked();
+        await page.getByRole('button', { name: 'Keep Active' }).click()
+        await page.getByRole('button', { name: 'Close alert' }).click()
+        await expect(page.getByRole('checkbox')).toBeChecked();
+    })
 });
