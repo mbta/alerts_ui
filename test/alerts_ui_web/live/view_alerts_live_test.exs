@@ -42,7 +42,8 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     effect_detail: "DETOUR",
     original_route_selections: ["1", "2"],
     duration_certainty: :UNKNOWN,
-    severity: 4
+    severity: 4,
+    last_push_notification_timestamp: @one_day_ago
   }
 
   describe "alerts list page" do
@@ -170,6 +171,64 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
 
       html = render_async(view)
       assert html =~ ~r/Alerts/
+    end
+
+    @tag :logged_in_user
+    test "all clear notification checkbox initializes properly", %{conn: conn} do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts")
+
+        assert has_element?(view, "#all-clear-checkbox-close-alert-modal-123[checked]")
+        assert has_element?(view, "#all-clear-checkbox-close-alert-modal-234")
+        refute has_element?(view, "#all-clear-checkbox-close-alert-modal-234[checked]")
+      end
+    end
+
+    @tag :logged_in_user
+    test "can turn on 'all clear notification' checkbox", %{conn: conn} do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts")
+        original_alert = Alerts.get_by_alert_id("234")
+        assert is_nil(original_alert.last_push_notification_timestamp)
+        assert has_element?(view, "td", "this is the second alert")
+        all_clear = element(view, "#all-clear-checkbox-close-alert-modal-234")
+
+        render_click(all_clear)
+
+        element(view, "#close-alert-modal-234-container button", "Close now") |> render_click()
+        refute has_element?(view, "td", "this is the second alert")
+
+        alert = Alerts.get_by_alert_id("234")
+        assert not is_nil(alert.last_push_notification_timestamp)
+      end
+    end
+
+    @tag :logged_in_user
+    test "can turn off 'all clear notification' checkbox", %{conn: conn} do
+      with_mock(RoutesRepo, [],
+        all: fn -> [] end,
+        get: fn route_id -> %{name: route_id} end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts")
+        original_alert = Alerts.get_by_alert_id("123")
+        last_push = original_alert.last_push_notification_timestamp
+        all_clear = element(view, "#all-clear-checkbox-close-alert-modal-123")
+
+        render_click(all_clear, %{value: false})
+
+        element(view, "#close-alert-modal-123-container button", "Close now") |> render_click()
+        refute has_element?(view, "td", "this is the first alert")
+
+        alert = Alerts.get_by_alert_id("123")
+        new_last_push = alert.last_push_notification_timestamp
+        assert last_push == new_last_push
+      end
     end
   end
 
