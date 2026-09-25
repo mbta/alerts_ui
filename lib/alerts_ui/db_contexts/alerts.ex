@@ -329,6 +329,7 @@ defmodule AlertsUI.Alerts do
     from(
       a in Alert,
       where: a.skate_detour_id in ^skate_ids,
+      where: is_nil(a.closed_timestamp),
       select: a.skate_detour_id
     )
     |> Repo.all()

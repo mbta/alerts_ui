@@ -317,12 +317,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     single_route_id = socket.assigns.form[:single_route_id].value
     existing_skate_id = socket.assigns.form[:skate_detour_id].value
 
+    form_type = socket.assigns.form_type
+
     Phoenix.LiveView.assign_async(socket, [:skate_detours], fn ->
       detours = GetDetours.get_detours() |> Enum.filter(&(&1.route_id == single_route_id))
 
+      used_detour_ids =
+        Alerts.get_matching_skate_ids(Enum.map(detours, & &1.id))
+
       # if we're editing and have an existing id, don't remove it from the list
       used_detour_ids =
-        Alerts.get_matching_skate_ids(Enum.map(detours, & &1.id)) -- [existing_skate_id]
+        if form_type == :editing do
+          used_detour_ids -- [existing_skate_id]
+        else
+          used_detour_ids
+        end
 
       detours = Enum.reject(detours, &(&1.id in used_detour_ids))
 
@@ -567,22 +576,30 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   defp clear_selections_on_change(changeset, %{"_target" => _target}) do
-    if Changeset.changed?(changeset, :route_ids) do
-      Changeset.cast(
-        changeset,
-        %{
-          stop_names_and_ids: [],
-          stop_ids: [],
-          trip_ids: [],
-          skate_detour_id: nil
-        },
-        [
-          :stop_names_and_ids,
-          :stop_ids,
-          :trip_ids,
-          :skate_detour_id
-        ]
-      )
+    changeset =
+      if Changeset.changed?(changeset, :route_ids) do
+        Changeset.cast(
+          changeset,
+          %{
+            stop_names_and_ids: [],
+            stop_ids: [],
+            trip_ids: [],
+            skate_detour_id: nil
+          },
+          [
+            :stop_names_and_ids,
+            :stop_ids,
+            :trip_ids,
+            :skate_detour_id
+          ]
+        )
+      else
+        changeset
+      end
+
+    # clear out direction if skate detour id is changed
+    if Changeset.fetch_change(changeset, :skate_detour_id) == {:ok, nil} do
+      Changeset.cast(changeset, %{direction: nil}, [:direction])
     else
       changeset
     end
@@ -923,7 +940,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               disabled={@disable_stop_input?}
               prompt={
                 cond do
-                  @disable_stop_input?->
+                  @disable_stop_input? ->
                     nil
 
                   !AffectedServiceSlice.allow_selecting_all_stops?(@form.source) ->
