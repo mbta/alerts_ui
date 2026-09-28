@@ -407,6 +407,55 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "effect for suspension with no stops is NO_SERVICE" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
+        {StopsRepo, [], [all: fn ["filter[id]": ""], _opts -> [] end]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "hello",
+          effect_name: "Suspension",
+          route_ids: ["57"],
+          stop_ids: [],
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-04-30 13:54:00],
+          alert_timing: :"one-time",
+          active_period_end_specifier: :later_today,
+          active_period_start_specifier: :custom
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :RDS, ~U[2024-04-30 11:54:00Z])
+        assert result.effect == :NO_SERVICE
+      end
+    end
+
+    test "effect for suspension with multiple stops is REDUCED_SERVICE" do
+      with_mocks([
+        {RoutePatternsRepo, [], [by_route_id: fn _route_id, _opts -> [] end]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 1} end]},
+        {StopsRepo, [],
+         [all: fn ["filter[id]": stop_id], _opts -> [%Stop{id: stop_id, name: stop_id}] end]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "hello",
+          effect_name: "Suspension",
+          route_ids: ["57"],
+          stop_ids: ["stop_two|stop_two"],
+          active_period_start: ~N[2024-04-30 11:54:00],
+          active_period_end: ~N[2024-04-30 13:54:00],
+          alert_timing: :"one-time",
+          active_period_end_specifier: :later_today,
+          active_period_start_specifier: :custom
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :RDS, ~U[2024-04-30 11:54:00Z])
+        assert result.effect == :REDUCED_SERVICE
+      end
+    end
+
     test "facility causes get set correctly" do
       facility = %Facility{
         id: "retailsale-303012",

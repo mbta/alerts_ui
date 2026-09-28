@@ -228,6 +228,8 @@ defmodule AlertsUI.AlertBuilder do
           {effect, effect_detail}
       end
 
+    effect = maybe_modify_effect(effect_name, Map.get(alert_data, :stop_ids), effect)
+
     %{
       cause: cause,
       cause_detail: cause_detail,
@@ -236,6 +238,9 @@ defmodule AlertsUI.AlertBuilder do
       effect_name: effect_name
     }
   end
+
+  defp maybe_modify_effect("Suspension", [], _), do: :NO_SERVICE
+  defp maybe_modify_effect(_effect_name, _stop_ids, effect), do: effect
 
   def original_selections(alert_data, combination, options \\ []) do
     if Keyword.get(options, :no_original_selections) do
