@@ -4,8 +4,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   """
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
+  alias AlertsUIWeb.CreateAlertMonoLive
   alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
-  alias AlertsUIWeb.CreateAlertMonoLive.ServiceSliceDispatcher
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.AlertData, as: OldAlertData
 
@@ -106,6 +106,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     field :trip_search_term, :string
     field :service_types, {:array, :integer}
     field :work_order_id, :string
+    field :skate_search_term, :string
+    field :skate_detour_id, :integer
 
     # time range
     field :alert_timing, Ecto.Enum, values: @alert_timing_values, default: :"one-time"
@@ -268,7 +270,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         )
 
     {extracted_params, socket} =
-      slices(socket, initial_combination)
+      slices(initial_combination)
       |> Enum.map(fn slice_module ->
         slice_module
         |> struct(Map.from_struct(base))
@@ -337,11 +339,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
         get_field(changeset, :combination)
       )
 
-    Enum.reduce(slices(socket, combination), changeset, fn slice_module, changeset ->
-      changeset
-      |> slice_from_changeset(slice_module)
-      |> Slice.transform(changeset, params, socket)
-    end)
+    Enum.reduce(
+      slices(combination),
+      changeset,
+      fn slice_module, changeset ->
+        changeset
+        |> slice_from_changeset(slice_module)
+        |> Slice.transform(changeset, params, socket)
+      end
+    )
   end
 
   def validate(%Changeset{} = changeset, params, socket) do
@@ -349,7 +355,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
 
     # Restart validation from a clean slate
     Enum.reduce(
-      slices(socket, combination),
+      slices(combination),
       %{changeset | errors: [], valid?: true},
       fn slice_module, changeset ->
         changeset
@@ -378,13 +384,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     struct(slice_module, as_map)
   end
 
-  def slices(socket), do: slices(socket, combination_from_socket(socket))
-
-  def slices(_socket, combination) do
+  def slices(combination) when is_atom(combination) do
     [
       TimelineSlice,
       UrlSlice,
-      ServiceSliceDispatcher.affected_service_component(combination),
+      CreateAlertMonoLive.service_slice(combination),
       TimeRangeSlice,
       AlertDetailsSlice,
       NotificationPeriodSlice,
@@ -393,6 +397,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
       SubmitSlice
     ]
   end
+
+  def slices(socket), do: slices(combination_from_socket(socket))
 
   defp combination_from_socket(socket) do
     case Map.get(socket.assigns, :form) do

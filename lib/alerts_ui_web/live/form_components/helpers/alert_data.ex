@@ -62,7 +62,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     :url,
     :last_push_notification_timestamp,
     :notification_toggle,
-    :work_order_id
+    :work_order_id,
+    :skate_detour_id
   ]
 
   @type reminder_time_t :: %{
@@ -118,7 +119,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           url: String.t() | nil,
           last_push_notification_timestamp: DateTime.t() | nil,
           notification_toggle: boolean(),
-          work_order_id: String.t() | nil
+          work_order_id: String.t() | nil,
+          skate_detour_id: integer() | nil
         }
   # effect names where user can only select 1 type of thing
   @single_route_effect_names ["Detour", "Snow Route"]
@@ -168,6 +170,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     |> Map.merge(service_types(alert))
     |> Map.merge(banner_sync_toggle(alert))
     |> Map.merge(work_order_id(alert, form_type))
+    |> Map.merge(skate_detour_id(alert, form_type))
   end
 
   def build_alert_data(_, _), do: %__MODULE__{}
@@ -339,6 +342,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   end
 
   defp work_order_id(_alert, _form_type), do: %{work_order_id: nil}
+
+  defp skate_detour_id(alert, :editing) do
+    %{
+      skate_detour_id: alert.skate_detour_id
+    }
+  end
+
+  defp skate_detour_id(_alert, _form_type), do: %{skate_detour_id: nil}
 
   def determine_one_time_active_period(alert) do
     shifted_active_period_start = shift_to_naive(alert.active_period_start)

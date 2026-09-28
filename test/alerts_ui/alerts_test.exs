@@ -1373,4 +1373,21 @@ defmodule AlertsUI.AlertsTest do
       refute Alerts.get_by_alert_id("123")
     end
   end
+
+  describe "get_matching_skate_ids/1" do
+    test "given list of skate ids, returns those ids that match ones belonging to open alerts" do
+      insert(:alert, %{alert_id: "55", skate_detour_id: 1})
+      insert(:alert, %{alert_id: "56", skate_detour_id: 2})
+
+      insert(:alert, %{
+        alert_id: "57",
+        skate_detour_id: 3,
+        closed_timestamp: ~U[2024-06-01 00:00:00Z]
+      })
+
+      insert(:alert, %{alert_id: "58", skate_detour_id: 4})
+
+      assert Alerts.get_matching_skate_ids([1, 2, 3]) == [1, 2]
+    end
+  end
 end

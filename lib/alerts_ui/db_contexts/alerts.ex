@@ -324,6 +324,17 @@ defmodule AlertsUI.Alerts do
     |> Repo.one()
   end
 
+  @spec get_matching_skate_ids([integer()]) :: [integer()]
+  def get_matching_skate_ids(skate_ids) do
+    from(
+      a in Alert,
+      where: a.skate_detour_id in ^skate_ids,
+      where: is_nil(a.closed_timestamp),
+      select: a.skate_detour_id
+    )
+    |> Repo.all()
+  end
+
   @spec get_earliest_version(String.t()) :: PaperTrail.Version.t() | nil
   def get_earliest_version(alert_uuid) do
     from(
