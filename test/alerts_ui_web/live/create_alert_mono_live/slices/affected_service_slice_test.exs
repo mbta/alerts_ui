@@ -1395,6 +1395,64 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "shows progressive errors if stops are not selected for Bypass alerts",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_type: fn _ -> [@subway_route] end, get: fn _, _ -> @subway_route end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@subway_stop, @stop_2] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station bypass")
+        render_async(view)
+
+        open_review_modal(view)
+        render_async(view)
+
+        assert has_element?(view, "p.text-text-error", "Select route(s)")
+        refute has_element?(view, "p.text-text-error", "Select stop(s)")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@subway_route.id]}
+        })
+
+        render_async(view)
+        open_review_modal(view)
+
+        refute has_element?(view, "p.text-text-error", "Select route(s)")
+        assert has_element?(view, "p.text-text-error", "Select stop(s)")
+      end
+    end
+
+    @tag :logged_in_user
+    test "hides 'All Stops' option for Bypass alerts",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [by_type: fn _ -> [@subway_route] end, get: fn _, _ -> @subway_route end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@subway_stop, @stop_2] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Subway", "Station bypass")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@subway_route.id]}
+        })
+
+        render_async(view)
+
+        refute has_element?(view, "option", "All Stops")
+      end
+    end
+
+    @tag :logged_in_user
     test "renders with 'All Future Trips' selected while editing an existing commuter rail alert",
          %{conn: conn} do
       alert_params =
