@@ -70,11 +70,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
     alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice.Selections
 
-    def mount(_service_data, socket, _base_params) do
+    def mount(service_data, socket, _base_params) do
       assign(
         socket,
-        :selections,
-        %Selections{today: AffectedServiceSlice.today()}
+        %{
+          selections: %Selections{today: AffectedServiceSlice.today()},
+          original_skate_id: service_data.skate_detour_id
+        }
       )
     end
 
@@ -315,9 +317,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   def async_assign_detours(socket, _params) do
     single_route_id = socket.assigns.form[:single_route_id].value
-    existing_skate_id = socket.assigns.form[:skate_detour_id].value
 
-    form_type = socket.assigns.form_type
+    original_skate_id = socket.assigns.original_skate_id
 
     Phoenix.LiveView.assign_async(socket, [:skate_detours], fn ->
       detours = GetDetours.get_detours() |> Enum.filter(&(&1.route_id == single_route_id))
@@ -325,13 +326,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       used_detour_ids =
         Alerts.get_matching_skate_ids(Enum.map(detours, & &1.id))
 
-      # if we're editing and have an existing id, don't remove it from the list
-      used_detour_ids =
-        if form_type == :editing do
-          used_detour_ids -- [existing_skate_id]
-        else
-          used_detour_ids
-        end
+      # if we have an existing id because we're editing, don't remove it from the list
+      used_detour_ids = used_detour_ids -- [original_skate_id]
 
       detours = Enum.reject(detours, &(&1.id in used_detour_ids))
 
