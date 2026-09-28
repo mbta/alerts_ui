@@ -85,10 +85,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
     "SWITCH_ISSUE",
     "SWITCH_PROBLEM",
     "TRACK_PROBLEM",
-    "UNRULY_PASSENGER"
+    "UNRULY_PASSENGER",
+    "VESSEL_SUBSTITUTION"
   ]
 
-  @uses_definite_article ["HOLIDAY"]
+  @uses_definite_article ["HOLIDAY", "PRESENCE_OF_WHALES"]
 
   # duration
   @spec alert_duration(__MODULE__.t()) :: String.t()
