@@ -115,10 +115,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
             Send notifications to alert subscribers
           </span>
         </div>
-        <div class="text-warning min-h-[1.5rem] mb-4 ml-8">
-          {if @form[:notification_toggle].value,
-            do: "Warning: Notifications will be sent to alert subscribers.",
-            else: ""}
+        <div
+          :if={Form.normalize_value("checkbox", @form[:notification_toggle].value)}
+          class="text-warning mb-4 ml-8"
+        >
+          "Warning: Notifications will be sent to alert subscribers."
         </div>
         <div id="banner_div" class="flex flex-col">
           <div class="flex flex-row mb-2">
