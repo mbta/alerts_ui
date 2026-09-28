@@ -45,6 +45,10 @@ export class CreateAlertPage {
             getByRole('option', { name, exact: true }).click(opts);
     }
 
+    async editMainMessage(message: string) {
+        await this.mainMessage().fill(message)
+    }
+
     mainMessage(): Locator {
         return this.page.locator('#alert_data_header_text');
     }
@@ -88,4 +92,15 @@ export class CreateAlertPage {
     async submit() {
         await this.reviewModal().getByRole('button', { name: /^submit/i }).click();
     }
+
+    async createRedLineDelay(message?: string) {
+        await this.gotoEffect("subway", "delay")
+        await this.selectLine('Red Line');
+        if (message) {
+            await this.editMainMessage(message)
+        }
+        await this.reviewAndSubmit();
+        await this.submit();
+    }
+
 }
