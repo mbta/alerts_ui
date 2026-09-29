@@ -786,7 +786,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       assign(assigns,
         single_route_effect?: single_route_effect?,
         route_field: route_field,
-        detours_loading?: assigns.skate_detours.loading,
+        detours_loading?: !is_nil(assigns.skate_detours.loading),
         disable_stop_input?: disable_stop_input?,
         bus_detour?: bus_detour?,
         skate_detour_options: skate_detour_options,
@@ -896,7 +896,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
                 true -> @skate_detour_options
               end
             }
-            disabled={Enum.empty?(@form[:route_ids].value)}
+            disabled={Enum.empty?(@skate_detour_options)}
             class="h-full md:mr-6"
             loading={@detours_loading?}
             multiple={false}
