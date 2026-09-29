@@ -21,6 +21,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   defstruct [
     :effect_name,
     :route_type,
+    :combination,
     # time range
     :active_period_start_specifier,
     :active_period_end_specifier,
@@ -82,7 +83,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     def mount(_details_data, socket, _base_params), do: socket
 
     def extract(details_data, _alert, _params) do
-      Map.drop(details_data, @time_range_fields)
+      details_data
+      |> Map.drop(@time_range_fields)
+      |> remove_invalid_cause_detail()
     end
 
     def transform(details_data, changeset, params, _socket) do
@@ -160,6 +163,25 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
         image_size: image_size,
         image_path: image_path
       })
+    end
+
+    defp remove_invalid_cause_detail(
+           %{combination: combination, route_type: route_type, cause_detail: cause_detail} =
+             details_data
+         ) do
+      # remove an existing cause detail if it's not
+      # currently valid
+      mode = if combination == :ACCESS, do: :ACCESS, else: route_type
+
+      valid_causes =
+        mode
+        |> Cause.cause_map_by_mode()
+        |> Map.keys()
+
+      new_cause_detail =
+        if cause_detail in valid_causes, do: cause_detail, else: nil
+
+      Map.put(details_data, :cause_detail, new_cause_detail)
     end
 
     defp get_severity(%{severity: nil, route_type: route_type}, effect_name) do
