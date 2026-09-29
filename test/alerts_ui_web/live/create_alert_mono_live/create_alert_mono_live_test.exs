@@ -1445,7 +1445,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "changing between from a bike facility to access issue should retain selections", %{
+    test "changing between from a bike facility to access issue should not retain selections", %{
       conn: conn
     } do
       alert_params =
@@ -1491,7 +1491,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         refute has_element?(view, "div", "Facility • Bike Issue")
         assert has_element?(view, "div", "Facility • Access Issue")
 
-        assert document_has_element?(
+        refute document_has_element?(
                  document,
                  "option[value=\"#{@bike_facility.id}\"][selected]"
                )

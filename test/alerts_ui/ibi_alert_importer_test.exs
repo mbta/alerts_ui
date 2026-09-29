@@ -97,6 +97,8 @@ defmodule AlertsUI.IBIAlertImporterTest do
         {FacilitiesRepo, [], [get_by_type: fn _, _opts -> [] end]},
         {StopsRepo, [], [all: fn _params, _opts -> [] end]}
       ]) do
+        :CANCELLATION
+
         assert _alert_params =
                  ibi_alert
                  |> ibi_alert_to_alert_data()
