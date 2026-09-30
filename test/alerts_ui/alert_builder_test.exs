@@ -4599,6 +4599,13 @@ defmodule AlertsUI.AlertBuilderTest do
                  route_type: 1,
                  facility_id: "349",
                  activities: [:USING_WHEELCHAIR]
+               },
+               %{
+                 stop_id: "place-alfcl",
+                 route_id: "Red",
+                 route_type: 1,
+                 facility_id: "349",
+                 activities: [:USING_WHEELCHAIR]
                }
              ]
     end

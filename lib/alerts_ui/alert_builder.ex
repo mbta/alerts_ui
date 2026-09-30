@@ -1150,7 +1150,9 @@ defmodule AlertsUI.AlertBuilder do
     stop = StopsRepo.get!(stop_id)
 
     child_stop_ids =
-      (stop.child_ids -- excluded_stops_from_facility_properties(properties)) |> Enum.uniq()
+      (stop.child_ids -- excluded_stops_from_facility_properties(properties))
+      |> Enum.concat([stop.id])
+      |> Enum.uniq()
 
     # fallback for rare cases the stop has no child stops (eg fare vending machines)
     child_stop_ids = if Enum.empty?(child_stop_ids), do: [stop_id], else: child_stop_ids
