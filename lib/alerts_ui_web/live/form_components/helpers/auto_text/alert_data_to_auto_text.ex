@@ -99,8 +99,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
     # then determine a new line name by finding which of the 2 branch names
     # appears in the list of stop names of the schedule's trip.
     # if both halves appear, because the route does not truly branch,
-    # (eg Framingham/Worcester Line)
-    # then use the one which appears at the beginning
+    # (eg Framingham/Worcester Line) then use the one which appears at the beginning
     # or end of the list.
     if String.contains?(route.name, "/") do
       [name_one, name_two] = String.split(route.name, "/")
@@ -124,13 +123,15 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
 
   defp calcuate_branch_name(_route_type, _routes, _schedules), do: nil
 
-  defp branch_name([intersection], _stop_names), do: intersection <> " Line"
+  defp branch_name([branch_name], _stop_names), do: branch_name <> " Line"
 
-  defp branch_name(route_names, stop_names) do
+  defp branch_name([_branch_one, _branch_two] = branch_names, [_ | _] = stop_names) do
     first_stop_name = List.first(stop_names)
     last_stop_name = List.last(stop_names)
 
-    [terminus_stop] = Enum.filter([first_stop_name, last_stop_name], &(&1 in route_names))
+    [terminus_stop] = Enum.filter([first_stop_name, last_stop_name], &(&1 in branch_names))
     terminus_stop <> " Line"
   end
+
+  defp branch_name(_branch_names, _stop_names), do: nil
 end
