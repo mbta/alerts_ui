@@ -101,7 +101,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       disable_button(
         step.name,
         assigns.previous_steps -- [assigns.progress.name],
-        assigns.change_type
+        assigns.change_type,
+        assigns.form_type
       )
 
     clickable_class =
@@ -143,14 +144,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
     """
   end
 
-  @spec disable_button(String.t(), [String.t()], boolean()) :: boolean()
-  defp disable_button(name, previous_steps, change_type?)
+  @spec disable_button(String.t(), [String.t()], boolean(), atom()) :: boolean()
+  defp disable_button(name, previous_steps, change_type?, form_type)
 
-  defp disable_button("details", [], true) do
+  defp disable_button("details", [], true, form_type) when form_type !== :creating do
     false
   end
 
-  defp disable_button(name, previous_steps, _) do
+  defp disable_button(name, previous_steps, _, _) do
     name not in previous_steps
   end
 end
