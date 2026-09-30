@@ -3,8 +3,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
     Converts alert data to an auto text struct
   """
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   def build_autotext_data(alert_data) do
+    route_type = Map.get(alert_data, :route_type)
+    routes = Map.get(alert_data, :routes, [])
+    schedules = Map.get(alert_data, :schedules, [])
+
     end_datetime =
       build_one_time_active_period_end(
         Map.get(alert_data, :active_period_end),
@@ -12,16 +17,19 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         Map.get(alert_data, :alert_timing)
       )
 
+    branch_name = calcuate_branch_name(route_type, routes, schedules)
+
     conversion =
       %{
-        route_type: Map.get(alert_data, :route_type),
+        route_type: route_type,
         effect_name: Map.get(alert_data, :effect_name),
-        routes: Map.get(alert_data, :routes, []),
+        routes: routes,
         stops: get_stops(alert_data),
-        schedules: Map.get(alert_data, :schedules, []),
+        schedules: schedules,
         facilities: Map.get(alert_data, :facilities),
         service_types: Map.get(alert_data, :service_types),
         direction: get_direction(Map.get(alert_data, :direction)),
+        branch_name: branch_name,
         severity: Map.get(alert_data, :severity) |> safe_string_to_int(),
         cause_detail: Map.get(alert_data, :cause_detail),
         start_specifier: Map.get(alert_data, :active_period_start_specifier, :now),
@@ -83,5 +91,46 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
     else
       autotext
     end
+  end
+
+  defp calcuate_branch_name(2, [route], [schedule]) do
+    # if this is a commuter rail alert with 1 selected route and schedule
+    # and the route name contains a slash (eg Franklin/Foxboro Line)
+    # then determine a new line name by finding which of the 2 branch names
+    # appears in the list of stop names of the schedule's trip.
+    # if both halves appear, because the route does not truly branch,
+    # (eg Framingham/Worcester Line)
+    # then use the one which appears at the beginning
+    # or end of the list.
+    if String.contains?(route.name, "/") do
+      [name_one, name_two] = String.split(route.name, "/")
+      name_two = String.replace_trailing(name_two, " Line", "")
+
+      stop_names =
+        schedule.trip.id
+        |> StopsRepo.by_trip()
+        |> Stream.map(& &1.name)
+        |> Enum.into([])
+
+      intersection =
+        MapSet.intersection(MapSet.new([name_one, name_two]), MapSet.new(stop_names))
+        |> MapSet.to_list()
+
+      branch_name(intersection, stop_names)
+    else
+      nil
+    end
+  end
+
+  defp calcuate_branch_name(_route_type, _routes, _schedules), do: nil
+
+  defp branch_name([intersection], _stop_names), do: intersection <> " Line"
+
+  defp branch_name(route_names, stop_names) do
+    first_stop_name = List.first(stop_names)
+    last_stop_name = List.last(stop_names)
+
+    [terminus_stop] = Enum.filter([first_stop_name, last_stop_name], &(&1 in route_names))
+    terminus_stop <> " Line"
   end
 end
