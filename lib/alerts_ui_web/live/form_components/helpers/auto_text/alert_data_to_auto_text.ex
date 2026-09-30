@@ -102,8 +102,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
     # (eg Framingham/Worcester Line) then use the one which appears at the beginning
     # or end of the list.
     if String.contains?(route.name, "/") do
-      [name_one, name_two] = String.split(route.name, "/")
-      name_two = String.replace_trailing(name_two, " Line", "")
+      [branch_one, branch_two] = String.split(route.name, "/")
+      branch_two = String.replace_trailing(branch_two, " Line", "")
 
       stop_names =
         schedule.trip.id
@@ -112,8 +112,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         |> Enum.into([])
 
       intersection =
-        MapSet.intersection(MapSet.new([name_one, name_two]), MapSet.new(stop_names))
-        |> MapSet.to_list()
+        Enum.filter([branch_one, branch_two], fn branch_name ->
+          Enum.any?(stop_names, fn stop_name -> String.contains?(stop_name, branch_name) end)
+        end)
 
       branch_name(intersection, stop_names)
     else
