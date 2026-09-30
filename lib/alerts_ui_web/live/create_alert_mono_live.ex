@@ -221,6 +221,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
+  def handle_event(
+        "move_progress",
+        %{"value" => "details"},
+        %{assigns: %{change_type: true}} = socket
+      ) do
+    # The case of moving from form page 1 to form page 2 via the "Alert Details" timeline button
+    socket =
+      socket
+      |> assign(%{progress: get_step_by_name("details"), change_type: false})
+      |> sync_socket(%{})
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("move_progress", %{"value" => name}, socket) do
     {:noreply, assign(socket, :progress, get_step_by_name(name))}
   end
