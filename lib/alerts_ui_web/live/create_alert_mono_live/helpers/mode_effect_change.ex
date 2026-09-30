@@ -1,5 +1,3 @@
-alias AlertsUI.Models.InformedEntity
-
 import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
   only: [
     combination_for: 2,
@@ -101,16 +99,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     previous_facility_types = facility_types(previous_effect_name)
     next_facility_types = facility_types(next_effect_name)
 
-    cond do
-      # If the next state has all facility types, do not remove anything
-      next_facility_types === InformedEntity.all_facility_types() ->
-        %{}
-
-      previous_facility_types !== next_facility_types ->
-        %{facility_ids: nil}
-
-      true ->
-        %{}
+    if previous_facility_types !== next_facility_types do
+      %{facility_ids: nil}
+    else
+      %{}
     end
   end
 

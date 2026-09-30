@@ -225,8 +225,8 @@ defmodule AlertsUI.IBIAlertImporterTest do
     end
 
     test ":effect_name", %{ibi_alert: ibi_alert} do
-      assert ibi_alert.effect_name == "Cancelled Trip"
-      assert from_ibi(ibi_alert, :effect_name) == "Cancellation"
+      assert ibi_alert.effect_name == "Out of Service"
+      assert from_ibi(ibi_alert, :effect_name) == "Access Issue"
     end
   end
 end
