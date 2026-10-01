@@ -1150,9 +1150,7 @@ defmodule AlertsUI.AlertBuilder do
     stop = StopsRepo.get!(stop_id)
 
     child_stop_ids =
-      (stop.child_ids -- excluded_stops_from_facility_properties(properties))
-      |> Enum.concat([stop.id])
-      |> Enum.uniq()
+      (stop.child_ids -- excluded_stops_from_facility_properties(properties)) |> Enum.uniq()
 
     # fallback for rare cases the stop has no child stops (eg fare vending machines)
     child_stop_ids = if Enum.empty?(child_stop_ids), do: [stop_id], else: child_stop_ids
@@ -1161,30 +1159,26 @@ defmodule AlertsUI.AlertBuilder do
       child_stop_ids
       |> Enum.join(",")
       |> RoutesRepo.by_stop()
-      |> Enum.filter(&(&1.description !== :rail_replacement_bus))
+
+    routes_from_parent =
+      RoutesRepo.by_stop(stop.id)
 
     # use route_ids from parent stop if none are associated with children
-    route_ids =
-      if Enum.empty?(routes_from_children) do
-        RoutesRepo.by_stop(stop.id)
-      else
-        routes_from_children
-      end
-      |> Enum.map(&[id: &1.id, type: &1.type])
-      |> Enum.uniq()
+    routes_from_children =
+      if Enum.empty?(routes_from_children), do: routes_from_parent, else: routes_from_children
 
-    child_stop_ids
-    |> Enum.flat_map(fn stop_id ->
-      Enum.map(route_ids, fn [id: route_id, type: route_type] ->
-        %{
-          activities: Activities.for_effect(effect),
-          facility_id: facility_id,
-          route_id: route_id,
-          route_type: route_type,
-          stop_id: stop_id
-        }
-      end)
-    end)
+    child_entities =
+      build_facility_entities_from_routes(
+        routes_from_children,
+        child_stop_ids,
+        facility_id,
+        effect
+      )
+
+    parent_entities =
+      build_facility_entities_from_routes(routes_from_parent, [stop.id], facility_id, effect)
+
+    child_entities ++ parent_entities
   end
 
   defp build_facility_maps(%Facility{stop: nil, id: facility_id}, effect) do
@@ -1194,6 +1188,27 @@ defmodule AlertsUI.AlertBuilder do
         facility_id: facility_id
       }
     ]
+  end
+
+  defp build_facility_entities_from_routes(routes, stop_ids, facility_id, effect) do
+    routes =
+      routes
+      |> Enum.filter(&(&1.description !== :rail_replacement_bus))
+      |> Enum.map(&[id: &1.id, type: &1.type])
+      |> Enum.uniq()
+
+    stop_ids
+    |> Enum.flat_map(fn stop_id ->
+      Enum.map(routes, fn [id: route_id, type: route_type] ->
+        %{
+          activities: Activities.for_effect(effect),
+          facility_id: facility_id,
+          route_id: route_id,
+          route_type: route_type,
+          stop_id: stop_id
+        }
+      end)
+    end)
   end
 
   @spec on_route?({Stop.id_t(), Route.id_t()}, String.t()) :: boolean()
