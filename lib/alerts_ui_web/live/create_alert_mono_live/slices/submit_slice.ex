@@ -1,6 +1,6 @@
 defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
   @moduledoc """
-  Slice that renders the bottom action bar with Back, Cancel, and Review/Submit
+  Slice that renders the bottom action bar with Select Alert Type, Cancel, and Review/Submit
   buttons, and conditionally shows the review modal and prediction-suppression
   warning modal before saving an alert.
   """
@@ -109,13 +109,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
       />
       <.button_secondary
         class="mt-8 self-center border-none py-2 px-3"
-        name="back"
+        name="select-alert-type"
         phx-click="move_progress"
         value="route_type_and_effect"
         type="button"
-        id="back"
+        id="select-alert-type"
       >
-        <.icon name="hero-arrow-left-solid" class="h-3 w-3 mr-2" /> Back
+        <.icon name="hero-arrow-left-solid" class="h-3 w-3 mr-2" /> Select Alert Type
       </.button_secondary>
       <div class="flex flex-1">&nbsp;</div>
       <.button_secondary

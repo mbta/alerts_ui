@@ -340,13 +340,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
 
   describe "other navigation events" do
     @tag :logged_in_user
-    test "back button returns to previous step", %{conn: conn} do
+    test "'select alert type' button returns to previous step", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
       view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
 
       view
-      |> element("button#back")
+      |> element("button#select-alert-type")
       |> render_click()
 
       assert render(view) =~ ~s(Service Type)
