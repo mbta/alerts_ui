@@ -1569,6 +1569,64 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
+    test "changing modes should only retain effect for the original mode",
+         %{conn: conn} do
+      # If we have a Bus Delay, then switch to Subway, we want Delay wiped out.
+      # But if we go back to Bus Delay, we want Delay to be selected still.
+      # Clicking Delay will bring us back to page 2
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           by_type: fn _, _ -> [@ferry_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        assert has_element?(view, "#effect-name-delay-button[aria-checked]")
+
+        # Click Ferry
+        view
+        |> element("#route-type-ferry-button")
+        |> render_click()
+
+        # Delay should not be checked
+        refute has_element?(view, "#effect-name-delay-button[aria-checked]")
+
+        # Go back to Bus
+        view
+        |> element("#route-type-bus-button")
+        |> render_click()
+
+        # Delay should be checked again
+        assert has_element?(view, "#effect-name-delay-button[aria-checked]")
+
+        # Clicking delay brings us back to Bus Delay
+        view |> element("#effect-name-delay-button") |> render_click
+
+        render_async(view)
+
+        assert has_element?(view, "div", "Bus • Delay")
+      end
+    end
+
+    @tag :logged_in_user
     test "changing from a CR delay to a facility issue should wipe affected service but keep trip times",
          %{conn: conn} do
       ap =

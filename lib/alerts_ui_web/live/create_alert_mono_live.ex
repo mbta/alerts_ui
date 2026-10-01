@@ -193,7 +193,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         %{assigns: %{change_type: true}} = socket
       ) do
     route_type = Map.get(params, "value")
-    {:noreply, socket |> assign(:path_route_type, route_type)}
+
+    # if we switch modes, we should clear the effect, except if we are going back to the originally selected mode
+    original_route_type = socket.assigns.form[:route_type].value
+    original_effect_name = socket.assigns.form[:effect_name].value
+    mode_name = InformedEntity.route_code_mapping(original_route_type) |> Atom.to_string()
+    draft_effect = if route_type === mode_name, do: original_effect_name, else: nil
+
+    {:noreply, socket |> assign(%{path_route_type: route_type, path_effect_name: draft_effect})}
   end
 
   @impl true
@@ -216,6 +223,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         change_type: true
       })
       |> push_patch(to: PathHelper.path(socket.assigns))
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "move_progress",
+        %{"value" => "details"},
+        %{assigns: %{change_type: true}} = socket
+      ) do
+    # The case of moving from form page 1 to form page 2 via the "Alert Details" timeline button
+    socket =
+      socket
+      |> assign(%{progress: get_step_by_name("details"), change_type: false})
+      |> sync_socket(%{})
 
     {:noreply, socket}
   end

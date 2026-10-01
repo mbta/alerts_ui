@@ -434,6 +434,7 @@ defmodule AlertsUIWeb.SharedComponents do
       #{if @hidden, do: "hidden", else: ""}
       #{@class}
     "}
+      aria-checked={@active}
       {@rest}
     >
       <div class="flex flex-row justify-center align-center">
