@@ -1934,7 +1934,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            get: fn
              "place-sstat" -> @stop
              "place-crtst" -> @stop_2
-           end
+           end,
+           by_trip: fn _trip_id -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [
@@ -2244,7 +2245,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            get: fn
              "place-sstat" -> @stop
              "place-crtst" -> @stop_2
-           end
+           end,
+           by_trip: fn _trip_id -> [@stop] end
          ]},
         {RoutePatternsRepo, [],
          [

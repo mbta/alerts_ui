@@ -599,6 +599,12 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
       assert BuildAutoText.route_names(%{routes: []}) == ""
     end
 
+    test "when there is a branch name" do
+      expected = "Providence Line"
+      actual = BuildAutoText.route_names(%{routes: [@route_1], branch_name: "Providence Line"})
+      assert expected == actual
+    end
+
     test "when there is 1 numeric route" do
       expected = "Route 1"
       actual = BuildAutoText.route_names(%{routes: [@route_1], schedules: []})

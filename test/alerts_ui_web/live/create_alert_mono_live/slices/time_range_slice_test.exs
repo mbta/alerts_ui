@@ -496,7 +496,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
 
       with_mocks([
         {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [schedule, schedule_2] end},
-        {StopsRepo, [], by_route: fn _, _, _opts -> [] end},
+        {StopsRepo, [], by_route: fn _, _, _opts -> [] end, by_trip: fn _trip_id -> [] end},
         {RoutesRepo, [], [by_type: fn _type -> [route] end, get: fn _id, _opts -> route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")

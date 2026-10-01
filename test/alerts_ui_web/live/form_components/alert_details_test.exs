@@ -684,7 +684,11 @@ defmodule AlertsUIWeb.FormComponents.AlertDetailsTest do
              |> Date.add(10)
            end
          ]},
-        {StopsRepo, [], [by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end]}
+        {StopsRepo, [],
+         [
+           by_route: fn _route, _direction, _opts -> [@stop, @stop_2] end,
+           by_trip: fn _trip_id -> [@stop] end
+         ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/legacy/new")
 

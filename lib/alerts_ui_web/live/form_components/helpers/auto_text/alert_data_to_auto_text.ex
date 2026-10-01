@@ -93,7 +93,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
     end
   end
 
-  defp calcuate_branch_name(2, [route], [schedule]) do
+  def calcuate_branch_name(2, [route], [schedule]) do
     # if this is a commuter rail alert with 1 selected route and schedule
     # and the route name contains a slash (eg Franklin/Foxboro Line)
     # then determine a new line name by finding which of the 2 branch names
@@ -111,18 +111,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         |> Stream.map(& &1.name)
         |> Enum.into([])
 
-      intersection =
-        Enum.filter([branch_one, branch_two], fn branch_name ->
-          Enum.any?(stop_names, fn stop_name -> String.contains?(stop_name, branch_name) end)
-        end)
-
-      branch_name(intersection, stop_names)
+      [branch_one, branch_two]
+      |> Enum.filter(fn branch_name ->
+        branch_name_in_stop_names?(branch_name, stop_names)
+      end)
+      |> branch_name(stop_names)
     else
       nil
     end
   end
 
-  defp calcuate_branch_name(_route_type, _routes, _schedules), do: nil
+  def calcuate_branch_name(_route_type, _routes, _schedules), do: nil
+
+  defp branch_name_in_stop_names?(branch_name, stop_names) do
+    Enum.any?(stop_names, fn stop_name -> String.contains?(stop_name, branch_name) end)
+  end
 
   defp branch_name([branch_name], _stop_names), do: branch_name <> " Line"
 

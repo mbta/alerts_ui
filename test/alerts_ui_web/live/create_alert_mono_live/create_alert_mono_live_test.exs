@@ -226,7 +226,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     test "Correctly displays trip end warning modal", %{conn: conn} do
       with_mocks([
         {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end},
-        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
+        {StopsRepo, [],
+         by_route: fn _, _, _opts -> [@stop] end, by_trip: fn _trip_id -> [@stop] end},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -265,7 +266,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     test "Works with both modals", %{conn: conn} do
       with_mocks([
         {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end},
-        {StopsRepo, [], by_route: fn _, _, _opts -> [@stop] end},
+        {StopsRepo, [],
+         by_route: fn _, _, _opts -> [@stop] end, by_trip: fn _trip_id -> [@stop] end},
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -1622,7 +1624,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {StopsRepo, [],
          [
            by_route: fn _, _, _ -> [@stop, @stop_2] end,
-           get_parent: fn _ -> nil end
+           get_parent: fn _ -> nil end,
+           by_trip: fn _trip_id -> [@stop] end
          ]},
         {SchedulesRepo, [],
          [
