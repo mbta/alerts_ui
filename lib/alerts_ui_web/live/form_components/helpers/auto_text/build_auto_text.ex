@@ -2,7 +2,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @moduledoc """
     Constructs auto-text for header from affected service.
   """
-  alias AlertsUI.Models.{EnhancedSchedule, InformedEntity, SeverityLevel, SkateDetour}
+  alias AlertsUI.Models.{EnhancedSchedule, InformedEntity, SeverityLevel}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, DateTimeHelpers, SelectFormatter}
   alias MBTAV3API.Facilities.Facility
@@ -18,7 +18,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             service_types: [],
             direction: [],
             branch_name: nil,
-            detour: nil,
+            missed_stops: nil,
             severity: nil,
             cause_detail: "",
             start_specifier: nil,
@@ -45,7 +45,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           service_types: [integer()],
           direction: [integer()],
           branch_name: String.t() | nil,
-          detour: SkateDetour.t() | nil,
+          missed_stops: [String.t()] | nil,
           severity: integer() | nil,
           cause_detail: String.t(),
           start_specifier: atom() | nil,
@@ -196,6 +196,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   @spec skipping_stop_text(__MODULE__.t()) :: String.t()
+
+  def skipping_stop_text(%{missed_stops: []}), do: ", but no stops are being skipped"
+
   def skipping_stop_text(%{direction: [_direction], stops: [_ | _]} = alert_data) do
     ", skipping #{stop_names(alert_data)}"
   end
@@ -205,12 +208,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   @spec closest_stop_text(__MODULE__.t()) :: String.t()
+  def closest_stop_text(%{missed_stops: []}), do: ""
+
+  def closest_stop_text(%{missed_stops: [missed_stop]}) do
+    "The closest stop with service is #{missed_stop}."
+  end
+
+  def closest_stop_text(%{missed_stops: [_ | _] = missed_stops}) do
+    "The closest stops with service are #{join_together(missed_stops)}."
+  end
+
   def closest_stop_text(%{direction: [_direction]}) do
-    "The closest stops with service are ___ and ___"
+    "The closest stops with service are ___ and ___."
   end
 
   def closest_stop_text(_alert_data) do
-    "The closest stops with inbound service are ___ and ___. The closest stops with outbound service are ___ and ___"
+    "The closest stops with inbound service are ___ and ___. The closest stops with outbound service are ___ and ___."
   end
 
   # trips

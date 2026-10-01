@@ -3136,7 +3136,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                  ~s(title="Stop ID 72" selected="" value="Mass Ave at Pearl St \(inbound\)|72">Mass Ave at Pearl St \(inbound\))
 
         assert view |> element("#alert_data_header_text") |> render_async =~
-                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St (inbound). The closest stops with service are ___ and ___."
+                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St (inbound). The closest stop with service is Mass Ave at Pearl St."
       end
     end
 

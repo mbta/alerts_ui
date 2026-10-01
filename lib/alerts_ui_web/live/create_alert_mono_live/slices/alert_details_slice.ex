@@ -380,6 +380,21 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
   end
 
+  defp get_missed_stops(nil, _), do: nil
+  defp get_missed_stops(_, nil), do: nil
+
+  defp get_missed_stops(detour, stop_names_and_ids) do
+    stop_names_and_ids
+    |> Alert.get_original_names_and_ids()
+    |> Enum.filter(fn {_name, id} -> id in detour.missed_stops end)
+    |> Enum.map(fn {name, _id} -> name end)
+    |> Enum.map(
+      &(&1
+        |> String.replace(" (inbound)", "")
+        |> String.replace(" (outbound)", ""))
+    )
+  end
+
   def autotext_map(alert_data, assigns) do
     selected =
       assigns |> unwrap_selections() |> selected_objects(alert_data)
@@ -387,12 +402,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     detour =
       assigns |> unwrap_detours |> Enum.find(&(&1.id == Map.get(alert_data, :skate_detour_id)))
 
+    missed_stops = get_missed_stops(detour, Map.get(alert_data, :stop_names_and_ids))
+
     autotext_data =
       alert_data
       |> translated_details()
       |> Map.merge(selected)
       |> Map.merge(%{
-        detour: detour,
+        missed_stops: missed_stops,
         service_types: alert_data.service_types,
         current_time: DateTimeHelpers.current_time()
       })
