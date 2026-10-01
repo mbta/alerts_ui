@@ -2,7 +2,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @moduledoc """
     Constructs auto-text for header from affected service.
   """
-  alias AlertsUI.Models.{EnhancedSchedule, InformedEntity, SeverityLevel}
+  alias AlertsUI.Models.{EnhancedSchedule, InformedEntity, SeverityLevel, SkateDetour}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, DateTimeHelpers, SelectFormatter}
   alias MBTAV3API.Facilities.Facility
@@ -18,6 +18,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             service_types: [],
             direction: [],
             branch_name: nil,
+            detour: nil,
             severity: nil,
             cause_detail: "",
             start_specifier: nil,
@@ -44,6 +45,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           service_types: [integer()],
           direction: [integer()],
           branch_name: String.t() | nil,
+          detour: SkateDetour.t() | nil,
           severity: integer() | nil,
           cause_detail: String.t(),
           start_specifier: atom() | nil,

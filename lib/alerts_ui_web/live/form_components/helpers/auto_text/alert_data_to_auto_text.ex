@@ -29,6 +29,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
         facilities: Map.get(alert_data, :facilities),
         service_types: Map.get(alert_data, :service_types),
         direction: get_direction(Map.get(alert_data, :direction)),
+        detour: Map.get(alert_data, :detour),
         branch_name: branch_name,
         severity: Map.get(alert_data, :severity) |> safe_string_to_int(),
         cause_detail: Map.get(alert_data, :cause_detail),

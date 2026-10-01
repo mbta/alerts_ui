@@ -373,15 +373,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
   end
 
+  defp unwrap_detours(assigns) do
+    case Map.get(assigns, :skate_detours) do
+      %AsyncResult{ok?: true} = async_result -> async_result.result
+      _ -> []
+    end
+  end
+
   def autotext_map(alert_data, assigns) do
     selected =
       assigns |> unwrap_selections() |> selected_objects(alert_data)
+
+    detour =
+      assigns |> unwrap_detours |> Enum.find(&(&1.id == Map.get(alert_data, :skate_detour_id)))
 
     autotext_data =
       alert_data
       |> translated_details()
       |> Map.merge(selected)
       |> Map.merge(%{
+        detour: detour,
         service_types: alert_data.service_types,
         current_time: DateTimeHelpers.current_time()
       })
