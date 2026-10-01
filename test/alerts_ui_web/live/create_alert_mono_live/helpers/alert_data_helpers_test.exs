@@ -201,7 +201,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpersTest do
 
   describe "get_single_route_effect_names/0" do
     test "returns the configured single-route effect list" do
-      assert AlertDataHelpers.get_single_route_effect_names() == ["Detour", "Snow Route"]
+      assert AlertDataHelpers.get_single_route_effect_names() == [
+               "Detour",
+               "Snow Route",
+               "Station Bypass",
+               "Dock Bypass"
+             ]
     end
   end
 
