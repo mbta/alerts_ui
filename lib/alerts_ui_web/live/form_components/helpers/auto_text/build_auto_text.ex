@@ -17,6 +17,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             facilities: [],
             service_types: [],
             direction: [],
+            branch_name: nil,
             severity: nil,
             cause_detail: "",
             start_specifier: nil,
@@ -42,6 +43,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           facilities: [Facility.t()],
           service_types: [integer()],
           direction: [integer()],
+          branch_name: String.t() | nil,
           severity: integer() | nil,
           cause_detail: String.t(),
           start_specifier: atom() | nil,
@@ -274,6 +276,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   # routes
   @spec route_names(__MODULE__.t()) :: String.t()
   def route_names(%{routes: []}), do: ""
+
+  # preferentially use calculated CR branch name if available
+  def route_names(%{branch_name: branch_name}) when not is_nil(branch_name), do: branch_name
 
   def route_names(%{routes: routes, schedules: []}) when length(routes) > 5 do
     grouped_routes = routes |> sort_routes() |> Enum.group_by(&first_letter_numeric?/1)

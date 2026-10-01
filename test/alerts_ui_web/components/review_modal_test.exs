@@ -433,7 +433,12 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
            get: fn _id -> @route_one end,
            get: fn _id, _opts -> @route_one end
          ]},
-        {StopsRepo, [], [by_route_type: fn _, _ -> [] end, by_route: fn _, _, _ -> [] end]},
+        {StopsRepo, [],
+         [
+           by_route_type: fn _, _ -> [] end,
+           by_route: fn _, _, _ -> [] end,
+           by_trip: fn _trip_id -> [@stop] end
+         ]},
         {SchedulesRepo, [], [by_route_ids: fn _route_ids, _opts -> [@schedule, @schedule_2] end]}
       ]) do
         # CR Cancellation
@@ -487,7 +492,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
                Map.put(@stop, :name, @stop.name <> "(inbound)")
              ]
            end,
-           get: fn _id -> @stop end
+           get: fn _id -> @stop end,
+           by_trip: fn _trip_id -> [@stop] end
          ]}
       ]) do
         # CR Delay
@@ -576,7 +582,8 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         {StopsRepo, [],
          [
            by_route: fn _route, _direction, _opts -> [@stop] end,
-           get: fn _id -> @stop end
+           get: fn _id -> @stop end,
+           by_trip: fn _trip_id -> [@stop] end
          ]}
       ]) do
         # Bus Delay
