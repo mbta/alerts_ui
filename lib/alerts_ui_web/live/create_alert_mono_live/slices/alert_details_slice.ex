@@ -394,10 +394,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   defp get_connection_points(_, _), do: nil
 
   def autotext_map(alert_data, assigns) do
-    foo = assigns |> unwrap_selections()
+    selections = assigns |> unwrap_selections()
 
     selected =
-      foo |> selected_objects(alert_data)
+      selections |> selected_objects(alert_data)
 
     detour =
       assigns
@@ -406,7 +406,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
 
     # You need to give this all the stops in selections
     # instead of stop names and ids
-    connection_points = get_connection_points(detour, Map.get(foo, :available_stops))
+    connection_points = get_connection_points(detour, Map.get(selections, :available_stops))
 
     autotext_data =
       alert_data
