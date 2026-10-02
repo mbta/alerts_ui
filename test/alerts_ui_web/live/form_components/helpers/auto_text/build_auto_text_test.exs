@@ -308,6 +308,11 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
   end
 
   describe "skipping stop text/1" do
+    test "when there's missed stops but they're empty" do
+      assert BuildAutoText.skipping_stop_text(%{missed_stops: []}) ==
+               ", but no stops are being skipped"
+    end
+
     test "when there's multiple directions" do
       assert BuildAutoText.skipping_stop_text(%{direction: [0, 1]}) == ""
     end
@@ -319,6 +324,28 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
   end
 
   describe "closest_stop_text/1" do
+    test "when there's connection points but they're empty" do
+      assert BuildAutoText.closest_stop_text(%{connection_points: []}) ==
+               ""
+    end
+
+    test "when there's 1 connection point" do
+      assert BuildAutoText.closest_stop_text(%{
+               connection_points: ["Massachusetts Ave opp Inman St"]
+             }) ==
+               "The closest stop with service is Massachusetts Ave opp Inman St."
+    end
+
+    test "when there's multiple connection points" do
+      assert BuildAutoText.closest_stop_text(%{
+               connection_points: [
+                 "Massachusetts Ave opp Inman St",
+                 "Massachusetts Ave @ Sidney St"
+               ]
+             }) ==
+               "The closest stops with service are Massachusetts Ave opp Inman St and Massachusetts Ave @ Sidney St."
+    end
+
     test "when there's only 1 direction" do
       assert BuildAutoText.closest_stop_text(%{direction: [0]}) ==
                "The closest stops with service are ___ and ___."

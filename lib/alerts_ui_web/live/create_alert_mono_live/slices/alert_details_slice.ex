@@ -383,6 +383,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   defp get_connection_points(%{connection_points: [_ | _] = connection_points}, [_ | _] = stops) do
     stops
     |> Enum.filter(fn stop -> stop.id in connection_points end)
+    |> Enum.uniq_by(& &1.id)
     |> Enum.map(
       &(&1.name
         |> String.replace(" (inbound)", "")

@@ -158,7 +158,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
   }
 
   @detour_stop %Stop{
-    id: "71",
+    id: "72",
     type: 3,
     name: "Mass Ave at Pearl St"
   }
@@ -3139,10 +3139,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                  ~s(disabled="")
 
         assert view |> element("#alert_data_stop_names_and_ids_selector") |> render_async =~
-                 ~s(title="Stop ID 7" selected="" value="Mass Ave at Pearl St \(inbound\)|72">Mass Ave at Pearl St \(inbound\))
+                 ~s(title="Stop ID 72" selected="" value="Mass Ave at Pearl St \(inbound\)|72">Mass Ave at Pearl St \(inbound\))
 
         assert view |> element("#alert_data_header_text") |> render_async =~
-                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St (inbound). The closest stop with service is Mass Ave opp Inman St (inbound)"
+                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St (inbound). The closest stop with service is Mass Ave opp Inman St"
       end
     end
 
