@@ -19,6 +19,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             direction: [],
             branch_name: nil,
             missed_stops: nil,
+            connection_points: nil,
             severity: nil,
             cause_detail: "",
             start_specifier: nil,
@@ -46,6 +47,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           direction: [integer()],
           branch_name: String.t() | nil,
           missed_stops: [String.t()] | nil,
+          connection_points: [String.t()] | nil,
           severity: integer() | nil,
           cause_detail: String.t(),
           start_specifier: atom() | nil,
@@ -208,14 +210,14 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   @spec closest_stop_text(__MODULE__.t()) :: String.t()
-  def closest_stop_text(%{missed_stops: []}), do: ""
+  def closest_stop_text(%{connection_points: []}), do: ""
 
-  def closest_stop_text(%{missed_stops: [missed_stop]}) do
-    "The closest stop with service is #{missed_stop}."
+  def closest_stop_text(%{connection_points: [connection_point]}) do
+    "The closest stop with service is #{connection_point}."
   end
 
-  def closest_stop_text(%{missed_stops: [_ | _] = missed_stops}) do
-    "The closest stops with service are #{join_together(missed_stops)}."
+  def closest_stop_text(%{connection_points: [_ | _] = connection_points}) do
+    "The closest stops with service are #{join_together(connection_points)}."
   end
 
   def closest_stop_text(%{direction: [_direction]}) do
