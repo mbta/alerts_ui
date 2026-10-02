@@ -3058,6 +3058,33 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "detour prompt changes if all skate detours are used", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           get: fn _, _ -> @bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [] end]},
+        {Alerts, [], [get_matching_skate_ids: fn _ -> [7, 8, 9] end]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"route_ids" => ["1"], "single_route_id" => "1"}
+        })
+
+        assert view |> element("#alert_data_skate_detour_id_selector") |> render_async =~
+                 "There is currently an alert for every Skate detour on this route."
+      end
+    end
+
+    @tag :logged_in_user
     test "detour select is displayed if one matches selected route", %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],

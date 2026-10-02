@@ -320,7 +320,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     original_skate_id = socket.assigns.original_skate_id
 
-    Phoenix.LiveView.assign_async(socket, [:skate_detours], fn ->
+    Phoenix.LiveView.assign_async(socket, [:skate_detours, :used_detour_ids], fn ->
       detours = GetDetours.get_detours() |> Enum.filter(&(&1.route_id == single_route_id))
 
       used_detour_ids =
@@ -328,12 +328,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
       # if we have an existing id because we're editing, don't remove it from the list
       used_detour_ids = used_detour_ids -- [original_skate_id]
-
       detours = Enum.reject(detours, &(&1.id in used_detour_ids))
 
       {:ok,
        %{
-         skate_detours: detours
+         skate_detours: detours,
+         used_detour_ids: used_detour_ids
        }}
     end)
   end
@@ -784,6 +784,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     assigns =
       assign(assigns,
+        used_detour_ids: assigns.used_detour_ids.result || [],
         single_route_effect?: single_route_effect?,
         route_field: route_field,
         detours_loading?: !is_nil(assigns.skate_detours.loading),
@@ -891,9 +892,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             filter_field={@form[:skate_search_term]}
             options={
               cond do
-                is_nil(@form[:single_route_id].value) -> []
-                Enum.empty?(@skate_detour_options) -> ["No active detours in Skate"]
-                true -> @skate_detour_options
+                is_nil(@form[:single_route_id].value) ->
+                  []
+
+                Enum.empty?(@skate_detour_options) && Enum.empty?(@used_detour_ids) ->
+                  ["No active detours in Skate"]
+
+                Enum.empty?(@skate_detour_options) ->
+                  ["There is currently an alert for every Skate detour on this route."]
+
+                true ->
+                  @skate_detour_options
               end
             }
             disabled={Enum.empty?(@skate_detour_options)}
@@ -959,10 +968,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
           automatically:
         </p>
         <ul class="list-disc ml-8">
-          <li>select a direction</li>
-          <li>select missed stops</li>
+          <li>Select a direction</li>
+          <li>Select missed stops</li>
           <li>
-            set this alert to close when the detour is
+            Set this alert to close when the detour is
             closed in Skate
           </li>
         </ul>

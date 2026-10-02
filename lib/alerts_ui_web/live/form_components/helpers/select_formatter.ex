@@ -185,10 +185,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
         },
         _route_type
       ) do
+    plural = if length(missed_stops) > 1, do: "s", else: ""
+
     if nearest_intersection do
-      "Start: #{nearest_intersection} "
+      missed_stop_text =
+        if missed_stops in [[], nil] do
+          ""
+        else
+          " (#{length(missed_stops)} affected stop#{plural}) "
+        end
+
+      "Start: #{nearest_intersection}#{missed_stop_text}"
     else
-      plural = if length(missed_stops) > 1, do: "s", else: ""
       "Skipped stop#{plural}: #{Enum.join(missed_stops, ",")}"
     end
   end
