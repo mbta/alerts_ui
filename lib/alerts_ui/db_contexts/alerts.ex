@@ -205,7 +205,7 @@ defmodule AlertsUI.Alerts do
 
   @spec list_all_open() :: [Alert.t()]
   def list_all_open do
-    # Using an inner join here reduces the
+    # Using preload here reduces the
     # number of overall queries
     # ref. https://hexdocs.pm/ecto/Ecto.Query.html#preload/3
     Repo.all(
