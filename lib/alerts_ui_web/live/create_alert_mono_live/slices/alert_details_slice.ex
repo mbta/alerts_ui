@@ -391,6 +391,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     )
   end
 
+  defp get_connection_points(%{connection_points: []}, _), do: []
+
   defp get_connection_points(_, _), do: nil
 
   def autotext_map(alert_data, assigns) do
