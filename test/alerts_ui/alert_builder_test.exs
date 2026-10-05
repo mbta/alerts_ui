@@ -4599,6 +4599,13 @@ defmodule AlertsUI.AlertBuilderTest do
                  route_type: 1,
                  facility_id: "349",
                  activities: [:USING_WHEELCHAIR]
+               },
+               %{
+                 stop_id: "place-alfcl",
+                 route_id: "Red",
+                 route_type: 1,
+                 facility_id: "349",
+                 activities: [:USING_WHEELCHAIR]
                }
              ]
     end
@@ -4648,6 +4655,83 @@ defmodule AlertsUI.AlertBuilderTest do
                %{
                  stop_id: "place-alfcl",
                  route_id: "Red",
+                 route_type: 1,
+                 facility_id: "349",
+                 activities: [:USING_WHEELCHAIR]
+               }
+             ]
+    end
+  end
+
+  test "builds facility informed entities by adding parent stops x routes" do
+    alert_data = %{
+      route_type: nil,
+      effect_name: "Elevator Closure",
+      header_text: "test header",
+      description_text: "test description",
+      facility_ids: ["349"]
+    }
+
+    facility = %Facility{
+      id: "349",
+      type: "ESCALATOR",
+      short_name: "Platform to Russell Field",
+      long_name: "Alewife Escalator 349 (Platform to Russell Field)",
+      stop: %Stop{
+        id: "place-alfcl",
+        type: "stop"
+      },
+      properties: []
+    }
+
+    stop = %Stop{
+      id: "place-alfcl",
+      type: "stop",
+      child_ids: ["door-alfcl-alewife"]
+    }
+
+    route = %Route{
+      id: "Red",
+      type: 1
+    }
+
+    route2 = %Route{
+      id: "Other Red",
+      type: 1
+    }
+
+    with_mocks([
+      {FacilitiesRepo, [], [get_by_type: fn _, _opts -> [facility] end]},
+      {StopsRepo, [],
+       [get!: fn _stop_id -> stop end, all: fn ["filter[id]": ""], _opts -> [] end]},
+      {RoutesRepo, [],
+       [
+         by_stop: fn
+           "place-alfcl" -> [route, route2]
+           "door-alfcl-alewife" -> [route]
+         end
+       ]}
+    ]) do
+      result = AlertBuilder.build_alert(alert_data, :ACCESS)
+
+      assert result.informed_entity == [
+               %{
+                 stop_id: "door-alfcl-alewife",
+                 route_id: "Red",
+                 route_type: 1,
+                 facility_id: "349",
+                 activities: [:USING_WHEELCHAIR]
+               },
+               %{
+                 stop_id: "place-alfcl",
+                 route_id: "Red",
+                 route_type: 1,
+                 facility_id: "349",
+                 activities: [:USING_WHEELCHAIR]
+               },
+               %{
+                 stop_id: "place-alfcl",
+                 route_id: "Other Red",
                  route_type: 1,
                  facility_id: "349",
                  activities: [:USING_WHEELCHAIR]
