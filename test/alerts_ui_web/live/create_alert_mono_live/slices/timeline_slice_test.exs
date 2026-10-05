@@ -114,6 +114,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSliceTest do
         |> render_click()
 
         # go back to second page
+        assert view |> element("#details") |> render =~ ~s(hover:underline)
         view |> element("#details") |> render_click
         assert render(view) =~ ~s(Bus • Delay)
         assert view |> element("#details") |> render =~ ~s(text-text-primary)
@@ -136,6 +137,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSliceTest do
       # the details button should be disabled
       assert view |> element("#route_type_and_effect") |> render =~ ~s(text-text-primary)
       assert view |> has_element?("#details[disabled]")
+      refute view |> element("#details") |> render =~ ~s(hover:underline)
     end
   end
 end

@@ -107,8 +107,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
 
     clickable_class =
       cond do
-        step.name in (assigns.previous_steps -- [assigns.progress.name]) && !disabled ->
-          "text-text-primary hover:underline"
+        step.name !== assigns.progress.name && !disabled ->
+          "text-text-primary hover:underline text-text-link-outline"
 
         step.name in assigns.previous_steps ->
           "text-text-primary"
@@ -118,7 +118,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
       end
 
     selected_class =
-      if assigns.progress.name == step.name, do: "text-base font-medium", else: "text-sm"
+      if assigns.progress.name == step.name, do: "text-base font-bold", else: "text-sm"
 
     assigns =
       assign(
