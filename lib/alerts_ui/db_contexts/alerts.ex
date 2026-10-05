@@ -198,6 +198,11 @@ defmodule AlertsUI.Alerts do
     from a in ActivePeriod, order_by: a.start
   end
 
+  @spec informed_entity_preload_query() :: Ecto.Query.t()
+  defp informed_entity_preload_query do
+    from(ie in AlertsUI.Models.InformedEntity, order_by: ie.id, preload: [:trip])
+  end
+
   @spec list_all_open() :: [Alert.t()]
   def list_all_open do
     # Using an inner join here reduces the
@@ -207,13 +212,11 @@ defmodule AlertsUI.Alerts do
       from(
         a in Alert,
         where: is_nil(a.closed_timestamp),
-        inner_join: ie in AlertsUI.Models.InformedEntity,
-        on: ie.alert_id == a.id,
         preload: [
           :user,
           :reminder_times,
           active_period: ^active_period_preload_query(),
-          informed_entity: {ie, :trip}
+          informed_entity: ^informed_entity_preload_query()
         ],
         order_by: [asc: a.alert_id]
       )
@@ -226,13 +229,11 @@ defmodule AlertsUI.Alerts do
       from(
         a in Alert,
         where: not is_nil(a.closed_timestamp) and a.closed_timestamp > from_now(-5, "minute"),
-        inner_join: ie in AlertsUI.Models.InformedEntity,
-        on: ie.alert_id == a.id,
         preload: [
           :user,
           :reminder_times,
           active_period: ^active_period_preload_query(),
-          informed_entity: {ie, :trip}
+          informed_entity: ^informed_entity_preload_query()
         ],
         order_by: [asc: a.alert_id]
       )
