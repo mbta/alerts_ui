@@ -373,15 +373,50 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
     end
   end
 
+  defp unwrap_detours(assigns) do
+    case Map.get(assigns, :skate_detours) do
+      %AsyncResult{ok?: true} = async_result -> async_result.result
+      _ -> []
+    end
+  end
+
+  defp get_connection_points(%{connection_points: [_ | _] = connection_points}, [_ | _] = stops) do
+    stops
+    |> Enum.filter(fn stop -> stop.id in connection_points end)
+    |> Enum.uniq_by(& &1.id)
+    |> Enum.map(
+      &(&1.name
+        |> String.replace(" (inbound)", "")
+        |> String.replace(" (outbound)", ""))
+    )
+  end
+
+  defp get_connection_points(%{connection_points: []}, _), do: []
+
+  defp get_connection_points(_, _), do: nil
+
   def autotext_map(alert_data, assigns) do
+    selections = assigns |> unwrap_selections()
+
     selected =
-      assigns |> unwrap_selections() |> selected_objects(alert_data)
+      selections |> selected_objects(alert_data)
+
+    detour =
+      assigns
+      |> unwrap_detours
+      |> Enum.find(%{}, &(&1.id == Map.get(alert_data, :skate_detour_id)))
+
+    # You need to give this all the stops in selections
+    # instead of stop names and ids
+    connection_points = get_connection_points(detour, Map.get(selections, :available_stops))
 
     autotext_data =
       alert_data
       |> translated_details()
       |> Map.merge(selected)
       |> Map.merge(%{
+        missed_stops: Map.get(detour, :missed_stops),
+        connection_points: connection_points,
         service_types: alert_data.service_types,
         current_time: DateTimeHelpers.current_time()
       })

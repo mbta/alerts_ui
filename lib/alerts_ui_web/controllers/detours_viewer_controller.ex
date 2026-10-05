@@ -14,9 +14,9 @@ defmodule AlertsUIWeb.DetoursViewerController do
       |> Enum.map(&Map.from_struct(&1))
 
     list_of_routes_with_detours =
-      Enum.map(detours, &String.to_integer(&1.route_id))
+      detours
+      |> Enum.map(& &1.route_id)
       |> Enum.uniq()
-      |> Enum.sort()
       |> Enum.join(", ")
 
     encoded_detours =

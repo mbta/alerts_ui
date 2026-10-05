@@ -18,6 +18,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
             service_types: [],
             direction: [],
             branch_name: nil,
+            missed_stops: nil,
+            connection_points: nil,
             severity: nil,
             cause_detail: "",
             start_specifier: nil,
@@ -44,6 +46,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
           service_types: [integer()],
           direction: [integer()],
           branch_name: String.t() | nil,
+          missed_stops: [String.t()] | nil,
+          connection_points: [String.t()] | nil,
           severity: integer() | nil,
           cause_detail: String.t(),
           start_specifier: atom() | nil,
@@ -194,6 +198,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   @spec skipping_stop_text(__MODULE__.t()) :: String.t()
+
+  def skipping_stop_text(%{missed_stops: []}), do: ", but no stops are being skipped"
+
   def skipping_stop_text(%{direction: [_direction], stops: [_ | _]} = alert_data) do
     ", skipping #{stop_names(alert_data)}"
   end
@@ -203,12 +210,22 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   @spec closest_stop_text(__MODULE__.t()) :: String.t()
+  def closest_stop_text(%{connection_points: []}), do: ""
+
+  def closest_stop_text(%{connection_points: [connection_point]}) do
+    "The closest stop with service is #{connection_point}."
+  end
+
+  def closest_stop_text(%{connection_points: [_ | _] = connection_points}) do
+    "The closest stops with service are #{join_together(connection_points)}."
+  end
+
   def closest_stop_text(%{direction: [_direction]}) do
-    "The closest stops with service are ___ and ___"
+    "The closest stops with service are ___ and ___."
   end
 
   def closest_stop_text(_alert_data) do
-    "The closest stops with inbound service are ___ and ___. The closest stops with outbound service are ___ and ___"
+    "The closest stops with inbound service are ___ and ___. The closest stops with outbound service are ___ and ___."
   end
 
   # trips
