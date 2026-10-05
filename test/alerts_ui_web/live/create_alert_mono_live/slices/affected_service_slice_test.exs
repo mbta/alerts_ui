@@ -1968,6 +1968,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         })
 
         open_review_modal(view)
+        render_async(view)
 
         view
         |> element("#review-modal-container button", "Submit")
