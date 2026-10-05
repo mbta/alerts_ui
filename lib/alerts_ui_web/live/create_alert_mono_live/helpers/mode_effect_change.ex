@@ -100,10 +100,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
     next_facility_types = facility_types(next_effect_name)
     changing_to_superset? = previous_facility_types -- next_facility_types === []
 
-    if not changing_to_superset? do
-      %{facility_ids: nil}
-    else
+    if changing_to_superset? do
       %{}
+    else
+      %{facility_ids: nil}
     end
   end
 
