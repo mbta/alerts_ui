@@ -110,6 +110,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       changeset
       |> TimeRangeSlice.normalize_alert_timing()
       |> TimeRangeSlice.prevent_recurrence_day_deselection(previous_recurrence_days)
+      |> TimeRangeSlice.set_values_from_detour(target, socket.assigns.skate_detours)
       |> TimeRangeSlice.ensure_start_values(
         previous_start_specifier,
         previous_start_time_specifier,
@@ -219,6 +220,13 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         else: :later_today
     end
   end
+
+  def set_values_from_detour(changeset, "skate_detour_id", _skate_detours) do
+    changeset
+    |> force_change(:active_period_start_specifier, :now)
+  end
+
+  def set_values_from_detour(changeset, _, _), do: changeset
 
   def ensure_start_values(
         changeset,
@@ -519,6 +527,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   attr :previous_end_specifier, :atom
   attr :previous_start_time_specifier, :atom
   attr :previous_end_time_specifier, :atom
+  attr :skate_detours, :map
 
   def render(assigns) do
     ~H"""

@@ -60,6 +60,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
     name: "Framingham/Worcester Line"
   }
 
+  @detour_bus_route %Route{
+    direction_names: %{0 => "Outbound", 1 => "Inbound"},
+    sort_order: 1,
+    id: "1",
+    type: 3,
+    name: "1"
+  }
+
   @stop %Stop{id: "place-sstat", name: "South Station"}
   @stop_2 %Stop{id: "place-crtst", name: "Courthouse"}
   @stop_3 %Stop{id: "place-masta", name: "Massachusetts Avenue"}
@@ -134,6 +142,43 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
 
       assert view
              |> render() =~ ~s(Coast Guard)
+    end
+
+    @tag :logged_in_user
+    test "cause is automatically selected upon skate detour selection", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@detour_bus_route] end,
+           get: fn _, _ -> @detour_bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"route_ids" => ["1"], "single_route_id" => "1"}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "skate_detour_id"],
+          "alert_data" => %{"skate_detour_id" => 7}
+        })
+
+        assert view |> element("#alert_data_cause_detail") |> render_async =~
+                 ~s(<option selected="" value="DRAWBRIDGE_BEING_RAISED">drawbridge being raised</option>)
+      end
     end
   end
 

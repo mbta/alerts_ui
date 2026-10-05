@@ -12,7 +12,7 @@ defmodule AlertsUI.SkateDetours.GetDetoursTest do
       assert %AlertsUI.Models.SkateDetour{
                id: 7,
                route_id: "1",
-               reason: "Accident",
+               reason: "Drawbridge being raised",
                nearest_intersection: "Massachusetts Avenue & Western Avenue",
                estimated_duration: "2026-04-14",
                activated_at: ~U[2026-04-06 18:44:19Z],

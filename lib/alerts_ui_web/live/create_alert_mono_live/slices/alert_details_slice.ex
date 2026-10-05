@@ -88,7 +88,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       |> remove_invalid_cause_detail()
     end
 
-    def transform(details_data, changeset, params, _socket) do
+    def transform(details_data, changeset, params, socket) do
       effect_name = EffectHelper.effect_from_url_name(details_data.effect_name || "")
 
       severity = get_severity(details_data, effect_name)
@@ -117,7 +117,22 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
       Enum.reduce(details_params, changeset, fn {key, value}, changeset ->
         force_change(changeset, key, value)
       end)
+      |> update_cause_for_detour(target, socket.assigns.skate_detours)
     end
+
+    defp update_cause_for_detour(
+           changeset,
+           "skate_detour_id",
+           %AsyncResult{ok?: true} = skate_detours
+         ) do
+      detour_id = get_field(changeset, :skate_detour_id)
+      detour = Enum.find(skate_detours.result, &(&1.id == detour_id))
+      new_cause = (Map.get(detour, :reason) || "") |> String.upcase() |> String.replace(" ", "_")
+
+      force_change(changeset, :cause_detail, new_cause)
+    end
+
+    defp update_cause_for_detour(changeset, _target, _), do: changeset
 
     defp header_sync_toggle("header_text", true), do: false
     defp header_sync_toggle(_, current_toggle), do: current_toggle
