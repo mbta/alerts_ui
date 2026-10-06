@@ -28,7 +28,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
     original_direction_selections: ["Both|default"],
     duration_certainty: :ESTIMATED,
     severity: 1,
-    severity_level: :INFO
+    severity_level: :INFO,
+    skate_detour_id: 7
   }
 
   @second_alert_params %{
@@ -68,7 +69,9 @@ defmodule AlertsUIWeb.AlertHistoryTest do
     image_url: "http://example.com/image.jpg",
     image_alternative_text: "example image",
     banner_text: "the banner text",
-    plaintext_reminder_selections: "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00"
+    plaintext_reminder_selections:
+      "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00",
+    work_order_id: "10"
   }
 
   describe "alert_history/1" do
@@ -133,7 +136,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                image_alternative_text: "",
                set_as_website_banner: false,
                website_banner_text: "",
-               reminders: ""
+               reminders: "",
+               source_id: 7
              } = result_1
 
       assert %{
@@ -169,7 +173,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                image_alternative_text: "example image",
                set_as_website_banner: true,
                website_banner_text: "the banner text",
-               reminders: "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00"
+               reminders: "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00",
+               source_id: "10"
              } = result_2
 
       assert %{
@@ -205,7 +210,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                image_alternative_text: "example image",
                set_as_website_banner: true,
                website_banner_text: "the banner text",
-               reminders: "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00"
+               reminders: "2024-04-30T12:04:00, 2024-04-30T12:14:00, 2024-04-30T12:24:00",
+               source_id: "10"
              } = result_3
 
       {:ok, last_modified_datetime_1, _} =
@@ -254,7 +260,8 @@ defmodule AlertsUIWeb.AlertHistoryTest do
                image_alternative_text: "",
                set_as_website_banner: false,
                website_banner_text: "",
-               reminders: ""
+               reminders: "",
+               source_id: nil
              }
     end
 

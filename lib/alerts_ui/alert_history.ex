@@ -43,7 +43,8 @@ defmodule AlertsUI.AlertHistory do
     :image_alternative_text,
     :set_as_website_banner,
     :website_banner_text,
-    :reminders
+    :reminders,
+    :source_id
   ]
 
   defstruct @history_keys
@@ -82,7 +83,8 @@ defmodule AlertsUI.AlertHistory do
           image_alternative_text: String.t() | nil,
           set_as_website_banner: String.t() | nil,
           website_banner_text: String.t() | nil,
-          reminders: String.t() | nil
+          reminders: String.t() | nil,
+          source_id: String.t() | nil
         }
 
   @with_seconds "%M:%S"
@@ -137,7 +139,8 @@ defmodule AlertsUI.AlertHistory do
       image_alternative_text: alert_map |> image_alternative_text(),
       set_as_website_banner: alert_map |> set_as_website_banner(),
       website_banner_text: alert_map |> website_banner_text(),
-      reminders: alert_map |> reminders()
+      reminders: alert_map |> reminders(),
+      source_id: alert_map |> source_id()
     }
   end
 
@@ -306,6 +309,12 @@ defmodule AlertsUI.AlertHistory do
 
   defp reminders(map) do
     Map.get(map, :plaintext_reminder_selections) || ""
+  end
+
+  defp source_id(map) do
+    # shows either the trapeze id or skate id if present.
+    # an alert will never have both of these.
+    Map.get(map, :work_order_id) || Map.get(map, :skate_detour_id)
   end
 
   # end build_history helpers
