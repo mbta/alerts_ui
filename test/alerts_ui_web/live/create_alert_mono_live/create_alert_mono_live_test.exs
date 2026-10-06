@@ -86,6 +86,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     stop: @stop
   }
 
+  @elevator_facility %Facility{
+    id: "Facility-elevator",
+    long_name: "Elevator Facility",
+    stop: @stop
+  }
+
   @parking_facility %Facility{
     id: "Facility-parking",
     long_name: "Parking Facility",
@@ -1447,7 +1453,67 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "changing between from a bike facility to access issue should not retain selections", %{
+    test "changing between from an elevator facility to access issue should not retain selections",
+         %{
+           conn: conn
+         } do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-access-edit",
+          effect: :OTHER_EFFECT,
+          effect_detail: "ELEVATOR_CLOSURE",
+          primary_service_type: "access",
+          informed_entity: [
+            %{facility_id: @elevator_facility.id, route_type: nil}
+          ],
+          original_facility_selections: [@elevator_facility.id]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mock(FacilitiesRepo,
+        get_by_type: fn
+          ["ELEVATOR"], _ -> [@elevator_facility]
+          ["PARKING_AREA", "PICK_DROP"], _ -> [@parking_facility]
+          _, _ -> [@elevator_facility, @parking_facility]
+        end
+      ) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-access-edit")
+        render_async(view)
+        assert has_element?(view, "div", "Facility • Elevator Closure")
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#effect-name-access_issue-button")
+        |> render_click()
+
+        render_async(view)
+
+        {:ok, document} =
+          view
+          |> render()
+          |> Floki.parse_document()
+
+        refute has_element?(view, "div", "Facility • Elevator Closure")
+        assert has_element?(view, "div", "Facility • Access Issue")
+
+        refute document_has_element?(
+                 document,
+                 "option[value=\"#{@elevator_facility.id}\"][selected]"
+               )
+
+        assert document_has_element?(
+                 document,
+                 "option[value=\"#{@parking_facility.id}\"]"
+               )
+      end
+    end
+
+    @tag :logged_in_user
+    test "changing between from a bike facility to access issue should retain selections", %{
       conn: conn
     } do
       alert_params =
@@ -1493,7 +1559,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         refute has_element?(view, "div", "Facility • Bike Issue")
         assert has_element?(view, "div", "Facility • Access Issue")
 
-        refute document_has_element?(
+        assert document_has_element?(
                  document,
                  "option[value=\"#{@bike_facility.id}\"][selected]"
                )
