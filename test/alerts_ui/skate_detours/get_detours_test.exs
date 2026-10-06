@@ -17,6 +17,7 @@ defmodule AlertsUI.SkateDetours.GetDetoursTest do
                estimated_duration: "2026-04-14",
                activated_at: ~U[2026-04-06 18:44:19Z],
                updated_at: ~U[2026-04-09 13:37:59Z],
+               autoclose_on: ~U[2026-04-10 07:00:00Z],
                direction_id: 1,
                missed_stops: ["72"],
                route_segments: nil,

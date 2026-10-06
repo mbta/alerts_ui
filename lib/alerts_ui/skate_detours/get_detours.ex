@@ -34,6 +34,7 @@ defmodule AlertsUI.SkateDetours.GetDetours do
       estimated_duration: data["estimated_duration"],
       activated_at: DateTime.from_unix!(data["activated_at"]),
       updated_at: DateTime.from_unix!(data["updated_at"]),
+      autoclose_on: safe_datetime_from_unix(Map.get(data, "autoclose_on")),
       direction_id: data["direction_id"],
       missed_stops: Map.get(data, "missed_stops"),
       connection_points: Map.get(data, "connection_points"),
@@ -47,4 +48,7 @@ defmodule AlertsUI.SkateDetours.GetDetours do
     read_module = AlertsUI.config(:file_read_module)
     read_module.read()
   end
+
+  defp safe_datetime_from_unix(nil), do: nil
+  defp safe_datetime_from_unix(datetime), do: DateTime.from_unix!(datetime)
 end
