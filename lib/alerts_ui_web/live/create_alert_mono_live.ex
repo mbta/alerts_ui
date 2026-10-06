@@ -123,6 +123,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         image_preview_size: nil,
         first_async_load: true,
         skate_detours: %AsyncResult{},
+        used_detour_ids: %AsyncResult{},
         steps: @steps,
         change_type: false,
         persisting_alert: false,

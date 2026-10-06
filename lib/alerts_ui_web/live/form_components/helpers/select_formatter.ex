@@ -185,10 +185,18 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
         },
         _route_type
       ) do
+    plural = if length(missed_stops) > 1, do: "s", else: ""
+
     if nearest_intersection do
-      "Start: #{nearest_intersection} "
+      missed_stop_text =
+        if missed_stops in [[], nil] do
+          ""
+        else
+          " (#{length(missed_stops)} skipped stop#{plural}) "
+        end
+
+      "Start: #{nearest_intersection}#{missed_stop_text}"
     else
-      plural = if length(missed_stops) > 1, do: "s", else: ""
       "Skipped stop#{plural}: #{Enum.join(missed_stops, ",")}"
     end
   end
@@ -256,7 +264,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
     plural = if length(detour.missed_stops) > 1, do: "s", else: ""
 
     last_updated = DateTimeFormatters.timestamp_date_time(detour.updated_at)
-    "Last updated: #{last_updated}. (#{length(detour.missed_stops)} affected stop#{plural})"
+    "Last updated: #{last_updated}. (#{length(detour.missed_stops)} skipped stop#{plural})"
   end
 
   defp tooltip_content(object) do
