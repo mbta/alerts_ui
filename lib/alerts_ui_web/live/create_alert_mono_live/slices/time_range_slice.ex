@@ -15,6 +15,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias AlertsUIWeb.TripEndWarningModal
+  alias Phoenix.LiveView.AsyncResult
 
   alias Phoenix.HTML.Form
 
@@ -110,7 +111,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
       changeset
       |> TimeRangeSlice.normalize_alert_timing()
       |> TimeRangeSlice.prevent_recurrence_day_deselection(previous_recurrence_days)
-      |> TimeRangeSlice.set_values_from_detour(target, socket.assigns.skate_detours)
       |> TimeRangeSlice.ensure_start_values(
         previous_start_specifier,
         previous_start_time_specifier,
@@ -123,6 +123,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         current_time,
         timing
       )
+      |> TimeRangeSlice.set_values_from_detour(target, socket.assigns.skate_detours)
       |> TimeRangeSlice.set_start_end_from_trip_selection(
         target,
         socket.assigns.selections,
@@ -221,9 +222,34 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     end
   end
 
-  def set_values_from_detour(changeset, "skate_detour_id", _skate_detours) do
-    changeset
-    |> force_change(:active_period_start_specifier, :now)
+  def set_values_from_detour(changeset, "skate_detour_id", %AsyncResult{
+        ok?: true,
+        result: skate_detours
+      }) do
+    detour_id = get_field(changeset, :skate_detour_id)
+
+    detour = Enum.find(skate_detours, &(&1.id == detour_id))
+
+    end_changes =
+      if is_nil(detour.autoclose_on) do
+        %{
+          active_period_end_specifier: :later_today
+        }
+      else
+        detour_end = utc_datetime_to_naive(detour.autoclose_on)
+
+        %{
+          active_period_end_specifier: :custom,
+          active_period_end: detour_end,
+          active_period_end_time: NaiveDateTime.to_time(detour_end),
+          active_period_end_date: Date.new!(detour_end.year, detour_end.month, detour_end.day)
+        }
+      end
+
+    Map.merge(%{alert_timing: :"one-time", active_period_start_specifier: :now}, end_changes)
+    |> Enum.reduce(changeset, fn {key, value}, changeset ->
+      force_change(changeset, key, value)
+    end)
   end
 
   def set_values_from_detour(changeset, _, _), do: changeset

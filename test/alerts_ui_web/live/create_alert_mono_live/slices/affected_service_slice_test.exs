@@ -3079,7 +3079,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
              [
                %{alert_id: "123", skate_detour_id: 7},
                %{alert_id: "123", skate_detour_id: 8},
-               %{alert_id: "123", skate_detour_id: 9}
+               %{alert_id: "123", skate_detour_id: 9},
+               %{alert_id: "123", skate_detour_id: 10}
              ]
            end
          ]}

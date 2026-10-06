@@ -49,6 +49,12 @@ defmodule AlertsUI.SkateDetours.GetDetours do
     read_module.read()
   end
 
-  defp safe_datetime_from_unix(nil), do: nil
-  defp safe_datetime_from_unix(datetime), do: DateTime.from_unix!(datetime)
+  defp safe_datetime_from_unix(datetime) when is_integer(datetime) do
+    case DateTime.from_unix(datetime) do
+      {:ok, datetime} -> datetime
+      {:error, _reason} -> nil
+    end
+  end
+
+  defp safe_datetime_from_unix(_), do: nil
 end
