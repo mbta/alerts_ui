@@ -15,6 +15,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   alias AlertsUIWeb.CreateAlertMonoLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias AlertsUIWeb.TripEndWarningModal
+  alias Phoenix.LiveView.AsyncResult
 
   alias Phoenix.HTML.Form
 
@@ -122,6 +123,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         current_time,
         timing
       )
+      |> TimeRangeSlice.set_values_from_detour(target, socket.assigns.skate_detours, current_time)
       |> TimeRangeSlice.set_start_end_from_trip_selection(
         target,
         socket.assigns.selections,
@@ -219,6 +221,44 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         else: :later_today
     end
   end
+
+  def set_values_from_detour(
+        changeset,
+        "skate_detour_id",
+        %AsyncResult{
+          ok?: true,
+          result: skate_detours
+        },
+        current_time
+      ) do
+    detour_id = get_field(changeset, :skate_detour_id)
+
+    detour = Enum.find(skate_detours, &(&1.id == detour_id))
+
+    end_changes =
+      if is_nil(detour.autoclose_on) do
+        %{
+          active_period_end_specifier: :later_today,
+          active_period_end: ActivePeriod.end_of_service_datetime_naive(current_time)
+        }
+      else
+        detour_end = utc_datetime_to_naive(detour.autoclose_on)
+
+        %{
+          active_period_end_specifier: :custom,
+          active_period_end: detour_end,
+          active_period_end_time: NaiveDateTime.to_time(detour_end),
+          active_period_end_date: Date.new!(detour_end.year, detour_end.month, detour_end.day)
+        }
+      end
+
+    Map.merge(%{alert_timing: :"one-time", active_period_start_specifier: :now}, end_changes)
+    |> Enum.reduce(changeset, fn {key, value}, changeset ->
+      force_change(changeset, key, value)
+    end)
+  end
+
+  def set_values_from_detour(changeset, _, _, _), do: changeset
 
   def ensure_start_values(
         changeset,
@@ -519,6 +559,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   attr :previous_end_specifier, :atom
   attr :previous_start_time_specifier, :atom
   attr :previous_end_time_specifier, :atom
+  attr :skate_detours, :map
 
   def render(assigns) do
     ~H"""

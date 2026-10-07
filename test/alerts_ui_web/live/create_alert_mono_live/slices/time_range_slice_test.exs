@@ -61,6 +61,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
   @todays_datetime DateTime.now!("America/New_York")
   @todays_date DateTime.to_date(@todays_datetime)
 
+  @detour_bus_route %Route{
+    direction_names: %{0 => "Outbound", 1 => "Inbound"},
+    sort_order: 1,
+    id: "1",
+    type: 3,
+    name: "1"
+  }
+
   defp trip_changeset(attrs \\ %{}) do
     Ecto.Changeset.cast(%AlertData{}, Map.merge(%{trip_ids: []}, attrs), [:trip_ids])
     |> Ecto.Changeset.change(%{active_period_end_specifier: :custom})
@@ -81,6 +89,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
         selections: %AsyncResult{
           ok?: true,
           result: %AffectedServiceSlice.Selections{available_schedules: schedules}
+        },
+        skate_detours: %AsyncResult{
+          ok?: true,
+          result: []
         }
       }
     }
@@ -91,13 +103,26 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
       assigns: %{
         form_type: form_type,
         current_time: DateTime.to_naive(@todays_datetime),
-        selections: %AffectedServiceSlice.Selections{available_schedules: schedules}
+        selections: %AffectedServiceSlice.Selections{available_schedules: schedules},
+        skate_detours: %AsyncResult{
+          ok?: true,
+          result: []
+        }
       }
     }
   end
 
   defp to_eastern_naive(utc_datetime),
     do: utc_datetime |> DateTime.shift_zone!("America/New_York") |> DateTime.to_naive()
+
+  defp selected_start_specifier(view) do
+    view
+    |> render()
+    |> Floki.parse_document!()
+    |> Floki.find(~s(select[name="alert_data[active_period_start_specifier]"] option[selected]))
+    |> Floki.attribute("value")
+    |> List.first()
+  end
 
   defp selected_end_specifier(view) do
     view
@@ -420,6 +445,90 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
+    test "autoselects start time of 'now' and end time of 'later_today' when skate detour with no end selected",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@detour_bus_route] end,
+           get: fn _, _ -> @detour_bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "route_ids" => ["1"],
+            "single_route_id" => "1",
+            "active_period_start_specifier" => "custom",
+            "active_period_end_specifier" => "custom"
+          }
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "skate_detour_id"],
+          "alert_data" => %{"skate_detour_id" => 9}
+        })
+
+        assert selected_start_specifier(view) == "now"
+        assert selected_end_specifier(view) == "later_today"
+      end
+    end
+
+    @tag :logged_in_user
+    test "autoselects custom end time when skate detour has autoclose_on field", %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@detour_bus_route] end,
+           get: fn _, _ -> @detour_bus_route end
+         ]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "route_ids" => ["1"],
+            "single_route_id" => "1"
+          }
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "skate_detour_id"],
+          "alert_data" => %{"skate_detour_id" => 10}
+        })
+
+        assert selected_start_specifier(view) == "now"
+        assert selected_end_specifier(view) == "custom"
+
+        assert view |> element("#alert_data_active_period_end") |> render =~
+                 ~s(value="2026-04-10T03:00")
+      end
+    end
+
+    @tag :logged_in_user
     test "switching from one-time to recurring has correct defaults", %{
       conn: conn
     } do
@@ -512,6 +621,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSliceTest do
             "active_period_start_specifier" => :custom
           }
         })
+
+        render_async(view)
 
         view
         |> element("form")

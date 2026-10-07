@@ -3079,7 +3079,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
              [
                %{alert_id: "123", skate_detour_id: 7},
                %{alert_id: "123", skate_detour_id: 8},
-               %{alert_id: "123", skate_detour_id: 9}
+               %{alert_id: "123", skate_detour_id: 9},
+               %{alert_id: "123", skate_detour_id: 10}
              ]
            end
          ]}
@@ -3179,7 +3180,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
                  ~s(title="Stop ID 72" selected="" value="Mass Ave at Pearl St \(inbound\)|72">Mass Ave at Pearl St \(inbound\))
 
         assert view |> element("#alert_data_header_text") |> render_async =~
-                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St (inbound). The closest stop with service is Mass Ave opp Inman St"
+                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St (inbound) due to a drawbridge being raised. The closest stop with service is Mass Ave opp Inman St."
       end
     end
 
