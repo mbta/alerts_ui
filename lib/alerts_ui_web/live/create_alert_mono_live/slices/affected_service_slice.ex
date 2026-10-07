@@ -320,20 +320,18 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     original_skate_id = socket.assigns.original_skate_id
 
-    Phoenix.LiveView.assign_async(socket, [:skate_detours, :used_detour_ids], fn ->
+    Phoenix.LiveView.assign_async(socket, [:skate_detours, :used_detours], fn ->
       detours = GetDetours.get_detours() |> Enum.filter(&(&1.route_id == single_route_id))
 
-      used_detour_ids =
+      # if we have an existing id because we're editing, don't mark it as used
+      used_detours =
         Alerts.get_matching_skate_ids(Enum.map(detours, & &1.id))
-
-      # if we have an existing id because we're editing, don't remove it from the list
-      used_detour_ids = used_detour_ids -- [original_skate_id]
-      detours = Enum.reject(detours, &(&1.id in used_detour_ids))
+        |> Enum.reject(&(&1.skate_detour_id == original_skate_id))
 
       {:ok,
        %{
          skate_detours: detours,
-         used_detour_ids: used_detour_ids
+         used_detours: used_detours
        }}
     end)
   end
@@ -690,26 +688,31 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     %{selections | service_dates: service_dates(), loading: true, today: today()}
   end
 
-  defp build_detour_options(skate_detour_result, form) do
-    skate_detours =
-      if skate_detour_result.ok? do
-        skate_detour_result.result
-      else
-        []
-      end
-
+  defp build_detour_options(
+         %{ok?: true, result: skate_detours},
+         %{ok?: true, result: used_detours},
+         form
+       ) do
     {outbound, inbound} = Enum.split_with(skate_detours, &(&1.direction_id == 0))
 
     [outbound_options, inbound_options] =
       Enum.map(
         [outbound, inbound],
-        &SelectFormatter.formatted_select_options(%SelectFormatter{
-          options: &1,
-          search_term: form[:skate_search_term].value,
-          route_type: 3,
-          values_to_keep: form[:skate_detour_id].value || [],
-          option_prefix: "detour-selector"
-        })
+        fn detour ->
+          SelectFormatter.formatted_select_options(%SelectFormatter{
+            options: detour,
+            search_term: form[:skate_search_term].value,
+            route_type: 3,
+            values_to_keep: form[:skate_detour_id].value || [],
+            option_prefix: "detour-selector"
+          })
+          |> Enum.map(fn option ->
+            matching_detour =
+              Enum.find(used_detours, &(&1.skate_detour_id == Keyword.get(option, :value)))
+
+            disable_option_if_matching_used_detour(matching_detour, option)
+          end)
+        end
       )
 
     if Enum.empty?(skate_detours) do
@@ -721,6 +724,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       }
       |> Enum.reject(fn {_k, v} -> Enum.empty?(v) end)
     end
+  end
+
+  defp build_detour_options(_, _, _), do: []
+
+  defp disable_option_if_matching_used_detour(nil, option), do: option
+
+  defp disable_option_if_matching_used_detour(matching_detour, option) do
+    option
+    |> Keyword.put(:title, "Already associated with alert #{matching_detour.alert_id}")
+    |> Keyword.put(:disabled, true)
   end
 
   def service_dates do
@@ -777,14 +790,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
     skate_detour_options =
       if bus_detour? do
-        build_detour_options(assigns.skate_detours, form)
+        build_detour_options(assigns.skate_detours, assigns.used_detours, form)
       else
         []
       end
 
     assigns =
       assign(assigns,
-        used_detour_ids: assigns.used_detour_ids.result || [],
+        all_detours_used?:
+          length(assigns.used_detours.result || []) == length(assigns.skate_detours.result || []),
         single_route_effect?: single_route_effect?,
         route_field: route_field,
         detours_loading?: !is_nil(assigns.skate_detours.loading),
@@ -895,7 +909,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
                 is_nil(@form[:single_route_id].value) ->
                   []
 
-                Enum.empty?(@skate_detour_options) && Enum.empty?(@used_detour_ids) ->
+                Enum.empty?(@skate_detour_options) && @all_detours_used? ->
                   ["No active detours in Skate"]
 
                 Enum.empty?(@skate_detour_options) ->
@@ -905,7 +919,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
                   @skate_detour_options
               end
             }
-            disabled={Enum.empty?(@skate_detour_options)}
+            disabled={@all_detours_used?}
             class="h-full md:mr-6"
             loading={@detours_loading?}
             multiple={false}

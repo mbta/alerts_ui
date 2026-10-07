@@ -330,7 +330,7 @@ defmodule AlertsUI.Alerts do
       a in Alert,
       where: a.skate_detour_id in ^skate_ids,
       where: is_nil(a.closed_timestamp),
-      select: a.skate_detour_id
+      select: %{skate_detour_id: a.skate_detour_id, alert_id: a.alert_id}
     )
     |> Repo.all()
   end

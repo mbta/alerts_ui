@@ -3073,7 +3073,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
            get: fn _, _ -> @bus_route end
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [] end]},
-        {Alerts, [], [get_matching_skate_ids: fn _ -> [7, 8, 9] end]}
+        {Alerts, [],
+         [
+           get_matching_skate_ids: fn _ ->
+             [
+               %{alert_id: "123", skate_detour_id: 7},
+               %{alert_id: "123", skate_detour_id: 8},
+               %{alert_id: "123", skate_detour_id: 9}
+             ]
+           end
+         ]}
       ]) do
         conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -3087,7 +3096,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         })
 
         assert view |> element("#alert_data_skate_detour_id_selector") |> render_async =~
-                 "There is currently an alert for every Skate detour on this route."
+                 ~s(disabled="" title="Already associated with alert 123")
       end
     end
 

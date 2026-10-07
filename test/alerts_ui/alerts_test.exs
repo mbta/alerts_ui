@@ -1387,7 +1387,10 @@ defmodule AlertsUI.AlertsTest do
 
       insert(:alert, %{alert_id: "58", skate_detour_id: 4})
 
-      assert Alerts.get_matching_skate_ids([1, 2, 3]) == [1, 2]
+      assert Alerts.get_matching_skate_ids([1, 2, 3]) == [
+               %{alert_id: "55", skate_detour_id: 1},
+               %{alert_id: "56", skate_detour_id: 2}
+             ]
     end
   end
 end
