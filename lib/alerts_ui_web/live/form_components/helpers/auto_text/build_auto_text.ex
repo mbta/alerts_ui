@@ -212,6 +212,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   @spec closest_stop_text(__MODULE__.t()) :: String.t()
   def closest_stop_text(%{connection_points: []}), do: ""
 
+  def closest_stop_text(%{missed_stops: []}), do: ""
+
   def closest_stop_text(%{connection_points: [connection_point]}) do
     "The closest stop with service is #{connection_point}."
   end

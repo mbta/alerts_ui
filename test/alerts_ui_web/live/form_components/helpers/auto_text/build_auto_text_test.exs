@@ -325,13 +325,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
 
   describe "closest_stop_text/1" do
     test "when there's connection points but they're empty" do
-      assert BuildAutoText.closest_stop_text(%{connection_points: []}) ==
+      assert BuildAutoText.closest_stop_text(%{connection_points: [], missed_stops: ["72"]}) ==
                ""
+    end
+
+    test "when there's connection points but no missed stops" do
+      assert BuildAutoText.closest_stop_text(%{
+               connection_points: ["Massachusetts Ave opp Inman St"],
+               missed_stops: []
+             }) == ""
     end
 
     test "when there's 1 connection point" do
       assert BuildAutoText.closest_stop_text(%{
-               connection_points: ["Massachusetts Ave opp Inman St"]
+               connection_points: ["Massachusetts Ave opp Inman St"],
+               missed_stops: ["72"]
              }) ==
                "The closest stop with service is Massachusetts Ave opp Inman St."
     end
@@ -341,7 +349,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
                connection_points: [
                  "Massachusetts Ave opp Inman St",
                  "Massachusetts Ave @ Sidney St"
-               ]
+               ],
+               missed_stops: ["72"]
              }) ==
                "The closest stops with service are Massachusetts Ave opp Inman St and Massachusetts Ave @ Sidney St."
     end
