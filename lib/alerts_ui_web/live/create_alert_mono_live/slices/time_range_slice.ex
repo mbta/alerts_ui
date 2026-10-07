@@ -123,7 +123,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         current_time,
         timing
       )
-      |> TimeRangeSlice.set_values_from_detour(target, socket.assigns.skate_detours)
+      |> TimeRangeSlice.set_values_from_detour(target, socket.assigns.skate_detours, current_time)
       |> TimeRangeSlice.set_start_end_from_trip_selection(
         target,
         socket.assigns.selections,
@@ -222,10 +222,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     end
   end
 
-  def set_values_from_detour(changeset, "skate_detour_id", %AsyncResult{
-        ok?: true,
-        result: skate_detours
-      }) do
+  def set_values_from_detour(
+        changeset,
+        "skate_detour_id",
+        %AsyncResult{
+          ok?: true,
+          result: skate_detours
+        },
+        current_time
+      ) do
     detour_id = get_field(changeset, :skate_detour_id)
 
     detour = Enum.find(skate_detours, &(&1.id == detour_id))
@@ -233,7 +238,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     end_changes =
       if is_nil(detour.autoclose_on) do
         %{
-          active_period_end_specifier: :later_today
+          active_period_end_specifier: :later_today,
+          active_period_end: ActivePeriod.end_of_service_datetime_naive(current_time)
         }
       else
         detour_end = utc_datetime_to_naive(detour.autoclose_on)
@@ -252,7 +258,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
     end)
   end
 
-  def set_values_from_detour(changeset, _, _), do: changeset
+  def set_values_from_detour(changeset, _, _, _), do: changeset
 
   def ensure_start_values(
         changeset,
