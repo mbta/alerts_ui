@@ -200,20 +200,15 @@ defmodule AlertsUI.Alerts do
 
   @spec list_all_open() :: [Alert.t()]
   def list_all_open do
-    # Using an inner join here reduces the
-    # number of overall queries
-    # ref. https://hexdocs.pm/ecto/Ecto.Query.html#preload/3
     Repo.all(
       from(
         a in Alert,
         where: is_nil(a.closed_timestamp),
-        inner_join: ie in AlertsUI.Models.InformedEntity,
-        on: ie.alert_id == a.id,
         preload: [
           :user,
           :reminder_times,
           active_period: ^active_period_preload_query(),
-          informed_entity: {ie, :trip}
+          informed_entity: [:trip]
         ],
         order_by: [asc: a.alert_id]
       )
@@ -226,13 +221,11 @@ defmodule AlertsUI.Alerts do
       from(
         a in Alert,
         where: not is_nil(a.closed_timestamp) and a.closed_timestamp > from_now(-5, "minute"),
-        inner_join: ie in AlertsUI.Models.InformedEntity,
-        on: ie.alert_id == a.id,
         preload: [
           :user,
           :reminder_times,
           active_period: ^active_period_preload_query(),
-          informed_entity: {ie, :trip}
+          informed_entity: [:trip]
         ],
         order_by: [asc: a.alert_id]
       )
