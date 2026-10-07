@@ -422,8 +422,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
         now
       )
       when loading != true do
+    IO.puts("set start end from trip selection with trip ids #{trip_ids}")
     available_schedules = Map.get(selections, :available_schedules, [])
     selected_schedules = Enum.filter(available_schedules, &(&1.trip.id in trip_ids))
+    IO.inspect(selected_schedules, label: "selected schedules")
     departure = get_trip_departure_time(selected_schedules)
     arrival = get_trip_arrival_time(selected_schedules)
 

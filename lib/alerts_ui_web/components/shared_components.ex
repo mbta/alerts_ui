@@ -897,7 +897,12 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :class, :string, default: "", doc: "classes to add to the containing div"
 
-  attr :loading, :boolean, default: false, doc: "in loading state if true"
+  attr :loading, :boolean, default: false, doc: "show loading state based on server variable"
+
+  attr :loads_based_on, :list,
+    default: [],
+    doc:
+      "IDs of elements whose phx-change-loading indicates this element should show its loading state"
 
   attr :modal_filter_id, :string,
     default: nil,
@@ -953,9 +958,27 @@ defmodule AlertsUIWeb.SharedComponents do
       |> assign_new(:value, fn ->
         assigns.selected || field.value || if assigns.multiple, do: [], else: nil
       end)
+      |> assign(
+        :client_loading_block_class,
+        create_client_loading_class(assigns.loads_based_on, "block")
+      )
+      |> assign(
+        :client_loading_hidden_class,
+        create_client_loading_class(assigns.loads_based_on, "hidden")
+      )
 
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", "relative", @hidden && "hidden"]}>
+      <%!-- In the event of slow connections, it is useful to have a loading state set by the client which
+    is set immediately (phx-change-loading on the form obj) without having to wait for a server round trip.
+    The server side loading state kicks in after the client loading state, so both exist simultaneously. --%>
+      <%!--  class="ml-4 absolute hidden group-has-[select[id=alert\_data\_route\_ids].phx-change-loading]:block" --%>
+      <div
+        :if={@loads_based_on}
+        class={["ml-4 absolute hidden", @client_loading_block_class]}
+      >
+        <.loading loading={true}></.loading>
+      </div>
       <div :if={!@disabled} class="ml-4 absolute">
         <.loading loading={@loading}></.loading>
       </div>
@@ -997,10 +1020,11 @@ defmodule AlertsUIWeb.SharedComponents do
           "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate block",
           @select_class,
           @errors != [] && "border-danger focus:border-danger",
-          @warning && "border-warning focus:border-warning"
+          @warning && "border-warning focus:border-warning",
+          @client_loading_hidden_class
         ]}
         multiple={@multiple}
         phx-hook="Selector"
@@ -1031,9 +1055,20 @@ defmodule AlertsUIWeb.SharedComponents do
         </option>
         {Form.options_for_select(@options, @value)}
       </select>
+
       <.input_error :for={msg <- @errors} class="mt-2">{msg}</.input_error>
     </div>
     """
+  end
+
+  defp create_client_loading_class(id_list, class) do
+    id_list
+    |> Enum.map(fn id ->
+      escaped_id = String.replace(id, "_", "\\_")
+      "group-has-[select[id=#{escaped_id}].phx-change-loading]:#{class}"
+    end)
+    |> Enum.join(" ")
+    |> IO.inspect()
   end
 
   @doc """
@@ -1054,7 +1089,12 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :class, :string, default: "", doc: "additional classes to add"
 
-  attr :loading, :boolean, default: false, doc: "in loading state if true"
+  attr :loading, :boolean, default: false, doc: "show loading state based on server variable"
+
+  attr :loads_based_on, :list,
+    default: [],
+    doc:
+      "IDs of elements whose phx-change-loading indicates this element should show its loading state"
 
   attr :multiple, :boolean, default: true
 
@@ -1180,6 +1220,7 @@ defmodule AlertsUIWeb.SharedComponents do
           }
           disabled={@disabled}
           loading={@loading}
+          loads_based_on={@loads_based_on}
           class="m-0 h-full"
           select_class="min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
             border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full"

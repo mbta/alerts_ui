@@ -110,10 +110,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def assigns(_service_data, socket, params) do
+      IO.puts("assigns")
+
       socket =
         socket
         |> AffectedServiceSlice.clear_stops_touched_on_route_change(params)
         |> AffectedServiceSlice.async_assign_selections(params)
+
+      IO.inspect(socket.assigns.selections.loading, label: "in assigns")
 
       form = socket.assigns.form
 
@@ -377,6 +381,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defp update_selections(socket, _params) do
     prev = prev(Map.get(socket.assigns, :selections))
+
+    socket =
+      socket
+      |> assign(:selections, %{prev | loading: true})
+
     form = socket.assigns.form
 
     direction = form[:direction].value
@@ -394,7 +403,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       end)
 
     socket
-    |> assign(:selections, %{prev | loading: true, filter_title_value: filter_title_value})
+    # |> assign(:selections, %{prev | loading: true, filter_title_value: filter_title_value})
     |> start_async(:fetch_selections, fn ->
       available_routes = CreateAlertLive.get_routes(all_route_types)
 
@@ -890,6 +899,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             filter_field={@form[:trip_search_term]}
             options={if @selections.loading, do: [], else: @selections.trip_id_options}
             loading={@selections.loading}
+            loads_based_on={[@route_field.id, @form[:direction].id]}
             no_results={
               Enum.empty?(@selections.trip_id_options) &&
                 !disable_trip_input?(@form[:route_ids].value)
@@ -951,6 +961,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               filter_field={@form[:stop_search_term]}
               options={if @selections.loading, do: [], else: @selections.stop_id_options}
               loading={@selections.loading}
+              loads_based_on={[@form[:trip_ids].id]}
               no_results={
                 Enum.empty?(@selections.stop_id_options) &&
                   !@disable_stop_input?
