@@ -939,10 +939,9 @@ defmodule AlertsUIWeb.SharedComponents do
     default: "",
     doc: "The target to send the events to (eg form component id)"
 
-  attr :hook, :string, default: nil, doc: "a JS hook to be attached to the element"
   attr :selected, :list, default: nil
 
-  attr :rest, :global, include: ~w(disabled size phx-debounce)
+  attr :rest, :global, include: ~w(hook disabled size phx-debounce)
 
   def select(%{field: %FormField{} = field} = assigns) do
     assigns =

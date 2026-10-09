@@ -456,7 +456,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         search_term: form[:stop_search_term].value,
         route_type: form[:route_type].value,
         values_to_keep: form[:stop_names_and_ids].value || [],
-        option_prefix: "stop-search"
+        option_prefix: "stop-selector"
       },
       true
     )
@@ -473,7 +473,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       search_term: form[:trip_search_term].value,
       route_type: form[:route_type].value,
       values_to_keep: form[:trip_ids].value,
-      option_prefix: "trip-search"
+      option_prefix: "trip-selector"
     })
   end
 

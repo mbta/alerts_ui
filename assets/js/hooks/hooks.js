@@ -163,6 +163,19 @@ Hooks.Selector = {
       view_alerts_live_effects: "effects"
     };
 
+    this.handleEvent("scrollToSelection", (payload) => {
+      var select_element = this.el
+
+      if (select_element.id === "alert_data_" + payload.select_name) {
+        var selected_option = select_element.namedItem(payload.type + "-selector-" + payload.value);
+        if (selected_option !== null) {
+          requestAnimationFrame(() => { // wait just a bit. needed to work on Chrome.
+            selected_option.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          })
+        }
+      }
+    })
+
     this.handleEvent("adjustSelections", (payload) => {
       const options = Array.from(this.el.options);
       const payloadKey = selectorIDLookup[this.el.id];
