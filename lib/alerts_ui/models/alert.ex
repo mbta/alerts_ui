@@ -15,6 +15,7 @@ defmodule AlertsUI.Models.Alert do
     Recurrence times are stored in their original EST form. They are meant for front-end use only.
   """
   use AlertsUI.Schema
+  use Flop.Schema
   import Ecto.Changeset
 
   alias AlertsUI.Models.{
@@ -153,8 +154,7 @@ defmodule AlertsUI.Models.Alert do
           recurring: boolean()
         }
 
-  @derive {
-    Flop.Schema,
+  @flop_options [
     filterable: [
       :alert_id,
       :effect_detail,
@@ -207,7 +207,7 @@ defmodule AlertsUI.Models.Alert do
         ]
       ]
     ]
-  }
+  ]
 
   schema "alerts" do
     belongs_to :user, User, on_replace: :nilify

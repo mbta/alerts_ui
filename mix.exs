@@ -93,7 +93,7 @@ defmodule AlertsUI.MixProject do
       {:gettext, "~> 0.20"},
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
-      {:flop_phoenix, "~> 0.26.0"},
+      {:flop_phoenix, "~> 0.27.0"},
       {:jason, "~> 1.2"},
       {:laboratory, github: "mbta/laboratory", ref: "master"},
       {:lazy_html, ">= 0.0.0", only: :test},
