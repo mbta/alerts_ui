@@ -509,7 +509,7 @@ defmodule AlertsUI.AlertBuilder do
     route_ids |> Enum.concat(added_routes)
   end
 
-  defp maybe_remove_green_line_routes(routes, ["Green"], selected_stop_ids, effect)
+  defp maybe_remove_green_line_routes(routes, ["Green"], [_ | _] = selected_stop_ids, effect)
        when effect in ["Shuttle", "Suspension"] do
     # the intention here is to NOT include a green line route
     # for shuttle and suspension alerts if the user has

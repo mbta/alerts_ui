@@ -998,6 +998,46 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "it does not remove green line routes for shuttle and suspension alerts if 'all stops' was selected" do
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _route_id, _ -> [] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _ -> [] end,
+           all: fn _, _opts -> [] end
+         ]},
+        {RoutesRepo, [],
+         [
+           green_line: fn -> @green_line_virtual_route end,
+           get: fn
+             route_id, _opts ->
+               %Route{id: route_id, line_id: "line-Green", type: 1, description: :rapid_transit}
+           end
+         ]}
+      ]) do
+        alert_data = %{
+          route_type: 1,
+          header_text: "header",
+          effect_name: "Shuttle",
+          route_ids: ["Green"],
+          stop_ids: [],
+          direction: "default"
+        }
+
+        result = AlertBuilder.build_alert(alert_data, :RDS, ~U[2024-04-30 05:54:00Z])
+
+        assert Enum.map(result.informed_entity, & &1.route_id) == [
+                 "Green-B",
+                 "Green-C",
+                 "Green-D",
+                 "Green-E"
+               ]
+      end
+    end
+
     test "it does not filter out shuttle routes if they were part of the original selection" do
       with_mocks([
         {RoutePatternsRepo, [],
