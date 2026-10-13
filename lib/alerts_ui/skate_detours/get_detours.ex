@@ -8,6 +8,9 @@ defmodule AlertsUI.SkateDetours.GetDetours do
   def get_detours do
     case read_data() do
       {:ok, data} ->
+        Logger.info("all data")
+        Logger.info(data)
+        Logger.info("individual lines")
         data
         |> String.trim()
         |> String.split("\n")
@@ -24,6 +27,7 @@ defmodule AlertsUI.SkateDetours.GetDetours do
   @spec parse_detour(binary()) :: SkateDetour.t()
   defp parse_detour(data) do
     # not parsing the route_segments because they're huge and we don't currently need them
+    Logger.info(data)
     data = data |> Jason.decode!()
 
     %SkateDetour{
