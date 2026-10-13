@@ -1,10 +1,25 @@
 defmodule AlertsUI.SkateDetours.GetDetoursTest do
   @moduledoc false
   use AlertsUI.DataCase
+  import Mock
 
-  alias AlertsUI.SkateDetours.GetDetours
+  alias AlertsUI.SkateDetours.{GetDetours, ReadLocal}
 
   describe "get_detours\0" do
+    test "detours are empty" do
+      with_mock(ReadLocal, [], read: fn -> {:ok, ""} end) do
+        data = GetDetours.get_detours()
+        assert data == []
+      end
+    end
+
+    test "detours are {}" do
+      with_mock(ReadLocal, [], read: fn -> {:ok, "{}"} end) do
+        data = GetDetours.get_detours()
+        assert data == []
+      end
+    end
+
     test "parses detours from file" do
       data = GetDetours.get_detours()
       assert length(data) == 8
