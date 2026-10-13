@@ -227,7 +227,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   end
 
   def closest_stop_text(_alert_data) do
-    "The closest stops with inbound service are ___ and ___. The closest stops with outbound service are ___ and ___."
+    "The closest stops with outbound service are ___ and ___. The closest stops with inbound service are ___ and ___."
   end
 
   # trips
