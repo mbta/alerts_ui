@@ -125,6 +125,17 @@ Hooks.DropdownPosition = {
   }
 }
 
+Hooks.AutoScroll = {
+  mounted() {
+    this.handleEvent("scrollToItemOnMobile", (payload) => {
+      const element = document.getElementById(payload.item_id);
+      if ((element !== null) && window.screen.width <= 640) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    })
+  }
+}
+
 // This hook covers 2 behaviors on <select> elements.
 //
 // 1. Some select elements that mustn't allow "All XYZ" to be selected
