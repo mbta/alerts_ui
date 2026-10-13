@@ -8,15 +8,7 @@ defmodule AlertsUI.SkateDetours.GetDetours do
   def get_detours do
     case read_data() do
       {:ok, data} ->
-        Logger.info("all data")
-        Logger.info(data)
-        Logger.info("individual lines")
-        data
-        |> String.trim()
-        |> String.split("\n")
-        |> Enum.map(&parse_detour(&1))
-        # filter out text-only detours
-        |> Enum.reject(&is_nil(&1.missed_stops))
+        parse_json(data)
 
       {:error, reason} ->
         Logger.error("Could not read Skate Detours" <> reason)
@@ -24,10 +16,21 @@ defmodule AlertsUI.SkateDetours.GetDetours do
     end
   end
 
+  @spec parse_json(binary()) :: list()
+  defp parse_json(""), do: []
+
+  defp parse_json(data) do
+    data
+    |> String.trim()
+    |> String.split("\n")
+    |> Enum.map(&parse_detour(&1))
+    # filter out text-only detours
+    |> Enum.reject(&is_nil(&1.missed_stops))
+  end
+
   @spec parse_detour(binary()) :: SkateDetour.t()
   defp parse_detour(data) do
     # not parsing the route_segments because they're huge and we don't currently need them
-    Logger.info(data)
     data = data |> Jason.decode!()
 
     %SkateDetour{
