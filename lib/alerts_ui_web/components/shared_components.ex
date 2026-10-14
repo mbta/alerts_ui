@@ -972,7 +972,13 @@ defmodule AlertsUIWeb.SharedComponents do
       <%!-- In the event of slow connections, it is useful to have a loading state set by the client which
     is set immediately (phx-change-loading on the form obj) without having to wait for a server round trip.
     The server side loading state kicks in after the client loading state, so both exist simultaneously. --%>
-      <%!--  class="ml-4 absolute hidden group-has-[select[id=alert\_data\_route\_ids].phx-change-loading]:block" --%>
+      <%!--  class="ml-4 absolute hidden group-has-[select[id=alert\_data\_route\_ids].phx-change-loading]:block
+      group-has-[select[id=alert\_data\_route\_ids].phx-change-loading]:hidden
+      group-has-[select[id=alert\_data\_direction].phx-change-loading]:block
+      group-has-[select[id=alert\_data\_direction].phx-change-loading]:hidden
+      group-has-[select[id=alert\_data\_trip\_ids].phx-change-loading]:hidden
+      group-has-[select[id=alert\_data\_trip\_ids].phx-change-loading]:block
+       --%>
       <div
         :if={@loads_based_on}
         class={
@@ -1072,7 +1078,7 @@ defmodule AlertsUIWeb.SharedComponents do
     do: "group-has-[select[id=alert\\_data\\_direction].phx-change-loading]:hidden"
 
   defp group_has_hidden_class("alert_data_trip_ids"),
-    do: "group-has-[select[id=alert\\_data\\trip\\_ids].phx-change-loading]:hidden"
+    do: "group-has-[select[id=alert\\_data\\_trip\\_ids].phx-change-loading]:hidden"
 
   defp group_has_hidden_class(_), do: ""
 
@@ -1080,7 +1086,7 @@ defmodule AlertsUIWeb.SharedComponents do
     do: "group-has-[select[id=alert\\_data\\_route\\_ids].phx-change-loading]:block"
 
   defp group_has_block_class("alert_data_trip_ids"),
-    do: "group-has-[select[id=alert\\_data\\trip\\_ids].phx-change-loading]:block"
+    do: "group-has-[select[id=alert\\_data\\_trip\\_ids].phx-change-loading]:block"
 
   defp group_has_block_class("alert_data_direction"),
     do: "group-has-[select[id=alert\\_data\\_direction].phx-change-loading]:block"
