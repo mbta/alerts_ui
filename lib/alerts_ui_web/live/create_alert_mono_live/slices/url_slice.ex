@@ -57,7 +57,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
     def assigns(_url_data, socket, params) do
       alert_id = get_alert_id(socket, params)
-
       path_route_type = get_path_route_type(socket, params)
 
       path_effect_name = get_path_effect_name(socket, params)
@@ -70,6 +69,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         else
           socket
         end
+        |> scroll_down_on_mobile(params)
 
       assign(
         socket,
@@ -81,6 +81,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         }
       )
     end
+
+    defp scroll_down_on_mobile(socket, %{"route_type" => _}) do
+      Phoenix.LiveView.push_event(socket, "scrollToItemOnMobile", %{item_id: "effect_buttons"})
+    end
+
+    defp scroll_down_on_mobile(socket, _), do: socket
 
     defp get_alert_id(socket, params) do
       case Map.fetch(params, "alert_id") do
@@ -208,7 +214,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
       ) do
     if is_nil(path_route_type) || is_nil(path_effect_name) || change_type do
       ~H"""
-      <div class="min-w-full flex flex-col mb-8" id="route_view">
+      <div class="min-w-full flex flex-col mb-8" id="route_view" phx-hook="AutoScroll">
         <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
           Alert type
         </.h5>
