@@ -126,8 +126,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
       socket =
         if is_nil(socket.assigns.skate_detours.loading) and bus_detour? do
-          socket
-          |> AffectedServiceSlice.async_assign_detours(params)
+          AffectedServiceSlice.async_assign_detours(socket, params)
         else
           socket
         end
@@ -1052,11 +1051,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   end
 
   defp optgroups_to_adjust(skate_detour_options) do
-      skate_detour_options
-      |> Enum.map(fn {key, value} ->
-        all_disabled? = Enum.all?(value, & Keyword.get(&1, :disabled, false))
-        if all_disabled?, do: key
-      end)
-      |> Enum.reject(&is_nil/1)
+    skate_detour_options
+    |> Enum.map(fn {key, value} ->
+      all_disabled? = Enum.all?(value, &Keyword.get(&1, :disabled, false))
+      if all_disabled?, do: key
+    end)
+    |> Enum.reject(&is_nil/1)
   end
 end

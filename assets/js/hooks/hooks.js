@@ -188,7 +188,7 @@ Hooks.Selector = {
         this.el.children.item(0).value !== "No active detours in Skate") {
         for (let element of this.el.children) {
           if (payload.data.includes(element.label)) {
-            element.classList.add("text-[#6d6d6d]");
+            element.classList.add("text-text-select-disabled");
           }
         }
       }
