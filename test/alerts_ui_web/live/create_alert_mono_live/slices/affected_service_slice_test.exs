@@ -1429,20 +1429,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         open_review_modal(view)
         render_async(view)
 
-        assert has_element?(view, "p.text-text-error", "Select route(s)")
+        assert has_element?(view, "p.text-text-error", "Select a route")
         refute has_element?(view, "p.text-text-error", "Select stop(s)")
 
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "route_ids"],
-          "alert_data" => %{"route_ids" => [@subway_route.id]}
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"single_route_id" => @subway_route.id}
         })
 
         render_async(view)
         open_review_modal(view)
 
-        refute has_element?(view, "p.text-text-error", "Select route(s)")
+        refute has_element?(view, "p.text-text-error", "Select a route")
         assert has_element?(view, "p.text-text-error", "Select stop(s)")
       end
     end
@@ -1984,6 +1984,55 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         alert = Alerts.get_by_alert_id("test-edit-stop")
 
         assert Enum.any?(alert.informed_entity, &(&1.stop_id == "place-crtst"))
+      end
+    end
+
+    @tag :logged_in_user
+    test "editing a station bypass alert does not render the obsolete entities modal", %{
+      conn: conn
+    } do
+      alert_params =
+        build(:alert_map, %{
+          alert_id: "test-station-bypass",
+          effect: :NO_SERVICE,
+          effect_detail: "STATION_CLOSURE",
+          effect_name: "Station Bypass",
+          primary_service_type: "1",
+          informed_entity: [
+            %{
+              route_type: 1,
+              route_id: @subway_route.id,
+              stop_id: @subway_stop.id,
+              direction_id: 0
+            }
+          ],
+          original_route_selections: ["#{@subway_route.name}|#{@subway_route.id}"],
+          original_stop_selections: ["#{@subway_stop.name}|#{@subway_stop.id}"]
+        })
+
+      {:ok, _} = Alerts.create_or_update_alert(alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@subway_route] end,
+           get: fn _ -> @subway_route end,
+           get: fn _, _ -> @subway_route end,
+           all: fn _ -> [@subway_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@subway_stop] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-station-bypass")
+        render_async(view)
+
+        refute view
+               |> element("#gtfs-warning-modal")
+               |> has_element?
       end
     end
 
