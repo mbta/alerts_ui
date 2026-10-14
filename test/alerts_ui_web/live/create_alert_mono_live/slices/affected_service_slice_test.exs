@@ -1429,20 +1429,20 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
         open_review_modal(view)
         render_async(view)
 
-        assert has_element?(view, "p.text-text-error", "Select a route")
+        assert has_element?(view, "p.text-text-error", "Select route(s)")
         refute has_element?(view, "p.text-text-error", "Select stop(s)")
 
         view
         |> element("form")
         |> render_change(%{
-          "_target" => ["alert_data", "single_route_id"],
-          "alert_data" => %{"single_route_id" => @subway_route.id}
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@subway_route.id]}
         })
 
         render_async(view)
         open_review_modal(view)
 
-        refute has_element?(view, "p.text-text-error", "Select a route")
+        refute has_element?(view, "p.text-text-error", "Select route(s)")
         assert has_element?(view, "p.text-text-error", "Select stop(s)")
       end
     end

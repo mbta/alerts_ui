@@ -139,7 +139,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
   end
 
   def get_single_route_effect_names do
-    ["Detour", "Snow Route", "Station Bypass", "Dock Bypass"]
+    ["Detour", "Snow Route"]
   end
 
   def get_single_facility_effect_names do
