@@ -9,6 +9,9 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
 
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+    only: [get_single_route_effect_names: 0, get_single_facility_effect_names: 0]
+
   alias MBTAV3API.Routes.Route
 
   # credo:disable-for-this-file
@@ -122,9 +125,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
           work_order_id: String.t() | nil,
           skate_detour_id: integer() | nil
         }
-  # effect names where user can only select 1 type of thing
-  @single_route_effect_names ["Detour", "Snow Route"]
-  @single_facility_effect_names ["Elevator Closure", "Escalator Closure"]
 
   @spec build_alert_data(String.t() | Alert.t() | nil, atom()) ::
           t()
@@ -227,21 +227,21 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
     route_ids = Alert.gather_route_ids(alert)
 
     single_route_id =
-      if alert.effect_name in @single_route_effect_names && length(route_ids) === 1 do
+      if alert.effect_name in get_single_route_effect_names() && length(route_ids) === 1 do
         hd(route_ids)
       else
         nil
       end
 
     route_ids =
-      if is_nil(single_route_id) && alert.effect_name in @single_route_effect_names,
+      if is_nil(single_route_id) && alert.effect_name in get_single_route_effect_names(),
         do: [],
         else: route_ids
 
     facility_ids = Alert.gather_facility_ids(alert)
 
     single_facility_id =
-      if alert.effect_name in @single_facility_effect_names && length(facility_ids) === 1 do
+      if alert.effect_name in get_single_facility_effect_names() && length(facility_ids) === 1 do
         hd(facility_ids)
       else
         nil
@@ -478,8 +478,6 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
       "custom"
     end
   end
-
-  def get_single_route_effect_names(), do: @single_route_effect_names
 
   defp get_route_type(nil), do: nil
   defp get_route_type("access"), do: nil

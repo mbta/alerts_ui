@@ -10,7 +10,6 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   alias AlertsUIWeb.CreateAlertLive
 
   alias AlertsUIWeb.FormComponents.Helpers.{
-    AlertData,
     ContentFormatter,
     EntityValidator,
     ErrorFormatter,
@@ -19,6 +18,9 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
     SelectFormatter,
     ServiceEffectCombinations
   }
+
+  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+    only: [get_single_route_effect_names: 0]
 
   alias MBTAV3API.Routes.Route
   alias Phoenix.LiveView.AsyncResult
@@ -40,7 +42,7 @@ defmodule AlertsUIWeb.FormComponents.AffectedService do
   end
 
   # effects where user can only select 1 route
-  @single_route_effect_names AlertData.get_single_route_effect_names()
+  @single_route_effect_names get_single_route_effect_names()
 
   @fields ~w[route_ids direction trip_ids stop_ids stop_names stop_names_and_ids trip_information_by_id route_search_term trip_search_term stop_search_term single_route_id modal_date modal_date_search_term]a
 
