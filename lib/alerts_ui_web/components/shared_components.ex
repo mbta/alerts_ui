@@ -970,8 +970,9 @@ defmodule AlertsUIWeb.SharedComponents do
     ~H"""
     <div phx-feedback-for={@name} class={["#{@class}", "relative", @hidden && "hidden"]}>
       <%!-- In the event of slow connections, it is useful to have a loading state set by the client which
-    is set immediately (phx-change-loading on the form obj) without having to wait for a server round trip.
-    The server side loading state kicks in after the client loading state, so both exist simultaneously. --%>
+        is set immediately (phx-change-loading on the select that was changed) without having to wait for
+        a server round trip. The server side loading state kicks in after the client loading state,
+        so both can exist simultaneously. --%>
       <div
         :if={@loads_based_on !== []}
         class={["ml-4 absolute hidden", @client_loading_block_class]}

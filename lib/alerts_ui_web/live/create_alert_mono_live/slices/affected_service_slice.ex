@@ -377,7 +377,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defp update_selections(socket, _params) do
     prev = prev(Map.get(socket.assigns, :selections))
-
     form = socket.assigns.form
 
     direction = form[:direction].value
