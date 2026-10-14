@@ -110,14 +110,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     end
 
     def assigns(_service_data, socket, params) do
-      IO.puts("assigns")
-
       socket =
         socket
         |> AffectedServiceSlice.clear_stops_touched_on_route_change(params)
         |> AffectedServiceSlice.async_assign_selections(params)
-
-      IO.inspect(socket.assigns.selections.loading, label: "in assigns")
 
       form = socket.assigns.form
 
@@ -382,10 +378,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defp update_selections(socket, _params) do
     prev = prev(Map.get(socket.assigns, :selections))
 
-    socket =
-      socket
-      |> assign(:selections, %{prev | loading: true})
-
     form = socket.assigns.form
 
     direction = form[:direction].value
@@ -403,7 +395,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       end)
 
     socket
-    # |> assign(:selections, %{prev | loading: true, filter_title_value: filter_title_value})
+    |> assign(:selections, %{prev | loading: true, filter_title_value: filter_title_value})
     |> start_async(:fetch_selections, fn ->
       available_routes = CreateAlertLive.get_routes(all_route_types)
 
