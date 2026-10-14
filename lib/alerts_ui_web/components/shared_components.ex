@@ -975,7 +975,10 @@ defmodule AlertsUIWeb.SharedComponents do
       <%!--  class="ml-4 absolute hidden group-has-[select[id=alert\_data\_route\_ids].phx-change-loading]:block" --%>
       <div
         :if={@loads_based_on}
-        class={["ml-4 absolute hidden", @client_loading_block_class]}
+        class={
+          ["ml-4 absolute hidden"] ++
+            Enum.map(@loads_based_on, fn id -> group_has_block_class(id) end)
+        }
       >
         <.loading loading={true}></.loading>
       </div>
@@ -1016,16 +1019,17 @@ defmodule AlertsUIWeb.SharedComponents do
         name={@name}
         id={@id}
         disabled={@disabled}
-        class={[
-          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
+        class={
+          [
+            "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
             rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate block",
-          @select_class,
-          @errors != [] && "border-danger focus:border-danger",
-          @warning && "border-warning focus:border-warning",
-          @client_loading_hidden_class
-        ]}
+            @select_class,
+            @errors != [] && "border-danger focus:border-danger",
+            @warning && "border-warning focus:border-warning"
+          ] ++ Enum.map(@loads_based_on, fn id -> group_has_hidden_class(id) end)
+        }
         multiple={@multiple}
         phx-hook="Selector"
         {@rest}
@@ -1061,14 +1065,34 @@ defmodule AlertsUIWeb.SharedComponents do
     """
   end
 
+  defp group_has_hidden_class("alert_data_route_ids"),
+    do: "group-has-[select[id=alert\\_data\\_route\\_ids].phx-change-loading]:hidden"
+
+  defp group_has_hidden_class("alert_data_direction"),
+    do: "group-has-[select[id=alert\\_data\\_direction].phx-change-loading]:hidden"
+
+  defp group_has_hidden_class("alert_data_trip_ids"),
+    do: "group-has-[select[id=alert\\_data\\trip\\_ids].phx-change-loading]:hidden"
+
+  defp group_has_hidden_class(_), do: ""
+
+  defp group_has_block_class("alert_data_route_ids"),
+    do: "group-has-[select[id=alert\\_data\\_route\\_ids].phx-change-loading]:block"
+
+  defp group_has_block_class("alert_data_trip_ids"),
+    do: "group-has-[select[id=alert\\_data\\trip\\_ids].phx-change-loading]:block"
+
+  defp group_has_block_class("alert_data_direction"),
+    do: "group-has-[select[id=alert\\_data\\_direction].phx-change-loading]:block"
+
+  defp group_has_block_class(_), do: ""
+
   defp create_client_loading_class(id_list, class) do
     id_list
-    |> Enum.map(fn id ->
+    |> Enum.map_join(" ", fn id ->
       escaped_id = String.replace(id, "_", "\\_")
       "group-has-[select[id=#{escaped_id}].phx-change-loading]:#{class}"
     end)
-    |> Enum.join(" ")
-    |> IO.inspect()
   end
 
   @doc """
