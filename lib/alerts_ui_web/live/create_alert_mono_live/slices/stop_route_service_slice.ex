@@ -275,8 +275,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   def stop_id_options(available_stops, form) do
-    IO.inspect(length(available_stops), label: "num stops")
-
     SelectFormatter.formatted_select_options(
       %SelectFormatter{
         options: available_stops,
