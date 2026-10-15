@@ -1224,6 +1224,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         |> element("#effect-name-detour-button")
         |> render_click()
 
+        assert view
+               |> element("#change-mode-effect-modal")
+               |> has_element?
+
+        render_click(view, "accepted_change_mode_effect_modal", %{})
+
         render_async(view)
 
         {:ok, document} =
@@ -1233,10 +1239,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         assert has_element?(view, "div", "Bus • Detour")
         refute has_element?(view, "div", "Bus • Delay")
-
-        assert view
-               |> element("#change-mode-effect-modal")
-               |> has_element?
 
         refute document_has_element?(
                  document,
@@ -1352,6 +1354,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         |> element("#effect-name-stop_closure-button")
         |> render_click()
 
+        render_click(view, "accepted_change_mode_effect_modal", %{})
+
         render_async(view)
 
         {:ok, document} =
@@ -1428,6 +1432,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         |> element("#effect-name-parking_closure-button")
         |> render_click()
 
+        render_click(view, "accepted_change_mode_effect_modal", %{})
+
         render_async(view)
 
         {:ok, document} =
@@ -1489,6 +1495,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         view
         |> element("#effect-name-access_issue-button")
         |> render_click()
+
+        render_click(view, "accepted_change_mode_effect_modal", %{})
 
         render_async(view)
 
@@ -1607,13 +1615,15 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         |> element("#effect-name-delay-button")
         |> render_click()
 
+        rendered_view = view |> element("#change-mode-effect-modal-content") |> render_async()
+        assert rendered_view =~ "some affected services may be omitted"
+
+        render_click(view, "accepted_change_mode_effect_modal", %{})
+
         render_async(view)
 
         assert has_element?(view, "div", "Ferry • Delay")
         refute has_element?(view, "div", "Bus • Delay")
-
-        rendered_view = view |> element("#change-mode-effect-modal-content") |> render_async()
-        assert rendered_view =~ "some affected services may be omitted"
 
         assert has_element?(view, "#alert_data_route_ids_selector")
         assert has_element?(view, "#alert_data_trip_ids_selector")
@@ -1773,6 +1783,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         |> element("#effect-name-access_issue-button")
         |> render_click()
 
+        render_click(view, "accepted_change_mode_effect_modal", %{})
+
         render_async(view)
 
         assert has_element?(view, "div", "Facility • Access Issue")
@@ -1896,14 +1908,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         |> element("#effect-name-delay-button")
         |> render_click()
 
+        assert view
+               |> element("#change-mode-effect-modal")
+               |> has_element?
+
+        render_click(view, "accepted_change_mode_effect_modal", %{})
+
         render_async(view)
 
         assert has_element?(view, "div", "Bus • Delay")
         refute has_element?(view, "div", "Systemwide • Notice")
-
-        assert view
-               |> element("#change-mode-effect-modal")
-               |> has_element?
 
         view
         |> element("form")
@@ -2011,6 +2025,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         |> element("#effect-name-cancellation-button")
         |> render_click()
 
+        # Go past the warning modal
+        render_click(view, "accepted_change_mode_effect_modal", %{})
+
         render_async(view)
 
         assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"true\"]")
@@ -2052,6 +2069,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         view
         |> element("#effect-name-cancellation-button")
         |> render_click()
+
+        render_click(view, "accepted_change_mode_effect_modal", %{})
 
         render_async(view)
 
@@ -2108,6 +2127,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         view
         |> element("#effect-name-stop_closure-button")
         |> render_click()
+
+        render_click(view, "accepted_change_mode_effect_modal", %{})
 
         render_async(view)
 
@@ -2225,6 +2246,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         view
         |> element("#effect-name-stop_closure-button")
         |> render_click()
+
+        render_async(view)
+
+        # Go past the warning modal
+        render_click(view, "accepted_change_mode_effect_modal", %{})
 
         render_async(view)
 
