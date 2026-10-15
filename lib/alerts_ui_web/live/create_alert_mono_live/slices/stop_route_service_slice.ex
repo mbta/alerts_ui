@@ -352,6 +352,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
           selected={@form[:stop_names_and_ids].value}
           label="Stops"
           loading={@selections.loading && @first_async_load}
+          first_async_load={@first_async_load}
           modal_filter_active={!(@selections.selected_route_id in [nil, "default"])}
           modal_filter_id="routes-filter-modal"
           modal_filter_title={"Filter: #{@selections.filter_title_value}"}

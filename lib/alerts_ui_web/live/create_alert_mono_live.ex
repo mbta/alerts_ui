@@ -296,7 +296,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         progress: get_step_by_name(socket.assigns.progress.next),
         path_effect_name: effect_name,
         change_type: false,
-        submitted?: false
+        submitted?: false,
+        first_async_load: true
       })
       |> sync_socket(%{})
 
