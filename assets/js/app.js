@@ -46,24 +46,6 @@ let liveSocket = new LiveSocket(
   }
 )
 
-// Add the connection error handler after 2 sec
-setTimeout(() => {
-  liveSocket.socket.conn.addEventListener("close", (event) => {
-    const element = document.getElementById("form_container")
-
-    if (!!element) {
-      const logPrefix = `[LV ${element.dataset.debugTag}]`
-
-      console.log(`${logPrefix} socket closed!`)
-      console.log(`${logPrefix} code: ${event.code}`)
-      console.log(`${logPrefix} reason: ${event.reason}`)
-      console.log(`${logPrefix} clean: ${event.wasClean}`)
-      console.log(`${logPrefix} event:`)
-      console.log(`${logPrefix} ${JSON.stringify(event, null, 4)}`)
-    }
-  });
-}, 2000)
-
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
