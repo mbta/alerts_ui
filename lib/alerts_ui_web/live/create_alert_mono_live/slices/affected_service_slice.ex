@@ -892,6 +892,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
             filter_field={@form[:trip_search_term]}
             options={if @selections.loading, do: [], else: @selections.trip_id_options}
             loading={@selections.loading}
+            loads_based_on={[@route_field.id, @form[:direction].id]}
             no_results={
               Enum.empty?(@selections.trip_id_options) &&
                 !disable_trip_input?(@form[:route_ids].value)
@@ -950,6 +951,11 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
               filter_field={@form[:stop_search_term]}
               options={if @selections.loading, do: [], else: @selections.stop_id_options}
               loading={@selections.loading}
+              loads_based_on={
+                if show_trips_input?(@form[:combination].value),
+                  do: [@form[:trip_ids].id, @form[:direction].id],
+                  else: [@route_field.id, @form[:direction].id]
+              }
               no_results={
                 Enum.empty?(@selections.stop_id_options) &&
                   !@disable_stop_input?
