@@ -189,6 +189,9 @@ Hooks.Selector = {
         for (let element of this.el.children) {
           if (payload.data.includes(element.label)) {
             element.classList.add("text-text-select-disabled");
+            for (let child_element of element.children) {
+              child_element.classList.add("text-text-select-disabled");
+            }
           }
         }
       }

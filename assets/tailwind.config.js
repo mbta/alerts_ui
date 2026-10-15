@@ -52,7 +52,7 @@ module.exports = {
         "text-toggle-disabled": "#8B8B8B",
         "text-secondary": "#B1BCCE",
         "text-disabled": "#c6c6c9",
-        "text-select-disabled": "#6d6d6d",
+        "text-select-disabled": "#7f7f7f",
         "text-link-outline": "#8ecdff",
         "text-error": "#F3A8A9",
         "text-invert": "#212529",
