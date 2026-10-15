@@ -995,7 +995,7 @@ defmodule AlertsUIWeb.SharedComponents do
         disabled={@disabled}
         class={[
           "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
-            rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
+            rounded text-text-primary disabled:text-text-select-disabled [scrollbar-width:thin] overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
             focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate",
           @select_class,

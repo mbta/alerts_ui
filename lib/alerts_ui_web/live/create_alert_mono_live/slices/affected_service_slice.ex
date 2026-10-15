@@ -795,6 +795,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
         []
       end
 
+    send(self(), {:adjust_optgroups, %{data: optgroups_to_adjust(skate_detour_options)}})
+
     assigns =
       assign(assigns,
         all_detours_used?:
@@ -911,9 +913,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
                 Enum.empty?(@skate_detour_options) && @all_detours_used? ->
                   ["No active detours in Skate"]
-
-                Enum.empty?(@skate_detour_options) ->
-                  ["There is currently an alert for every Skate detour on this route."]
 
                 true ->
                   @skate_detour_options
@@ -1049,5 +1048,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
       })
 
     async_assign_selections(socket, %{})
+  end
+
+  defp optgroups_to_adjust(skate_detour_options) do
+    skate_detour_options
+    |> Enum.map(fn {key, value} ->
+      all_disabled? = Enum.all?(value, &Keyword.get(&1, :disabled, false))
+      if all_disabled?, do: key
+    end)
+    |> Enum.reject(&is_nil/1)
   end
 end

@@ -774,6 +774,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   end
 
   @impl true
+  def handle_info({:adjust_optgroups, %{data: optgroups_to_adjust}}, socket) do
+    socket = push_event(socket, "adjustOptgroupColor", %{data: optgroups_to_adjust})
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:changing_mode_effect, _replaced_values}, socket) do
     socket =
       socket

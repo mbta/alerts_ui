@@ -180,6 +180,23 @@ Hooks.Selector = {
       }
     });
 
+    this.handleEvent("adjustOptgroupColor", (payload) => {
+      // adds a "disabled" color to optgroup titles
+      // used for Skate detours when all the options under it are disabled.
+      if (this.el.id == "alert_data_skate_detour_id" &&
+        this.el.children.length > 0 &&
+        this.el.children.item(0).value !== "No active detours in Skate") {
+        for (let element of this.el.children) {
+          if (payload.data.includes(element.label)) {
+            element.classList.add("text-text-select-disabled");
+            for (let child_element of element.children) {
+              child_element.classList.add("text-text-select-disabled");
+            }
+          }
+        }
+      }
+    });
+
     this.el.addEventListener('pointerdown', (e) => {
       // save the current scroll top so we can return after rerender
       this.savedScrollTop = this.el.scrollTop;
