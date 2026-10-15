@@ -456,15 +456,18 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def handle_event(
         "image-preview-size",
         %{"id" => "size-of-image", "image_preview_size" => image_preview_size},
-        socket
-      ) do
+        %{assigns: %{selected_alert_data: selected_alert_data}} = socket
+      )
+      when is_map(selected_alert_data) do
     {:noreply,
      assign(socket,
        scroll_to_top: false,
-       selected_alert_data:
-         Map.put(socket.assigns.selected_alert_data, :image_preview_size, image_preview_size)
+       selected_alert_data: Map.put(selected_alert_data, :image_preview_size, image_preview_size)
      )}
   end
+
+  @impl true
+  def handle_event("image-preview-size", _data, socket), do: {:noreply, socket}
 
   @impl true
   def handle_event(
