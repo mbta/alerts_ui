@@ -1056,6 +1056,8 @@ defmodule AlertsUIWeb.SharedComponents do
 
   attr :loading, :boolean, default: false, doc: "in loading state if true"
 
+  attr :first_async_load, :boolean, default: false, doc: "is the initial loading state"
+
   attr :multiple, :boolean, default: true
 
   attr :field, FormField,
@@ -1119,14 +1121,14 @@ defmodule AlertsUIWeb.SharedComponents do
           phx-click={show_modal(@modal_filter_id)}
           class={[
             "flex shrink min-w-0 items-center leading-tight ml-2 mb-2 min-h-[1.3rem] text-right",
-            if(@disabled, do: "text-text-disabled", else: "text-primary")
+            if(@disabled || @first_async_load, do: "text-text-disabled", else: "text-primary")
           ]}
           type="button"
-          disabled={@disabled}
+          disabled={@disabled || @first_async_load}
         >
           <span class={[
             "shrink-0 hero-funnel-mini w-4 h-4 mr-1",
-            if(@disabled, do: "text-text-disabled", else: "bg-primary")
+            if(@disabled || @first_async_load, do: "text-text-disabled", else: "bg-primary")
           ]} />
           <span class="truncate">{@modal_filter_title}</span>
           <span
@@ -1154,8 +1156,8 @@ defmodule AlertsUIWeb.SharedComponents do
           class="grow py-[.6rem] mb-0 border-0 ring-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-b-none"
           icon="hero-magnifying-glass-mini"
           field={@filter_field}
-          placeholder={if @disabled, do: nil, else: "Search..."}
-          disabled={@disabled}
+          placeholder={if @disabled || @first_async_load, do: nil, else: "Search..."}
+          disabled={@disabled || @first_async_load}
           phx-debounce="250"
           action_icon="hero-x-circle-solid"
           action_event="reset_search_filter"
