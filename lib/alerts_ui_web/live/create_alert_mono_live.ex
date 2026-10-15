@@ -556,7 +556,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
   def handle_event("cancelled_change_mode_effect_modal", _params, socket) do
     {:noreply,
      socket
-     |> set_modal_open(@change_mode_effect_modal_id, false)}
+     |> set_modal_open(@change_mode_effect_modal_id, false)
+     |> assign(%{
+       path_effect_name: socket.assigns.original_alert_form[:effect_name]
+     })}
   end
 
   defp set_modal_open(socket, id, state) do
