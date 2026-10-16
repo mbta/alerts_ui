@@ -318,7 +318,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
     end
 
     test "when there's only 1 direction" do
-      assert BuildAutoText.skipping_stop_text(%{direction: [0], stops: [@stop_1, @stop_2]}) ==
+      assert BuildAutoText.skipping_stop_text(%{
+               direction: [0],
+               stops: [
+                 %{@stop_1 | name: "Lechmere (outbound)"},
+                 %{@stop_2 | name: "Longwood Medical Area (outbound)"}
+               ]
+             }) ==
                ", skipping Lechmere and Longwood Medical Area"
     end
   end

@@ -202,7 +202,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
   def skipping_stop_text(%{missed_stops: []}), do: ", but no stops are being skipped"
 
   def skipping_stop_text(%{direction: [_direction], stops: [_ | _]} = alert_data) do
-    ", skipping #{stop_names(alert_data)}"
+    stop_names = alert_data |> stop_names |> String.replace(~r/\s{1}\((inbound|outbound)\)/, "")
+    ", skipping #{stop_names}"
   end
 
   def skipping_stop_text(_alert_data) do
