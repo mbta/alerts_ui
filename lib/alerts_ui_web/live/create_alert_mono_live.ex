@@ -580,6 +580,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
 
     socket = translate_stop_names_and_ids(socket, new_selections)
+    socket = scroll_stop_list(socket, socket.assigns.first_async_load)
 
     # Always override route_ids — no guard for pre-existing selections; see design spec.
     socket =
@@ -605,6 +606,23 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       _ -> {:noreply, socket}
     end
   end
+
+  def scroll_stop_list(%{assigns: %{form: form}} = socket, true) do
+    # scrolls to pre-selected stop if editing
+    stop_name_and_id = List.first(form.data.stop_names_and_ids || [])
+
+    if stop_name_and_id do
+      push_event(socket, "scrollToSelection", %{
+        select_name: "stop_names_and_ids",
+        type: "stop",
+        value: stop_name_and_id
+      })
+    else
+      socket
+    end
+  end
+
+  def scroll_stop_list(socket, _), do: socket
 
   # In the case of converting an alert with stops to SR, we need to adjust the `stop_names_and_ids` because
   # the names will change depending on direction. For example, in a Bus Delay, we would have both
