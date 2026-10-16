@@ -26,9 +26,23 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
         base_url \\ Application.get_env(:alerts_ui, :api_url),
         api_key \\ Application.get_env(:alerts_ui, :api_key)
       ) do
-    api_opts = [base_url: base_url, api_key: api_key]
-
     Alerts.list_all_open()
+    |> Enum.reject(&(&1.primary_service_type == "2"))
+    |> gather_alerts(base_url: base_url, api_key: api_key)
+  end
+
+  @spec validate_commuter_rail_alerts(String.t(), String.t()) :: [invalid_alert_t()]
+  def validate_commuter_rail_alerts(
+        base_url \\ Application.get_env(:alerts_ui, :api_url),
+        api_key \\ Application.get_env(:alerts_ui, :api_key)
+      ) do
+    Alerts.list_all_open()
+    |> Enum.filter(&(&1.primary_service_type == "2"))
+    |> gather_alerts(base_url: base_url, api_key: api_key)
+  end
+
+  defp gather_alerts(alerts, api_opts) do
+    alerts
     |> Enum.map(fn alert ->
       %{
         alert_id: alert.alert_id,
@@ -65,10 +79,10 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
 
   @spec format_invalid_alerts([invalid_alert_t()], String.t()) :: String.t()
   # use to format a list of invalid alert structs for logging purposes
-  def format_invalid_alerts(invalid_alerts, error_message_word \\ "")
-  def format_invalid_alerts([], _), do: "No invalid alerts found"
+  def format_invalid_alerts(invalid_alerts, error_message_word, mode_word \\ "")
+  def format_invalid_alerts([], _, _), do: "No invalid alerts found"
 
-  def format_invalid_alerts(invalid_alerts, error_message_word) do
+  def format_invalid_alerts(invalid_alerts, error_message_word, mode_word) do
     invalid_alert_info =
       Enum.map(invalid_alerts, fn invalid_alert ->
         entity_results =
@@ -83,7 +97,7 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
         "Alert #{invalid_alert.alert_id}:|" <> Enum.join(entity_results, "|")
       end)
 
-    "The following alerts have entities that no longer exist in #{error_message_word} GTFS:|" <>
+    "The following #{mode_word}alerts have entities that no longer exist in #{error_message_word} GTFS:|" <>
       Enum.join(invalid_alert_info, "||")
   end
 
