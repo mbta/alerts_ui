@@ -1228,6 +1228,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
                |> element("#change-mode-effect-modal")
                |> has_element?
 
+        # Go past the warning modal
         render_click(view, "accepted_change_mode_effect_modal", %{})
 
         render_async(view)
@@ -2153,7 +2154,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         |> element("#effect-name-cancellation-button")
         |> render_click()
 
-        # Go past the warning modal
         render_click(view, "accepted_change_mode_effect_modal", %{})
 
         render_async(view)
@@ -2377,7 +2377,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         render_async(view)
 
-        # Go past the warning modal
         render_click(view, "accepted_change_mode_effect_modal", %{})
 
         render_async(view)

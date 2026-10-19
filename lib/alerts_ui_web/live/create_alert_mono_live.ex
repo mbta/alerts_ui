@@ -265,8 +265,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         do: ModeEffectChange.condensed_form(socket.assigns.form),
         else: socket.assigns.original_alert_form
 
-    ###
-
     %{new: form_updates, replaced: replaced_values} =
       ModeEffectChange.new_form_values(form_to_compare, next_route_type, effect_name)
 
@@ -563,6 +561,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     {:noreply,
      socket
      |> set_modal_open(@change_mode_effect_modal_id, false)
+     # Revert back to the originally chosen route and effect types
      |> assign(%{
        path_route_type:
          Atom.to_string(
