@@ -25,9 +25,6 @@ import Hooks from "./hooks/hooks"
 
 import "./fullstory";
 
-
-
-
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket(
   "/live",
@@ -37,9 +34,6 @@ let liveSocket = new LiveSocket(
     longPollFallbackMs: 3000,
     hooks: Hooks,
     params: { _csrf_token: csrfToken },
-    beforeConnect: (callback) => {
-      console.log('before connect')
-    },
     dom: {
       // So that resizing a textarea does not undo itself 
       // https://github.com/phoenixframework/phoenix_live_view/issues/1011
@@ -68,6 +62,8 @@ const connectLiveSocket = () => {
   window.liveSocket = liveSocket
 }
 
+// Chrome can 'preload' a site which messes up the initial websocket connection
+// This makes sure not to attempt the websocket connection until the page is actually visible
 if (document.visibilityState !== "visible") {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
