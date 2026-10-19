@@ -25,40 +25,74 @@ import Hooks from "./hooks/hooks"
 
 import "./fullstory";
 
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket(
-  "/live",
-  Socket,
-  {
-    heartbeatIntervalMs: 3000,
-    longPollFallbackMs: 3000,
-    hooks: Hooks,
-    params: { _csrf_token: csrfToken },
-    dom: {
-      // So that resizing a textarea does not undo itself 
-      // https://github.com/phoenixframework/phoenix_live_view/issues/1011
-      onBeforeElUpdated: (fromEl, toEl) => {
-        if (fromEl.tagName === "TEXTAREA") {
-          toEl.style.height = fromEl.style.height;
+const initializeLiveSocket = () => {
+  if (window.liveSocket) return;
+
+  let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+  let liveSocket = new LiveSocket(
+    "/live",
+    Socket,
+    {
+      heartbeatIntervalMs: 3000,
+      longPollFallbackMs: 3000,
+      hooks: Hooks,
+      params: { _csrf_token: csrfToken },
+      beforeConnect: (callback) => {
+        console.log('before connect')
+      },
+      dom: {
+        // So that resizing a textarea does not undo itself 
+        // https://github.com/phoenixframework/phoenix_live_view/issues/1011
+        onBeforeElUpdated: (fromEl, toEl) => {
+          if (fromEl.tagName === "TEXTAREA") {
+            toEl.style.height = fromEl.style.height;
+          }
         }
       }
     }
+  )
+
+  // Show progress bar on live navigation and form submits
+  topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
+  window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
+  window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
+
+  liveSocket.connect();
+  window.liveSocket = liveSocket
+
+  window.addEventListener("phx:show-modal", (e) => {
+    let el = document.getElementById(e.detail.id)
+    if (el) {
+      liveSocket.execJS(el, el.getAttribute("data-show"))
+    }
+  })
+}
+
+// // connect if there are any LiveViews on the page
+// liveSocket.connect()
+
+// // expose liveSocket on window for web console debug logs and latency simulation:
+// // >> liveSocket.enableDebug()
+// // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
+// // >> liveSocket.disableLatencySim()
+// window.liveSocket = liveSocket
+
+if (document.visibilityState !== "visible") {
+  console.log(document.visibilityState);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      console.log('visible now')
+      setTimeout(initializeLiveSocket, 50);
+    }
+  }, { once: true })
+} else {
+  console.log(document.visibilityState)
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", initializeLiveSocket, { once: true })
+  } else {
+    initializeLiveSocket()
   }
-)
-
-// Show progress bar on live navigation and form submits
-topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
-window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
-window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
-
-// connect if there are any LiveViews on the page
-liveSocket.connect()
-
-// expose liveSocket on window for web console debug logs and latency simulation:
-// >> liveSocket.enableDebug()
-// >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
-// >> liveSocket.disableLatencySim()
-window.liveSocket = liveSocket
+}
 
 // Copy contents of target to the clipboard
 window.addEventListener("phx:copy_input", (event) => {
@@ -97,10 +131,4 @@ const handleCopy = (event, textToCopy) => {
   }
 }
 
-window.addEventListener("phx:show-modal", (e) => {
 
-  let el = document.getElementById(e.detail.id)
-  if (el) {
-    liveSocket.execJS(el, el.getAttribute("data-show"))
-  }
-})
