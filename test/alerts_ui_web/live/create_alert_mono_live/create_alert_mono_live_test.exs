@@ -1647,6 +1647,134 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
+    test "cancelling the modal when editing should close the modal with original route and effect highlighted and original selections retained",
+         %{conn: conn} do
+      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           by_type: fn _, _ -> [@ferry_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#route-type-ferry-button")
+        |> render_click()
+
+        view
+        |> element("#effect-name-notice-button")
+        |> render_click()
+
+        rendered_view = view |> element("#change-mode-effect-modal-content") |> render_async()
+        assert rendered_view =~ "some affected services may be omitted"
+
+        render_click(view, "cancelled_change_mode_effect_modal", %{})
+
+        render_async(view)
+        assert has_element?(view, "#effect-name-delay-button[aria-checked]")
+        assert has_element?(view, "#route-type-bus-button[aria-checked]")
+
+        view
+        |> element("#effect-name-delay-button")
+        |> render_click()
+
+        open_review_modal(view)
+        assert view |> element("#review-modal-container", "Bus • Delay") |> has_element?
+        assert view |> element("#review-modal-container", "SLW") |> has_element?
+        assert view |> element("#review-modal-container", "Courthouse (outbound)") |> has_element?
+      end
+    end
+
+    @tag :logged_in_user
+    test "cancelling the modal when creating should close the modal with original route and effect highlighted and original selections retained",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@bus_route] end,
+           by_type: fn _, _ -> [@ferry_route] end,
+           get: fn _ -> @bus_route end,
+           get: fn _, _ -> @bus_route end,
+           all: fn _ -> [@bus_route] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop, @stop_2] end,
+           get_parent: fn _ -> nil end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new/bus/delay")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => [@bus_route.id]}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "stop_names_and_ids"],
+          "alert_data" => %{
+            "stop_names_and_ids" => ["Courthouse (outbound)|place-crtst"]
+          }
+        })
+
+        render_async(view)
+
+        view
+        |> element("#route_type_and_effect")
+        |> render_click()
+
+        view
+        |> element("#route-type-ferry-button")
+        |> render_click()
+
+        view
+        |> element("#effect-name-notice-button")
+        |> render_click()
+
+        rendered_view = view |> element("#change-mode-effect-modal-content") |> render_async()
+        assert rendered_view =~ "some affected services may be omitted"
+
+        render_click(view, "cancelled_change_mode_effect_modal", %{})
+
+        render_async(view)
+        assert has_element?(view, "#effect-name-delay-button[aria-checked]")
+        assert has_element?(view, "#route-type-bus-button[aria-checked]")
+
+        view
+        |> element("#effect-name-delay-button")
+        |> render_click()
+
+        open_review_modal(view)
+        assert view |> element("#review-modal-container", "Bus • Delay") |> has_element?
+        assert view |> element("#review-modal-container", "SLW") |> has_element?
+        assert view |> element("#review-modal-container", "Courthouse (outbound)") |> has_element?
+      end
+    end
+
+    @tag :logged_in_user
     test "changing modes should only retain effect for the original mode",
          %{conn: conn} do
       # If we have a Bus Delay, then switch to Subway, we want Delay wiped out.

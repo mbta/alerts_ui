@@ -265,6 +265,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
         do: ModeEffectChange.condensed_form(socket.assigns.form),
         else: socket.assigns.original_alert_form
 
+    ###
+
     %{new: form_updates, replaced: replaced_values} =
       ModeEffectChange.new_form_values(form_to_compare, next_route_type, effect_name)
 
@@ -292,7 +294,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     socket =
       socket
       |> assign(%{
-        form: Phoenix.Component.to_form(updated_source),
+        draft_form: Phoenix.Component.to_form(updated_source),
         path_effect_name: effect_name,
         submitted?: false,
         first_async_load: true
@@ -304,6 +306,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
       if Enum.empty?(replaced_values) do
         socket
         |> assign(%{
+          form: socket.assigns.draft_form,
           progress: get_step_by_name(socket.assigns.progress.next),
           change_type: false
         })
@@ -546,6 +549,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
      socket
      |> set_modal_open(@change_mode_effect_modal_id, false)
      |> assign(%{
+       form: socket.assigns.draft_form,
        progress: get_step_by_name(socket.assigns.progress.next),
        change_type: false
      })
@@ -554,11 +558,17 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("cancelled_change_mode_effect_modal", _params, socket) do
+    original_form = socket.assigns.original_alert_form
+
     {:noreply,
      socket
      |> set_modal_open(@change_mode_effect_modal_id, false)
      |> assign(%{
-       path_effect_name: socket.assigns.original_alert_form[:effect_name]
+       path_route_type:
+         Atom.to_string(
+           PathHelper.path_route_type(original_form[:route_type], original_form[:effect_name])
+         ),
+       path_effect_name: original_form[:effect_name]
      })}
   end
 
