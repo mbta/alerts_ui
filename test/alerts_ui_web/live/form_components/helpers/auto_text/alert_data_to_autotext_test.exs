@@ -82,5 +82,23 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoTextTest do
         assert expected == actual
       end
     end
+
+    test "returns nil if start AND end stop match" do
+      trip_id = @schedule_1.trip.id
+
+      with_mock(StopsRepo, [], by_trip: fn ^trip_id -> [@stop_2, @stop_3] end) do
+        actual = AlertDataToAutoText.calcuate_branch_name(2, [@route_2], [@schedule_1])
+        assert is_nil(actual)
+      end
+    end
+
+    test "returns nil if NO stops match match" do
+      trip_id = @schedule_1.trip.id
+
+      with_mock(StopsRepo, [], by_trip: fn ^trip_id -> [@stop_1] end) do
+        actual = AlertDataToAutoText.calcuate_branch_name(2, [@route_2], [@schedule_1])
+        assert is_nil(actual)
+      end
+    end
   end
 end
