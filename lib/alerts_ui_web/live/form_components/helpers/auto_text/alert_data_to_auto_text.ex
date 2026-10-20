@@ -102,7 +102,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
     # appears in the list of stop names of the schedule's trip.
     # if both halves appear, because the route does not truly branch,
     # (eg Framingham/Worcester Line) then use the one which appears at the beginning
-    # or end of the list.
+    # or end of the list. If start AND end of trip is branch names, return nil (use normal route name)
     if String.contains?(route.name, "/") do
       [branch_one, branch_two] = String.split(route.name, "/")
       branch_two = String.replace_trailing(branch_two, " Line", "")
@@ -135,8 +135,10 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
     first_stop_name = List.first(stop_names)
     last_stop_name = List.last(stop_names)
 
-    [terminus_stop] = Enum.filter([first_stop_name, last_stop_name], &(&1 in branch_names))
-    terminus_stop <> " Line"
+    case Enum.filter([first_stop_name, last_stop_name], &(&1 in branch_names)) do
+      [terminus_stop] -> terminus_stop <> " Line"
+      _ -> nil
+    end
   end
 
   defp branch_name(_branch_names, _stop_names), do: nil
