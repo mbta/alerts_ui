@@ -109,7 +109,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
       </.h5>
       <div class="flex flex-col gap-1">
         <div class="flex flex-row">
-          <.checkbox field={@form[:notification_toggle]} id="notification-toggle" />
+          <.form_checkbox field={@form[:notification_toggle]} id="notification-toggle" />
 
           <span class="ml-4">
             Send notifications to alert subscribers
@@ -123,7 +123,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
         </div>
         <div id="banner_div" class="flex flex-col">
           <div class="flex flex-row mb-2">
-            <.checkbox field={@form[:view_banner]} />
+            <.form_checkbox field={@form[:view_banner]} />
             <span class="ml-4">Banner on all MBTA.com pages</span>
           </div>
           <div
@@ -156,7 +156,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
                 field={@form[:banner_text]}
               />
             </div>
-            <.checkbox
+            <.form_checkbox
               class="mt-2 md:ml-4 md:mt-8"
               field={@form[:banner_sync_toggle]}
               label="Auto refresh"
@@ -166,7 +166,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
             :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
             class="flex flex-row mt-4"
           >
-            <.checkbox
+            <.form_checkbox
               field={@form[:accept_banner]}
               label="I understand this will post a high priority alert banner on every page of MBTA.com."
             />

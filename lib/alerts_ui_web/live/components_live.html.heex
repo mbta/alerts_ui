@@ -304,12 +304,24 @@
       class="md:min-w-64 md:max-w-64"
       disabled={true}
     />
-    <.checkbox label="Checkbox" field={@form[:checkbox]} />
-    <.checkbox
-      label="Checkbox with a different image"
+    <.form_checkbox label="Checkbox" field={@form[:checkbox]} />
+    <.form_checkbox
+      label="Different checkbox"
       field={@form[:checkbox_icon]}
-      class="h-5 w-5 border border-border-primary rounded"
+      class="h-5 w-5"
       check_class="w-[100%] h-[100%] checked:before:hero-truck leading-normal checked:before:mb-8"
     />
   </.form>
+
+  <div class="mt-16">
+    <.checkbox
+      id="normal-checkbox"
+      name="anormal-checkbox"
+      value="true"
+      checked={true}
+    />
+    <AlertsUIWeb.SharedComponents.label for="normal-checkbox">
+      A checkbox with no form field
+    </AlertsUIWeb.SharedComponents.label>
+  </div>
 </div>
