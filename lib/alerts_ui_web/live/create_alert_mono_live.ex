@@ -292,18 +292,27 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     socket =
       socket
       |> assign(%{
-        form: Phoenix.Component.to_form(updated_source),
-        progress: get_step_by_name(socket.assigns.progress.next),
+        draft_form: Phoenix.Component.to_form(updated_source),
         path_effect_name: effect_name,
-        change_type: false,
         submitted?: false,
         first_async_load: true
       })
-      |> sync_socket(%{})
 
-    if not Enum.empty?(replaced_values) do
-      send(self(), {:changing_mode_effect, replaced_values})
-    end
+    # If there are no replaced values, go to form page 2.
+    # Otherwise, show the warning modal.
+    socket =
+      if Enum.empty?(replaced_values) do
+        socket
+        |> assign(%{
+          form: socket.assigns.draft_form,
+          progress: get_step_by_name(socket.assigns.progress.next),
+          change_type: false
+        })
+        |> sync_socket(%{})
+      else
+        send(self(), {:changing_mode_effect, replaced_values})
+        socket
+      end
 
     {:noreply, socket}
   end
@@ -534,15 +543,32 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
 
   @impl true
   def handle_event("accepted_change_mode_effect_modal", _params, socket) do
-    {:noreply, socket |> set_modal_open(@change_mode_effect_modal_id, false)}
+    {:noreply,
+     socket
+     |> set_modal_open(@change_mode_effect_modal_id, false)
+     |> assign(%{
+       form: socket.assigns.draft_form,
+       progress: get_step_by_name(socket.assigns.progress.next),
+       change_type: false
+     })
+     |> sync_socket(%{})}
   end
 
   @impl true
   def handle_event("cancelled_change_mode_effect_modal", _params, socket) do
+    original_form = socket.assigns.original_alert_form
+
     {:noreply,
      socket
      |> set_modal_open(@change_mode_effect_modal_id, false)
-     |> redirect(to: return_to(socket.assigns.return_to || "/"))}
+     # Revert back to the originally chosen route and effect types
+     |> assign(%{
+       path_route_type:
+         Atom.to_string(
+           PathHelper.path_route_type(original_form[:route_type], original_form[:effect_name])
+         ),
+       path_effect_name: original_form[:effect_name]
+     })}
   end
 
   defp set_modal_open(socket, id, state) do
