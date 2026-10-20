@@ -671,18 +671,14 @@ defmodule AlertsUIWeb.ReviewModal do
         Are you sure you want to close alert #{@alert_id}?
       </p>
       <div class="flex row">
-        <div class="h-5 w-5 mr-4 border border-border-primary rounded">
+        <div class="mr-4">
           <input type="hidden" name="all-clear-checkbox" value="false" />
-          <input
-            type="checkbox"
+          <.checkbox
             id={"all-clear-checkbox-#{@id}-#{@alert_id}"}
             name="all-clear-checkbox"
             value="true"
             phx-click="all_clear_checkbox"
             checked={@send_all_clear?}
-            class="[appearance:none] hover:bg-primary-hover rounded bg-bg-input-default w-[100%] h-[100%]
-             checked:bg-primary checked:before:content-['✓'] before:absolute before:inline before:translate-y-[-4px] before:translate-x-[2px]"
-            ,
           />
         </div>
         <AlertsUIWeb.SharedComponents.label for="all-clear-checkbox">

@@ -436,7 +436,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               field={@form[:header_text]}
             />
           </div>
-          <.checkbox
+          <.form_checkbox
             class="mt-2 md:ml-4 md:mt-8"
             field={@form[:header_sync_toggle]}
             label="Auto refresh"
@@ -471,7 +471,7 @@ defmodule AlertsUIWeb.FormComponents.AlertDetails do
               field={@form[:description_text]}
             />
           </div>
-          <.checkbox
+          <.form_checkbox
             class="mt-2 md:ml-4 md:mt-8"
             field={@form[:description_sync_toggle]}
             label="Auto refresh"

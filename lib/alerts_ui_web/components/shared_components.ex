@@ -1451,15 +1451,13 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   @doc """
-  Renders a checkbox input.
+  Renders a checkbox input for a form field.
 
   ## Examples
 
-      <.checkbox field={@form[:fieldname]} />
+      <.form_checkbox field={@form[:fieldname]} />
   """
   attr :id, :any, default: nil
-  attr :value, :any
-  attr :hidden, :boolean, default: false
   attr :class, :string, default: "", doc: "additional classes to add to container div"
   attr :check_class, :string, default: "", doc: "additional classes to add directly to input"
   attr :label, :string, default: nil
@@ -1467,12 +1465,9 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :field, FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :errors, :list, default: []
-  attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
-
   attr :rest, :global, include: ~w(phx-debounce disabled)
 
-  def checkbox(%{field: %FormField{} = field} = assigns) do
+  def form_checkbox(%{field: %FormField{} = field} = assigns) do
     assigns =
       assigns
       |> assign(id: assigns.id || field.id)
@@ -1484,28 +1479,58 @@ defmodule AlertsUIWeb.SharedComponents do
     <div>
       <div phx-feedback-for={@name} class={@class}>
         <input type="hidden" name={@name} value="false" />
-        <input
-          type="checkbox"
+        <.checkbox
           id={@id}
           name={@name}
           value="true"
           checked={@checked}
-          class={[
-            "[appearance:none] bg-bg-input-default checked:bg-primary hover:bg-bg-elevation-6 hover:checked:bg-primary-hover
-            rounded font-bold leading-none text-text-dark  w-4 h-4 before:content-['✓']
-            border border-primary border-rounded hover:checked:border-primary-hover
-            outline-text-primary outline-offset-2 focus:outline focus:outline-1
-            [&:not(:checked)]:text-transparent
-            ",
-            @check_class,
-            if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")
-          ]}
+          class={@check_class}
+          errors={@errors}
           {@rest}
         />
         <.label :if={@label} for={@id}>{@label}</.label>
         <.input_error :for={msg <- @errors}>{msg}</.input_error>
       </div>
     </div>
+    """
+  end
+
+  @doc """
+  Renders a checkbox input.
+
+  ## Examples
+
+    <.checkbox id="my_checkbox" value="true" />
+  """
+  attr :id, :any, default: nil
+  attr :value, :any
+  attr :name, :string, default: ""
+  attr :class, :string, default: "", doc: "additional classes to add to container div"
+  attr :errors, :list, default: []
+  attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
+
+  attr :rest, :global, include: ~w(phx-debounce disabled phx-click)
+
+  def checkbox(assigns) do
+    ~H"""
+    <input
+      type="checkbox"
+      id={@id}
+      name={@name}
+      value={@value}
+      checked={@checked}
+      class={[
+        "[appearance:none] bg-bg-input-default checked:bg-primary hover:bg-bg-elevation-6 hover:checked:bg-primary-hover
+            rounded font-bold leading-none text-text-dark  w-4 h-4 before:content-['✓']
+            border border-primary border-rounded hover:checked:border-primary-hover
+            outline-text-primary outline-offset-2 focus:outline focus:outline-1
+            [&:not(:checked)]:text-transparent
+            ",
+        @class,
+        if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")
+      ]}
+      {@rest}
+    />
     """
   end
 

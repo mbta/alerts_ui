@@ -174,7 +174,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
         id="delivery_form"
       >
         <div class="flex flex-row">
-          <.checkbox
+          <.form_checkbox
             field={@form[:notification_toggle]}
             phx-change="notification_toggle_change"
             phx-target={@myself}
@@ -187,7 +187,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
         </div>
         <div id="banner_div" class="flex flex-col">
           <div class="flex flex-row mb-2">
-            <.checkbox field={@form[:view_banner]} phx-change="view_banner" phx-target={@myself} />
+            <.form_checkbox field={@form[:view_banner]} phx-change="view_banner" phx-target={@myself} />
             <span class="ml-4">Banner on all MBTA.com pages</span>
           </div>
           <div
@@ -212,7 +212,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
                 field={@form[:banner_text]}
               />
             </div>
-            <.checkbox
+            <.form_checkbox
               class="mt-2 md:ml-4 md:mt-8"
               field={@form[:banner_sync_toggle]}
               label="Auto refresh"
@@ -222,7 +222,7 @@ defmodule AlertsUIWeb.FormComponents.Delivery do
             :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
             class="flex flex-row mt-4"
           >
-            <.checkbox field={@form[:accept_banner]} />
+            <.form_checkbox field={@form[:accept_banner]} />
             <span class={
               if @form[:accept_banner].errors |> length > 0, do: "-ml-[14rem]", else: "ml-4"
             }>
