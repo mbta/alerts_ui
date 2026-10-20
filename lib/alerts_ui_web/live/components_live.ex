@@ -76,6 +76,67 @@ defmodule AlertsUIWeb.ComponentsLive do
   end
 
   @impl true
+  def handle_event("create_bad_alerts", _, socket) do
+    AlertsUI.Alerts.get_by_alert_id("1000535")
+    |> AlertsUI.Models.Alert.changeset(%{
+      original_route_selections: ["Orange Line|Orange", "Purple Line|Purple"],
+      informed_entity: [
+        %{
+          route_id: "Orange",
+          route_type: 1,
+          activities: [
+            :BOARD,
+            :EXIT,
+            :RIDE
+          ],
+          agency_id: "1"
+        },
+        %{
+          route_id: "Purple",
+          route_type: 1,
+          activities: [
+            :BOARD,
+            :EXIT,
+            :RIDE
+          ],
+          agency_id: "1"
+        }
+      ]
+    })
+    |> AlertsUI.Repo.update()
+
+    AlertsUI.Alerts.get_by_alert_id("1000536")
+    |> AlertsUI.Models.Alert.changeset(%{
+      original_route_selections: ["Fairmount Line|CR-Fairmount", "Columbus Line|CR-Buckeyes"],
+      informed_entity: [
+        %{
+          route_id: "Fairmount Line",
+          route_type: 2,
+          activities: [
+            :BOARD,
+            :EXIT,
+            :RIDE
+          ],
+          agency_id: "1"
+        },
+        %{
+          route_id: "CR-Buckeyes",
+          route_type: 2,
+          activities: [
+            :BOARD,
+            :EXIT,
+            :RIDE
+          ],
+          agency_id: "1"
+        }
+      ]
+    })
+    |> AlertsUI.Repo.update()
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("rerender", %{"components_live" => components_live}, socket) do
     form =
       %__MODULE__{}

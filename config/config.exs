@@ -120,7 +120,7 @@ config :alerts_ui, Oban,
        # Update recurring alerts every day at 3:01 am EST
        {"1 8 * * *", AlertsUI.Jobs.RecurringAlertUpdater},
        # Validate alerts against production every day at 4:00 am EST
-       {"0 9 * * *", AlertsUI.Jobs.AlertValidationDailyWorker},
+       {"*/30 * * * *", AlertsUI.Jobs.AlertValidationDailyWorker},
        # Check if we need to validate alerts against dev every minute
        {
          "*/1 * * * *",
