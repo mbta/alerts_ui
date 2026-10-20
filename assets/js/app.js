@@ -45,6 +45,7 @@ let liveSocket = new LiveSocket(
     }
   }
 )
+sessionStorage.setItem("phx:fallback:LongPoll", false);
 
 // Show progress bar on live navigation and form submits
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
