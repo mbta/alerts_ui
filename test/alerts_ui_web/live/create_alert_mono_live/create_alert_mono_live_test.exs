@@ -2119,7 +2119,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "notification toggle defaults as expected on edit", %{conn: conn} do
+    test "notification toggle defaults to true when editing", %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 
       with_mocks([
@@ -2140,30 +2140,24 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
         render_async(view)
-        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"false\"]")
+        refute has_element?(view, "[name=\"alert_data[notification_toggle]\"][checked]")
 
         view
         |> element("#route_type_and_effect")
         |> render_click()
 
         view
-        |> element("#route-type-commuter_rail-button")
+        |> element("#effect-name-notice-button")
         |> render_click()
-
-        view
-        |> element("#effect-name-cancellation-button")
-        |> render_click()
-
-        render_click(view, "accepted_change_mode_effect_modal", %{})
 
         render_async(view)
 
-        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"true\"]")
+        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][checked]")
       end
     end
 
     @tag :logged_in_user
-    test "notification toggle defaults as expected on duplicate", %{conn: conn} do
+    test "notification toggle defaults to true when changed to CR on duplicate", %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 
       with_mocks([
@@ -2184,7 +2178,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/duplicate/test-bus-delay")
         render_async(view)
-        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"false\"]")
+        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][checked]")
 
         view
         |> element("#route_type_and_effect")
@@ -2202,7 +2196,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
 
         render_async(view)
 
-        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][value=\"true\"]")
+        assert has_element?(view, "[name=\"alert_data[notification_toggle]\"][checked]")
       end
     end
 

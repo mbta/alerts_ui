@@ -257,6 +257,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     effect_name = Map.get(params, "value")
     next_route_type = InformedEntity.route_type_mapping(socket.assigns.path_route_type)
     create? = socket.assigns.form_type === :creating
+    edit? = socket.assigns.form_type === :editing
 
     # On edit/duplicate, we always compare to the saved form
     # On create, we compare to the last form the user edited
@@ -268,6 +269,16 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
     %{new: form_updates, replaced: replaced_values} =
       ModeEffectChange.new_form_values(form_to_compare, next_route_type, effect_name)
 
+    notification_toggle =
+      if edit?,
+        do: true,
+        else:
+          NotificationToggle.get_notification_toggle_default(
+            %{notification_toggle: nil, route_type: next_route_type},
+            effect_name,
+            socket.assigns.form_type
+          )
+
     updated_source =
       change(
         form_to_compare.source,
@@ -277,12 +288,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive do
             effect_name: effect_name,
             combination: AlertDataHelpers.combination_for(next_route_type, effect_name),
             # We want to initialize with the default for the NEW mode/effect
-            notification_toggle:
-              NotificationToggle.get_notification_toggle_default(
-                %{notification_toggle: nil, route_type: next_route_type},
-                effect_name,
-                socket.assigns.form_type
-              )
+            notification_toggle: notification_toggle
           },
           form_updates
         )
