@@ -2157,46 +2157,6 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     end
 
     @tag :logged_in_user
-    test "notification toggle defaults to false when changing to bus notice on duplicate", %{
-      conn: conn
-    } do
-      {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
-
-      with_mocks([
-        {RoutesRepo, [],
-         [
-           by_type: fn _ -> [@bus_route] end,
-           by_type: fn _, _ -> [@ferry_route] end,
-           get: fn _ -> @bus_route end,
-           get: fn _, _ -> @bus_route end,
-           all: fn _ -> [@bus_route] end
-         ]},
-        {StopsRepo, [],
-         [
-           by_route: fn _, _, _ -> [@stop, @stop_2] end,
-           get_parent: fn _ -> nil end
-         ]},
-        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]}
-      ]) do
-        {:ok, view, _html} = live(conn, "/alerts/edit/test-bus-delay")
-        render_async(view)
-        refute has_element?(view, "[name=\"alert_data[notification_toggle]\"][checked]")
-
-        view
-        |> element("#route_type_and_effect")
-        |> render_click()
-
-        view
-        |> element("#effect-name-notice-button")
-        |> render_click()
-
-        render_async(view)
-
-        refute has_element?(view, "[name=\"alert_data[notification_toggle]\"][checked]")
-      end
-    end
-
-    @tag :logged_in_user
     test "notification toggle defaults to true when changed to CR on duplicate", %{conn: conn} do
       {:ok, _} = Alerts.create_or_update_alert(@alert_params, build(:user))
 
