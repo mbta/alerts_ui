@@ -35,7 +35,7 @@ defmodule AlertsUI.Jobs.AlertValidationUpcomingWorker do
       |> Logger.info()
 
       AlertValidator.validate_commuter_rail_alerts(base_url, api_key)
-      |> AlertValidator.format_invalid_alerts("current", "Commuter Rail ")
+      |> AlertValidator.format_invalid_alerts("upcoming", "Commuter Rail ")
       |> Logger.info()
     else
       {:error, error} when is_atom(error) ->
