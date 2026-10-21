@@ -110,7 +110,7 @@ defmodule AlertsUI.MixProject do
       {:oban, "~> 2.16"},
       {:oban_web, "~> 2.11"},
       {:paper_trail, "~> 1.1.2"},
-      {:phoenix, "~> 1.8.6"},
+      {:phoenix, "~> 1.8.16"},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_html_helpers, "~> 1.0"},
