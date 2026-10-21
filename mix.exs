@@ -116,7 +116,7 @@ defmodule AlertsUI.MixProject do
       {:phoenix_html_helpers, "~> 1.0"},
       {:phoenix_live_dashboard, "~> 0.9.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.2.9"},
+      {:phoenix_live_view, "~> 1.2.13"},
       {:phoenix_swagger, "~> 0.8"},
       {:plug_cowboy, "~> 2.7"},
       {:postgrex, ">= 0.0.0"},
