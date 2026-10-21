@@ -31,7 +31,6 @@ let liveSocket = new LiveSocket(
   Socket,
   {
     heartbeatIntervalMs: 3000,
-    longPollFallbackMs: 3000,
     hooks: Hooks,
     params: { _csrf_token: csrfToken },
     dom: {
