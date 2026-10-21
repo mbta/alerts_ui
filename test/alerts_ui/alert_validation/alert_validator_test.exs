@@ -25,18 +25,27 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
          ]}
       ]) do
         insert(:alert, %{
+          alert_id: "567",
+          primary_service_type: "2",
+          informed_entity: [%{route_type: 2, route_id: "4"}]
+        })
+
+        insert(:alert, %{
           alert_id: "456",
+          primary_service_type: "3",
           informed_entity: [%{route_type: 3, route_id: "1"}, %{route_type: 3, route_id: "2"}]
         })
 
         insert(:alert, %{
           alert_id: "234",
+          primary_service_type: "3",
           closed_timestamp: ~U[2023-10-14 00:01:00Z],
           informed_entity: [%{route_type: 3, route_id: "1"}]
         })
 
         insert(:alert, %{
           alert_id: "123",
+          primary_service_type: "3",
           informed_entity: [
             %{route_type: 3, route_id: "1"},
             %{route_type: 3, route_id: "2"},
@@ -227,6 +236,66 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
     end
   end
 
+  describe("validate_commuter_rail_alerts/1") do
+    test "finds CR alerts with routes no longer in api" do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           all: fn ["filter[id]": _], [reject_hidden: false, base_url: _, api_key: _] ->
+             [%Route{id: "1", type: 2}, %Route{id: "2", type: 3}]
+           end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "567",
+          primary_service_type: "2",
+          informed_entity: [%{route_type: 2, route_id: "4"}]
+        })
+
+        insert(:alert, %{
+          alert_id: "456",
+          primary_service_type: "3",
+          informed_entity: [%{route_type: 3, route_id: "1"}, %{route_type: 3, route_id: "2"}]
+        })
+
+        insert(:alert, %{
+          alert_id: "234",
+          primary_service_type: "2",
+          closed_timestamp: ~U[2023-10-14 00:01:00Z],
+          informed_entity: [%{route_type: 3, route_id: "1"}]
+        })
+
+        insert(:alert, %{
+          alert_id: "123",
+          primary_service_type: "2",
+          informed_entity: [
+            %{route_type: 2, route_id: "1"},
+            %{route_type: 3, route_id: "2"},
+            %{route_type: 2, route_id: "3"}
+          ]
+        })
+
+        assert AlertValidator.validate_commuter_rail_alerts() ==
+                 [
+                   %{
+                     alert_id: "567",
+                     invalid_facilities: [],
+                     invalid_routes: ["4"],
+                     invalid_stops: [],
+                     invalid_trips: []
+                   },
+                   %{
+                     alert_id: "123",
+                     invalid_facilities: [],
+                     invalid_routes: ["3"],
+                     invalid_stops: [],
+                     invalid_trips: []
+                   }
+                 ]
+      end
+    end
+  end
+
   describe "format invalid alerts/1" do
     test "formats alerts if no invalid alerts" do
       with_mocks([
@@ -274,7 +343,9 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
           informed_entity: [%{facility_id: "1"}]
         })
 
-        result = AlertValidator.validate_alerts() |> AlertValidator.format_invalid_alerts()
+        result =
+          AlertValidator.validate_alerts() |> AlertValidator.format_invalid_alerts("current")
+
         assert result == "No invalid alerts found"
       end
     end
@@ -331,6 +402,60 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
 
         assert result ==
                  "The following alerts have entities that no longer exist in current GTFS:|Alert 456:|Facilities: 2||Alert 345:|Trips: 2||Alert 234:|Stops: 2||Alert 123:|Routes: 2"
+      end
+    end
+
+    test "formats Commuter Rail alerts correctly" do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           all: fn ["filter[id]": _], [reject_hidden: false, base_url: _, api_key: _] ->
+             [%Route{id: "1", type: 2}]
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           all: fn ["filter[id]": _], [base_url: _, api_key: _] -> [%Stop{id: "1"}] end
+         ]},
+        {SchedulesRepo, [],
+         [
+           trips_by_ids: fn _, [], [base_url: _, api_key: _] -> [%Trip{id: "1"}] end
+         ]},
+        {FacilitiesRepo, [],
+         [
+           get: fn
+             "1", [], [base_url: _, api_key: _] -> %Facility{id: "1"}
+             "2", [], [base_url: _, api_key: _] -> nil
+           end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "123",
+          primary_service_type: "2",
+          informed_entity: [%{route_type: 2, route_id: "1"}, %{route_type: 2, route_id: "2"}]
+        })
+
+        insert(:alert, %{
+          alert_id: "234",
+          primary_service_type: "2",
+          informed_entity: [%{stop_id: "1"}, %{stop_id: "2"}]
+        })
+
+        insert(:alert, %{
+          alert_id: "345",
+          primary_service_type: "2",
+          informed_entity: [
+            %{trip: %{trip_id: "1"}},
+            %{trip: %{trip_id: "2"}}
+          ]
+        })
+
+        result =
+          AlertValidator.validate_commuter_rail_alerts()
+          |> AlertValidator.format_invalid_alerts("upcoming", "Commuter Rail ")
+
+        assert result ==
+                 "The following Commuter Rail alerts have entities that no longer exist in upcoming GTFS:|Alert 345:|Trips: 2||Alert 234:|Stops: 2||Alert 123:|Routes: 2"
       end
     end
   end
