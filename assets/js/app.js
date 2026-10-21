@@ -30,6 +30,7 @@ let liveSocket = new LiveSocket(
   "/live",
   Socket,
   {
+    longPollFallbackMs: 3_000,
     heartbeatIntervalMs: 30_000,
     timeout: 60_000,
     hooks: Hooks,
