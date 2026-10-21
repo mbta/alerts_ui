@@ -30,10 +30,10 @@ let liveSocket = new LiveSocket(
   "/live",
   Socket,
   {
-    heartbeatIntervalMs: 3000,
+    heartbeatIntervalMs: 30000,
+    timeout: 30000,
     hooks: Hooks,
     params: { _csrf_token: csrfToken },
-    timeout: 30_000,
     dom: {
       // So that resizing a textarea does not undo itself 
       // https://github.com/phoenixframework/phoenix_live_view/issues/1011
