@@ -52,14 +52,29 @@ topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
-// connect if there are any LiveViews on the page
-liveSocket.connect()
+const connectLiveSocket = () => {
+  if (window.liveSocket) return;
+  // connect if there are any LiveViews on the page
+  liveSocket.connect();
+  // expose liveSocket on window for web console debug logs and latency simulation:
+  // >> liveSocket.enableDebug()
+  // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
+  // >> liveSocket.disableLatencySim()
+  window.liveSocket = liveSocket
+}
 
-// expose liveSocket on window for web console debug logs and latency simulation:
-// >> liveSocket.enableDebug()
-// >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
-// >> liveSocket.disableLatencySim()
-window.liveSocket = liveSocket
+// Chrome can 'preload' a site which messes up the initial websocket connection
+// This makes sure not to attempt the websocket connection until the page is actually visible
+if (document.visibilityState !== "visible") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      setTimeout(connectLiveSocket, 10);
+    }
+  }, { once: true })
+} else {
+  connectLiveSocket()
+
+}
 
 // Copy contents of target to the clipboard
 window.addEventListener("phx:copy_input", (event) => {
@@ -99,9 +114,9 @@ const handleCopy = (event, textToCopy) => {
 }
 
 window.addEventListener("phx:show-modal", (e) => {
-
   let el = document.getElementById(e.detail.id)
   if (el) {
     liveSocket.execJS(el, el.getAttribute("data-show"))
   }
 })
+
