@@ -32,13 +32,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
     AffectedService,
     AlertDetails,
     Delivery,
-    NotificationPeriod,
-    RiderReminders,
-    RouteTypeAndEffect,
     StopRouteAffectedService,
     Submit,
     SystemwideAffectedService,
-    Timeline,
     TimeRange
   }
 
@@ -756,12 +752,6 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp get_step_by_name(name) do
     Enum.find(@steps, &(&1.name == name))
   end
-
-  @spec route_type(map()) :: Route.type_int() | nil
-  defp route_type(alert_data), do: Map.get(alert_data, :route_type)
-
-  @spec route_type(map()) :: String.t() | nil
-  defp effect_name(alert_data), do: Map.get(alert_data, :effect_name)
 
   @spec maybe_include_virtual_green_line([Route.t()]) :: [Route.t()]
   defp maybe_include_virtual_green_line(routes) do

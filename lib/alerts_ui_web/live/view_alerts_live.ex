@@ -428,16 +428,14 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def handle_event("edit_alert", %{"alert_id" => alert_id}, socket) do
     socket = assign(socket, scroll_to_top: false)
 
-    {:noreply,
-     push_navigate(socket, to: form_path_edit(socket.assigns.use_legacy_form, alert_id))}
+    {:noreply, push_navigate(socket, to: form_path_edit(alert_id))}
   end
 
   @impl true
   def handle_event("duplicate_alert", %{"alert_id" => alert_id}, socket) do
     socket = assign(socket, scroll_to_top: true)
 
-    {:noreply,
-     push_navigate(socket, to: form_path_duplicate(socket.assigns.use_legacy_form, alert_id))}
+    {:noreply, push_navigate(socket, to: form_path_duplicate(alert_id))}
   end
 
   @impl true
@@ -628,27 +626,15 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   defp order_directions(_, direction, _, _),
     do: [String.to_existing_atom(direction || "asc")]
 
-  def form_path_new(true = _use_legacy_form) do
-    "/alerts/legacy/new"
-  end
-
-  def form_path_new(_use_legacy_form) do
+  def form_path_new do
     "/alerts/new"
   end
 
-  def form_path_edit(true = _use_legacy_form, alert_id) do
-    "/alerts/legacy/edit?alert_id=#{alert_id}"
-  end
-
-  def form_path_edit(_use_legacy_form, alert_id) do
+  def form_path_edit(alert_id) do
     "/alerts/edit/#{alert_id}"
   end
 
-  def form_path_duplicate(true = _use_legacy_form, alert_id) do
-    "/alerts/legacy/duplicate?alert_id=#{alert_id}"
-  end
-
-  def form_path_duplicate(_use_legacy_form, alert_id) do
+  def form_path_duplicate(alert_id) do
     "/alerts/duplicate/#{alert_id}"
   end
 
