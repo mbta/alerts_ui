@@ -1,5 +1,6 @@
 defmodule AlertsUIWeb.FormComponents.Helpers.ObsoleteEntities do
   @moduledoc """
+  #TODO possibly remove?
   extracted shared functions for processing obsolete entities inside async handlers
   """
 

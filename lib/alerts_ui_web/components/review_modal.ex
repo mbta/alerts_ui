@@ -21,12 +21,10 @@ defmodule AlertsUIWeb.ReviewModal do
   alias AlertsUI.Models.{Alert, SeverityLevel}
 
   alias AlertsUIWeb.FormComponents.Helpers.{
-    ContentFormatter,
-    RecurringDurationText,
-    SelectFormatter
+    ContentFormatter
   }
 
-  alias AlertsUIWeb.CreateAlertLive.Helpers.{TimeRangeDurationText}
+  alias AlertsUIWeb.CreateAlertLive.Helpers.{RecurringDurationText, SelectFormatter, TimeRangeDurationText}
 
   alias AlertsUIWeb.FormComponents.Helpers.Helpers, as: FormHelpers
   alias AlertsUIWeb.UserHelpers

@@ -1,7 +1,7 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.GreenLineTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.GreenLineTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
-  alias AlertsUIWeb.FormComponents.Helpers.GreenLine
+  alias AlertsUIWeb.CreateAlertLive.Helpers.GreenLine
   alias MBTAV3API.Stops.Stop
 
   ###

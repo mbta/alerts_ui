@@ -3,7 +3,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
     Constructs auto-text for description from affected service.
   """
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
-  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+  alias AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter
 
   @spec affected_routes(BuildAutoText.t()) :: String.t()
   def affected_routes(%{routes: routes, effect_name: effect, route_type: route_type}) do

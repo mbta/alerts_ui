@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.GreenLine do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.GreenLine do
   @moduledoc """
     Given a list of stops chunked by route id, models their branching structure as a polytree and
     returns a list of stops "in order" according to the following rubric:

@@ -1,9 +1,9 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatterTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatterTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+  alias AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Trip

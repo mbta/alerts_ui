@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.SelectFormatter do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter do
   @moduledoc """
   Formats selection dropdowns for affected service components
   """

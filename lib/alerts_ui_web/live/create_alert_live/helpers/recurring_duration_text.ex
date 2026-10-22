@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationText do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.RecurringDurationText do
   @moduledoc """
     Validators for time range component
   """

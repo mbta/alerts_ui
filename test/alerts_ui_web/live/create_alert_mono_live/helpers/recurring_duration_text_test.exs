@@ -1,9 +1,9 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.RecurringDurationTextTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.RecurringDurationTextTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  alias AlertsUIWeb.FormComponents.Helpers.RecurringDurationText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.RecurringDurationText
 
   describe("recurring_duration_text/1") do
     test "manages with nil data" do

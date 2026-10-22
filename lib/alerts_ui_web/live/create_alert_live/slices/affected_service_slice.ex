@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
   alias AlertsUIWeb.CreateAlertLive.AlertData
   alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
-  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+  alias AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter
 
   alias Ecto.Changeset
 
