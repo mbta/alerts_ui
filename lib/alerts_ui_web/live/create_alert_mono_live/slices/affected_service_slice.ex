@@ -318,7 +318,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   def async_assign_detours(socket, _params) do
     single_route_id = socket.assigns.form[:single_route_id].value
 
-    original_skate_id = socket.assigns.original_skate_id
+    original_skate_id = Map.get(socket.assigns, :original_skate_id)
 
     Phoenix.LiveView.assign_async(socket, [:skate_detours, :used_detours], fn ->
       detours = GetDetours.get_detours() |> Enum.filter(&(&1.route_id == single_route_id))
