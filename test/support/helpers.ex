@@ -40,22 +40,7 @@ defmodule Test.Support.Helpers do
   end
 
   # Useful in e2e testing
-  def get_to_submission_page(view, mode, effect) do
-    # Use any combo to proceed to next page
-    view
-    |> element("#service_type_buttons button", mode)
-    |> render_click()
-
-    view
-    |> element("#effect_buttons button", effect)
-    |> render_click()
-
-    view
-    |> element("#route_types_form")
-    |> render_submit()
-  end
-
-  def get_to_submission_page_refactor(conn, view, mode, effect) do
+  def get_to_submission_page(conn, view, mode, effect) do
     view
     |> element("#service_type_buttons button", mode)
     |> render_click()
@@ -85,10 +70,6 @@ defmodule Test.Support.Helpers do
     view
     |> element("button", "Yes, continue")
     |> render_click()
-  end
-
-  def fill_out_required_form_fields(view, affected_service) do
-    fill_out_form(view, "#service_form", affected_service)
   end
 
   def fill_out_form(view, form_section, params) do

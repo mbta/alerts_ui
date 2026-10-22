@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.Tickets.AffectedServiceFilterWeirdnessTest do
     test "selected route is present in options after LiveView re-render", %{conn: conn} do
       with_mocks(base_mocks()) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Multi-route detour")
+        view = get_to_submission_page(conn, view, "Bus", "Multi-route detour")
         render_async(view)
 
         # All three routes should be present in the modal filter select initially
@@ -149,7 +149,7 @@ defmodule AlertsUIWeb.Tickets.AffectedServiceFilterWeirdnessTest do
     test "selected route is preserved in options even when search term changes", %{conn: conn} do
       with_mocks(base_mocks()) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Multi-route detour")
+        view = get_to_submission_page(conn, view, "Bus", "Multi-route detour")
         render_async(view)
 
         # Select route 88 in the modal

@@ -45,7 +45,7 @@ defmodule AlertsUIWeb.Tickets.EscapeReviewModalTest do
   # review modal can be opened.
   defp setup_valid_form(conn) do
     {:ok, view, _html} = live(conn, "/alerts/new")
-    view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+    view = get_to_submission_page(conn, view, "Bus", "Delay")
 
     view
     |> element("form")

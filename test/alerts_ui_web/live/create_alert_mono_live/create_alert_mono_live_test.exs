@@ -140,7 +140,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         assert first_rendered_view =~ ~s(class="min-w-full flex flex-col mb-8" id="route_view")
         refute first_rendered_view =~ ~s(class="min-w-full flex flex-col mt-4" id="details_view")
 
-        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+        view = get_to_submission_page(conn, view, "Commuter Rail", "Suspension")
 
         second_rendered_view = render_async(view, 1000)
 
@@ -173,7 +173,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+        view = get_to_submission_page(conn, view, "Commuter Rail", "Suspension")
 
         view
         |> element("form")
@@ -199,7 +199,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+        view = get_to_submission_page(conn, view, "Commuter Rail", "Suspension")
 
         view
         |> element("form")
@@ -238,7 +238,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
+        view = get_to_submission_page(conn, view, "Commuter Rail", "Delay")
 
         view
         |> element("form")
@@ -278,7 +278,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+        view = get_to_submission_page(conn, view, "Commuter Rail", "Suspension")
 
         view
         |> element("form")
@@ -335,7 +335,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Suspension")
+        view = get_to_submission_page(conn, view, "Commuter Rail", "Suspension")
 
         view
         |> element("form")
@@ -373,7 +373,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {FacilitiesRepo, [], get_by_type: fn _types, _opts -> [] end}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Facility", "Parking issue")
+        view = get_to_submission_page(conn, view, "Facility", "Parking issue")
 
         assert render_async(view) =~ ~s(id="access_service_view")
       end
@@ -383,7 +383,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
     test "shows correct affected service for systemwide combination", %{conn: conn} do
       with_mock(RoutePatternsRepo, by_route_id: fn _route_id, _opts -> [] end) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Systemwide", "Notice")
+        view = get_to_submission_page(conn, view, "Systemwide", "Notice")
 
         assert render_async(view) =~ ~s(id="systemwide_service_view")
       end
@@ -396,7 +396,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Stop move")
+        view = get_to_submission_page(conn, view, "Bus", "Stop move")
 
         assert render_async(view) =~ ~s(id="stop_route_service_view")
       end
@@ -409,7 +409,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+        view = get_to_submission_page(conn, view, "Bus", "Detour")
 
         assert render_async(view) =~ ~s(id="service_view")
       end
@@ -424,7 +424,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
         assert render_async(view) =~ ~s(id="route_view")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+        view = get_to_submission_page(conn, view, "Bus", "Detour")
 
         assert render_async(view) =~ ~s(id="details_view")
 
@@ -451,7 +451,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {RoutesRepo, [], [by_type: fn _type -> [@route] end, get: fn _id, _opts -> @route end]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+        view = get_to_submission_page(conn, view, "Bus", "Detour")
 
         render_async(view)
 
@@ -474,7 +474,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         {SchedulesRepo, [], by_route_ids: fn _route_ids, _opts -> [] end}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+        view = get_to_submission_page(conn, view, "Bus", "Detour")
         render_async(view, 1000)
 
         view
@@ -507,7 +507,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          all: fn ["filter[id]": ""], _ -> [stop, child_stop] end}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
+        view = get_to_submission_page(conn, view, "Facility", "Elevator closure")
         render_async(view)
 
         assert view
@@ -550,7 +550,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
         conn = put_req_header(conn, "referer", "/alerts?filter[timeline]=future")
 
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
+        view = get_to_submission_page(conn, view, "Facility", "Elevator closure")
         render_async(view)
 
         view
@@ -587,7 +587,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Multi-route detour")
+        view = get_to_submission_page(conn, view, "Bus", "Multi-route detour")
 
         refute view
                |> element("#gtfs-warning-modal")
@@ -2325,7 +2325,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
         render_async(view)
         assert has_element?(view, "div", "Bus • Delay")
 

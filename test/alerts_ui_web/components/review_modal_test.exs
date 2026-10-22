@@ -95,7 +95,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -239,7 +239,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -260,7 +260,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         get: fn _ -> @facility end
       ) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Facility", "Bike issue")
+        view = get_to_submission_page(conn, view, "Facility", "Bike issue")
 
         fill_out_form(view, "form", %{
           alert_data: %{
@@ -297,7 +297,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{
@@ -336,7 +336,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{
@@ -372,7 +372,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Extra Service
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Extra service")
+        view = get_to_submission_page(conn, view, "Bus", "Extra service")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"]}
@@ -407,7 +407,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Stop Closure
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
+        view = get_to_submission_page(conn, view, "Bus", "Stop closure")
 
         fill_out_form(view, "form", %{
           alert_data: %{stop_names_and_ids: ["Aquarium|place-aqucl"], route_ids: ["CR-Worcester"]}
@@ -444,7 +444,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         # CR Cancellation
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Cancellation")
+        view = get_to_submission_page(conn, view, "Commuter Rail", "Cancellation")
 
         fill_out_form(view, "form", %{
           alert_data: %{
@@ -498,7 +498,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # CR Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Commuter Rail", "Delay")
+        view = get_to_submission_page(conn, view, "Commuter Rail", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{
@@ -530,7 +530,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Access Elevator Closure
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
+        view = get_to_submission_page(conn, view, "Facility", "Elevator closure")
 
         fill_out_form(view, "form", %{
           alert_data: %{single_facility_id: "349"}
@@ -552,7 +552,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
     test "Systemwide", %{conn: conn} do
       # Systemwide delay
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Systemwide", "Delay")
+      view = get_to_submission_page(conn, view, "Systemwide", "Delay")
 
       fill_out_form(view, "form", %{
         alert_data: %{service_types: [3, 2, 4, 1]}
@@ -588,7 +588,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -618,7 +618,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
          ]}
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Facility", "Elevator closure")
+        view = get_to_submission_page(conn, view, "Facility", "Elevator closure")
 
         fill_out_form(view, "form", %{
           alert_data: %{single_facility_id: "349"}
@@ -703,7 +703,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -752,7 +752,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -791,7 +791,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -829,7 +829,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -878,7 +878,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -909,7 +909,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -957,7 +957,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -988,7 +988,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -1073,7 +1073,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -1105,7 +1105,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -1145,7 +1145,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -1185,7 +1185,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{
@@ -1224,7 +1224,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       ]) do
         # Bus Delay
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         fill_out_form(view, "form", %{
           alert_data: %{route_ids: ["CR-Worcester"], stop_ids: ["place-aqucl"]}
@@ -1275,7 +1275,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
         conn = AlertsUIWeb.ConnCase.log_in_user(conn, user)
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         view
         |> element("form")

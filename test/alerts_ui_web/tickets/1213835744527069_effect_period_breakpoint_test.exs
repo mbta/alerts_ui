@@ -42,7 +42,7 @@ defmodule AlertsUIWeb.Tickets.EffectPeriodBreakpointTest do
     test "start group (dropdown + datetime + 'to') is wrapped separately from the end group",
          %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       # Reproduce the ticket: choose Custom in both the effect start and end dropdowns,
       # which reveals both datetime pickers.

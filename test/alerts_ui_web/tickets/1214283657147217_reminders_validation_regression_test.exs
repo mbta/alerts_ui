@@ -180,7 +180,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
       conn: conn
     } do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+      view = get_to_submission_page(conn, view, "Bus", "Detour")
 
       # Add a reminder entry
       view
@@ -218,7 +218,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
       conn: conn
     } do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+      view = get_to_submission_page(conn, view, "Bus", "Detour")
 
       # Add a reminder entry with no reminder_time value
       view
