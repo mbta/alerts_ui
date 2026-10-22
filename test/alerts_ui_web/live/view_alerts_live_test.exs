@@ -1181,9 +1181,9 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
 
     @tag :logged_in_user
-    test "it does not paginate Current records", %{conn: conn} do
+    test "it paginates Current records", %{conn: conn} do
       {:ok, _view, html} = live(conn, "/alerts?filter[timeline]=current")
-      assert get_alert_id_order(html) == Enum.map(91..200, fn i -> "#{i}" end)
+      assert get_alert_id_order(html) == Enum.map(91..140, fn i -> "#{i}" end)
     end
 
     @tag :logged_in_user
