@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ContentFormatter do
   """
 
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias AlertsUIWeb.CreateAlertLive.Helpers.ServiceEffectCombinations
 
   @doc """
   Returns formatted string given a route atom

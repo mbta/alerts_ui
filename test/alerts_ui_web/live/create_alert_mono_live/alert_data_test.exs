@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.CreateAlertLive.AlertDataTest do
   import Phoenix.LiveViewTest
 
   alias AlertsUIWeb.CreateAlertLive.AlertData
-  alias AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeDurationText
 
   describe "slices/1" do
     test "AC-1: slices/1 returns non-empty list when form is nil" do

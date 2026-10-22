@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.ServiceEffectCombinations do
   @moduledoc """
   Gives a combination based on service type and effect
   """

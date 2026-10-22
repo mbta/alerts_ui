@@ -1,7 +1,7 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationTextTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeDurationTextTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
-  alias AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeDurationText
 
   describe "one_time_duration_text/1" do
     test "custom end" do

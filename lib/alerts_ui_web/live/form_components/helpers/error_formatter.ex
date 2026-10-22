@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatter do
 
   import Ecto.Changeset
 
-  alias AlertsUIWeb.FormComponents.Helpers.ServiceEffectCombinations
+  alias AlertsUIWeb.CreateAlertLive.Helpers.ServiceEffectCombinations
 
   @field_name_to_error_message %{
     header_text: "Enter message text",

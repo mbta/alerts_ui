@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeDurationText do
   @moduledoc """
     Constructs one-time time range duration text for time-range component.
   """
