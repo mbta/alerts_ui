@@ -122,7 +122,7 @@ defmodule AlertsUI.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:protox, "~> 2.0"},
       {:req, "~> 0.7.2"},
-      {:sentry, "~> 13.0"},
+      {:sentry, "~> 14.0"},
       {:sftp_client, "~> 2.1"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:stream_data, "~> 1.4.0", only: :test},
