@@ -154,7 +154,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     flop =
       socket.assigns.meta.flop
       |> Flop.set_page(params["page"] || "1")
-      |> single_page_if_current_page(timefield)
+      |> Map.put(:page_size, 50)
       |> Map.put(:filters, flop_filters)
       |> Map.put(:order_by, order_fields)
       |> Map.put(:order_directions, order_directions)
@@ -627,17 +627,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   defp order_directions(_, direction, _, _),
     do: [String.to_existing_atom(direction || "asc")]
-
-  defp single_page_if_current_page(flop, "current"),
-    do:
-      flop
-      |> Map.put(:page_size, 1_000)
-      |> Flop.set_page(1)
-
-  defp single_page_if_current_page(flop, _),
-    do:
-      flop
-      |> Map.put(:page_size, 50)
 
   def form_path_new(true = _use_legacy_form) do
     "/alerts/legacy/new"
