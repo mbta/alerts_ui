@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
   @moduledoc """
   Slice that manages the alert active period (start/end datetimes, one-time vs.
   recurring timing, recurrence days, and automatic-close eligibility). Provides
@@ -7,12 +7,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
 
   alias AlertsUI.Models.ActivePeriod
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+  import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [put_over_nil: 3, values_to_options: 1]
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters, as: TimeGetters
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.Helpers.DurationText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeSliceGetters, as: TimeGetters
+  alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias AlertsUIWeb.TripEndWarningModal
   alias Phoenix.LiveView.AsyncResult
@@ -44,9 +44,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
-    alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-    alias AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.TimeRangeSlice
+    alias AlertsUIWeb.CreateAlertLive.AlertData
+    alias AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeValidators
+    alias AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice
 
     def mount(_slice, socket, _params) do
       assign(socket, :current_time, DateTimeHelpers.current_time())

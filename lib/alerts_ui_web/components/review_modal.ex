@@ -8,10 +8,10 @@ defmodule AlertsUIWeb.ReviewModal do
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+  import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [humanize_effect_name: 2, display_alert_timing: 1]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Value,
+  import AlertsUIWeb.CreateAlertLive.Helpers.Value,
     only: [blank?: 1]
 
   import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]

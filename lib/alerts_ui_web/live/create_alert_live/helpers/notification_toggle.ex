@@ -1,6 +1,6 @@
 alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
 
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.NotificationToggle do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.NotificationToggle do
   @moduledoc """
   Helpers to work with the notification toggle
   """

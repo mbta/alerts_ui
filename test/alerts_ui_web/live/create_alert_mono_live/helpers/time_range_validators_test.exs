@@ -1,9 +1,9 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidatorsTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeValidatorsTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeValidators
 
   @naive_now DateTime.now!("America/New_York") |> DateTime.to_naive()
 

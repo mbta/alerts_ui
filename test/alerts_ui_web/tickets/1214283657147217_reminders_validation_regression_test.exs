@@ -33,7 +33,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice
+  alias AlertsUIWeb.CreateAlertLive.Slices.ReminderTimesSlice
 
   # ---------------------------------------------------------------------------
   # Changeset-level unit tests (fast, no browser required)
@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     test "blank reminder_time produces 'Select reminder time' error" do
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{id: "", reminder_time: ""},
+          %AlertsUIWeb.CreateAlertLive.AlertData.ReminderTime{id: "", reminder_time: ""},
           %{},
           @min_time,
           @max_time
@@ -60,7 +60,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     test "nil reminder_time produces 'Select reminder time' error" do
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{id: nil, reminder_time: nil},
+          %AlertsUIWeb.CreateAlertLive.AlertData.ReminderTime{id: nil, reminder_time: nil},
           %{},
           @min_time,
           @max_time
@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     test "reminder_time before notification start produces 'after notification period starts' error for new entries" do
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{
+          %AlertsUIWeb.CreateAlertLive.AlertData.ReminderTime{
             id: "new-123",
             reminder_time: nil
           },
@@ -101,7 +101,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
     test "existing reminder (has id) before notification start does NOT produce a past-time error" do
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{
+          %AlertsUIWeb.CreateAlertLive.AlertData.ReminderTime{
             id: "some-existing-uuid",
             # existing record: past times are allowed (already sent)
             reminder_time: ~N[2024-09-25 06:00:00]
@@ -134,7 +134,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
 
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{
+          %AlertsUIWeb.CreateAlertLive.AlertData.ReminderTime{
             id: "new-123",
             reminder_time: nil
           },
@@ -156,7 +156,7 @@ defmodule AlertsUIWeb.Tickets.RemindersValidationRegressionTest do
 
       changeset =
         ReminderTimesSlice.reminder_time_changeset(
-          %AlertsUIWeb.CreateAlertMonoLive.AlertData.ReminderTime{
+          %AlertsUIWeb.CreateAlertLive.AlertData.ReminderTime{
             id: "new-123",
             reminder_time: nil
           },

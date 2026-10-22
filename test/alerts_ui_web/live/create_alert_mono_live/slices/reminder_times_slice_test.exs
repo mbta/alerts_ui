@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.ReminderTimesSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest
@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSliceTest do
   import Mock
 
   alias AlertsUI.Alerts
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.AlertData
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
 

@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeGettersTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeGettersTest do
   @moduledoc false
   use ExUnit.Case, async: true
   use AlertsUIWeb.ConnCase

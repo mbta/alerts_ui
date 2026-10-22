@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Title do
+defmodule AlertsUIWeb.CreateAlertLive.Title do
   use AlertsUIWeb, :html
 
   @cute_noise_map %{

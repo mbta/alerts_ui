@@ -30,8 +30,8 @@ defmodule AlertsUIWeb.Tickets.DirectionChangeClearsOppositeBusStopsTest do
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo

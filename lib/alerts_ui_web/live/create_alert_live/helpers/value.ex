@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Value do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.Value do
   @moduledoc """
   Helpers for formatting generic values
   """

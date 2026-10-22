@@ -1,12 +1,12 @@
-defmodule AlertsUIWeb.Step do
-  @moduledoc "Describe a step in the multi-step form and where it can go."
+defmodule AlertsUIWeb.CreateAlertLive.Step do
+  @moduledoc "Describes a timeline step in the multi-step form and what its previous and next steps are."
 
   @doc """
   Returns list of atoms allowed in alert lifecycle field of alert
-
-  ## Examples
-      iex> %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
-      %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
+  A value of nil for previous means this is the first step, and nil for
+  next means it's the last step. Otherwise
+  these values should reference the name strings of other steps.
+  Label is the text that shows up in the timeline.
   """
   defstruct [:name, :previous, :next, :label]
 
@@ -19,42 +19,64 @@ defmodule AlertsUIWeb.Step do
 end
 
 defmodule AlertsUIWeb.CreateAlertLive do
+  @moduledoc """
+  A monolithic LiveView for creating and editing alerts.
+  """
+
   use AlertsUIWeb, :live_view
+  require Logger
 
   alias AlertsUI.AlertBuilder
   alias AlertsUI.Alerts
-  alias AlertsUI.DBContexts.Users
-  alias AlertsUI.Models.{ActivePeriod, Alert, Effect, EnhancedSchedule, InformedEntity}
-  alias AlertsUI.Routes
+  alias AlertsUI.Configs.ModeEffect
+  alias AlertsUI.Models.Alert
+  alias AlertsUI.Models.InformedEntity
+  alias Phoenix.LiveView
 
-  alias AlertsUIWeb.FormComponents.{
-    AccessAffectedService,
-    AffectedService,
-    AlertDetails,
-    Delivery,
-    StopRouteAffectedService,
-    Submit,
-    SystemwideAffectedService,
-    TimeRange
+  alias AlertsUIWeb.CreateAlertLive.{
+    AlertData,
+    Title
   }
+
+  alias AlertsUIWeb.CreateAlertLive.Helpers.{ModeEffectChange, NotificationToggle}
+
+  alias AlertsUIWeb.CreateAlertLive.Slices.{
+    AccessAffectedServiceSlice,
+    AffectedServiceSlice,
+    AlertDetailsSlice,
+    DeliverySlice,
+    NotificationPeriodSlice,
+    ReminderTimesSlice,
+    StopRouteServiceSlice,
+    SubmitSlice,
+    SystemwideServiceSlice,
+    TimelineSlice,
+    TimeRangeSlice,
+    UrlSlice
+  }
+
+  alias AlertsUIWeb.CreateAlertLive.Step
 
   alias AlertsUIWeb.FormComponents.Helpers.{
-    AlertData,
-    EffectsForRouteTypes,
+    EntityValidator,
     ErrorFormatter,
-    GetKeyForModeEffect,
-    GreenLine,
-    SelectFormatter
+    ObsoleteEntities,
+    ServiceEffectCombinations
   }
 
-  alias AlertsUIWeb.Step
-  alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
-  alias MBTAV3API.Routes.Repo, as: RoutesRepo
-  alias MBTAV3API.Routes.Route
-  alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
-  alias MBTAV3API.Schedules.Trip
-  alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias AlertsUIWeb.{PredictionSuppressionWarningModal, TripEndWarningModal}
+
+  alias Phoenix.LiveView
+
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers
+
+  alias AlertsUIWeb.CreateAlertLive.Helpers.Path, as: PathHelper
+
+  alias AlertsUI.DBContexts.Users
   alias MBTAV3API.Stops.Stop
+  alias Phoenix.LiveView.AsyncResult
+
+  import Ecto.Changeset, only: [change: 2]
 
   @steps [
     %Step{
@@ -72,42 +94,48 @@ defmodule AlertsUIWeb.CreateAlertLive do
     %Step{name: "preview", previous: nil, next: nil, label: "Review and Submit"}
   ]
 
+  @gtfs_modal_id "gtfs-warning-modal"
+  @change_mode_effect_modal_id "change-mode-effect-modal"
+
   @impl true
   def mount(params, session, socket) do
-    socket = socket |> assign_new(:return_to, fn -> session["return_to"] end)
-
-    alert_id = Map.get(params, "alert_id")
-    existing_alert_or_nil = alert_id && Alerts.get_by_alert_id(alert_id)
-
+    # initialize the alert data form or throw an exception trying
     form_type = form_type_from_socket(socket)
     form_title = form_title_from_type(form_type)
-    alert_data = alert_data_on_mount(params, form_type, existing_alert_or_nil)
 
-    {
-      :ok,
-      assign(socket, %{
-        page_title: "#{form_title} an Alert",
-        progress: progress_on_mount(params, form_type, @steps),
-        steps: @steps,
-        alert_data: alert_data,
-        combination: Map.get(alert_data, :combination),
-        selected_routes: [],
-        selected_stops: [],
-        selected_schedules: [],
-        selected_facilities: [],
-        selected_route_type: route_type_from_params!(params),
-        selected_effect: effect_name_from_params!(params),
-        alert_uuid: nil,
-        alert_id: alert_id,
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(AlertsUI.PubSub, "persisting")
+    end
+
+    socket =
+      socket
+      |> assign(%{
+        page_title: "#{form_title} Alert",
+        selections: %{},
+        check_predictions: false,
+        check_trip_end: false,
         form_type: form_type,
-        errors: %{},
-        submitted: false,
-        obsolete_ids: %{},
         obsolete_id_text: [],
-        remounted: remounting?(socket),
-        debug_tag: :crypto.strong_rand_bytes(8) |> Base.encode64()
+        obsolete_ids: nil,
+        submitting?: false,
+        submitted?: false,
+        stops_touched?: false,
+        image_preview_size: nil,
+        first_async_load: true,
+        skate_detours: %AsyncResult{},
+        used_detours: %AsyncResult{},
+        steps: @steps,
+        change_type: false,
+        persisting_alert: false,
+        modal_open_map: %{@gtfs_modal_id => false, @change_mode_effect_modal_id => false},
+        gtfs_modal_id: @gtfs_modal_id,
+        change_mode_effect_modal_id: @change_mode_effect_modal_id,
+        # Used for keeping track of original state of an alert when changing its mode/effect type
+        original_alert_form: nil
       })
-    }
+      |> assign_new(:return_to, fn -> session["return_to"] end)
+
+    {:ok, start_socket(socket, params)}
   end
 
   defp form_type_from_socket(socket) do
@@ -121,159 +149,98 @@ defmodule AlertsUIWeb.CreateAlertLive do
   defp form_title_from_type(title) do
     case title do
       :editing -> "Edit"
-      :duplicating -> "Duplicating"
+      :duplicating -> "Duplicate"
       :creating -> "Create"
     end
   end
 
-  defp progress_on_mount(params, form_type, [first_step, second_step | _]) do
-    route_type = Map.get(params, "route_type")
-    effect = Map.get(params, "effect")
-
-    if form_type == :creating && (is_nil(route_type) || is_nil(effect)) do
-      first_step
-    else
-      second_step
-    end
-  end
-
-  def effect_from_url_name(nil), do: nil
-
-  def effect_from_url_name(url_name) do
-    url_name
-    |> String.replace("_", " ")
-    |> String.split(" ")
-    |> Enum.map_join(" ", &String.capitalize(&1))
-    |> String.replace("-route", "-Route")
-  end
-
-  def effect_to_url_name(effect_name) do
-    effect_name
-    |> String.split(" ")
-    |> Enum.map_join("_", &String.downcase(&1))
-  end
-
-  def effect_name_from_params!(params) do
-    case Map.get(params, "effect") do
-      nil ->
-        nil
-
-      effect ->
-        effect_name = effect_from_url_name(effect)
-
-        if Effect.effect_map_by_name(effect_name) == %{} do
-          raise ArgumentError, "no such effect #{effect_name}"
-        else
-          effect_name
-        end
-    end
-  end
-
-  def route_type_from_params!(params) do
-    case Map.get(params, "route_type") do
-      nil ->
-        nil
-
-      route_type ->
-        route_type_atom = String.to_existing_atom(route_type)
-
-        if InformedEntity.valid_route_type?(route_type_atom) do
-          route_type
-        else
-          raise ArgumentError, "no such route type #{route_type}"
-        end
-    end
-  end
-
-  defp alert_data_on_mount(params, form_type, existing_alert_or_nil) do
-    case existing_alert_or_nil do
-      nil ->
-        assign_from_params(%{}, params)
-
-      alert ->
-        alert
-        |> AlertData.build_alert_data(form_type)
-        |> Map.from_struct()
-    end
-    |> adjust_by_form_type(form_type)
-  end
-
-  @spec adjust_by_form_type(AlertData.t(), atom()) :: AlertData.t()
-
-  defp adjust_by_form_type(alert_data, :duplicating) do
-    if AlertsUI.ActiveStatus.get_alert_status(alert_data) == :past do
-      now = DateTime.utc_now() |> DateTime.shift_zone!("America/New_York")
-
-      active_period_end_specifier =
-        if Map.get(alert_data, :alert_timing, :"one-time") == :"one-time" do
-          :later_today
-        else
-          :until_further_notice
-        end
-
-      Map.merge(alert_data, %{
-        start_datetime: now,
-        end_datetime: nil,
-        active_period_start_specifier: :now,
-        active_period_start: now,
-        active_period_start_date: now |> DateTime.to_date(),
-        active_period_end_specifier: active_period_end_specifier,
-        active_period_end: nil,
-        active_period_end_date: nil,
-        notification_specifier: :now,
-        notification_period_start: now
-      })
-    else
-      alert_data
-    end
-    |> Map.put(:reminder_times, [])
-  end
-
-  defp adjust_by_form_type(alert_data, _), do: alert_data
-
-  defp assign_from_params(alert_data, params) do
-    effect_name = effect_name_from_params!(params)
-
-    route_type_mapping =
-      case route_type_from_params!(params) do
-        nil ->
-          nil
-
-        route_type ->
-          mapping =
-            route_type
-            |> String.to_existing_atom()
-            |> InformedEntity.route_type_mapping()
-
-          if is_nil(mapping) && effect_name in EffectsForRouteTypes.list_effects(:facility) do
-            :facility
-          else
-            mapping
-          end
-      end
-
-    combination =
-      GetKeyForModeEffect.get_value_of_key(
-        :combination,
-        route_type_mapping,
-        effect_name
-      )
-
-    alert_data
-    |> Map.put(:route_type, Map.get(alert_data, :route_type, route_type_mapping))
-    |> Map.put(:effect_name, Map.get(alert_data, :effect, effect_name))
-    |> Map.put(:combination, Map.get(alert_data, :combination, combination))
+  @impl true
+  def handle_params(
+        %{"review" => "true"} = params,
+        _url,
+        %{assigns: %{submitted?: false}} = socket
+      ) do
+    # handles the case where someone hits reload on the review modal
+    {:noreply, sync_socket(socket, Map.drop(params, ["review"]))}
   end
 
   @impl true
-  def handle_params(_params, _url, socket) do
-    {:noreply, socket}
+  def handle_params(params, _url, socket) do
+    {:noreply, sync_socket(socket, params)}
+  end
+
+  @impl true
+  def handle_event("validate", params, socket) do
+    # accept changes to form params
+    {:noreply, sync_socket(socket, params)}
+  end
+
+  def handle_event("recover_form", params, socket) do
+    # fires if the socket disconnects and reconnects
+    # resync the socket with the current form data and no target
+    params = Map.drop(params, ["_target"])
+    {:noreply, sync_socket(socket, params)}
+  end
+
+  @impl true
+  def handle_event("stop_selector_blur", _params, socket) do
+    {:noreply, socket |> assign(:stops_touched?, true) |> sync_socket(%{})}
+  end
+
+  @impl true
+  def handle_event(
+        "push_route_type",
+        params,
+        %{assigns: %{change_type: true}} = socket
+      ) do
+    route_type = Map.get(params, "value")
+
+    # if we switch modes, we should clear the effect, except if we are going back to the originally selected mode
+    original_route_type = socket.assigns.form[:route_type].value
+    original_effect_name = socket.assigns.form[:effect_name].value
+    mode_name = InformedEntity.route_code_mapping(original_route_type) |> Atom.to_string()
+    draft_effect = if route_type === mode_name, do: original_effect_name, else: nil
+
+    {:noreply, socket |> assign(%{path_route_type: route_type, path_effect_name: draft_effect})}
+  end
+
+  @impl true
+  def handle_event("push_route_type", params, socket) do
+    route_type = Map.get(params, "value")
+    path = PathHelper.path_with_route_type(socket.assigns, route_type)
+
+    {:noreply, push_patch(socket, to: path)}
   end
 
   @impl true
   def handle_event("move_progress", %{"value" => "route_type_and_effect"}, socket) do
-    {:noreply,
-     assign(socket, progress: get_step_by_name("route_type_and_effect"), alert_data: %{})}
+    socket =
+      socket
+      |> assign(%{
+        progress: get_step_by_name("route_type_and_effect"),
+        path_route_type: Atom.to_string(PathHelper.path_route_type_from_socket(socket)),
+        path_effect_name: PathHelper.path_effect_name_from_socket(socket),
+        selections: %{},
+        change_type: true
+      })
+      |> push_patch(to: PathHelper.path(socket.assigns))
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "move_progress",
+        %{"value" => "details"},
+        %{assigns: %{change_type: true}} = socket
+      ) do
+    # The case of moving from form page 1 to form page 2 via the "Alert Details" timeline button
+    socket =
+      socket
+      |> assign(%{progress: get_step_by_name("details"), change_type: false})
+      |> sync_socket(%{})
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -282,231 +249,526 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
-  def handle_event("accepted_gtfs_modal", _params, socket) do
+  def handle_event(
+        "push_effect_name",
+        params,
+        %{assigns: %{change_type: true}} = socket
+      ) do
+    effect_name = Map.get(params, "value")
+    next_route_type = InformedEntity.route_type_mapping(socket.assigns.path_route_type)
+    create? = socket.assigns.form_type === :creating
+    edit? = socket.assigns.form_type === :editing
+
+    # On edit/duplicate, we always compare to the saved form
+    # On create, we compare to the last form the user edited
+    form_to_compare =
+      if create?,
+        do: ModeEffectChange.condensed_form(socket.assigns.form),
+        else: socket.assigns.original_alert_form
+
+    %{new: form_updates, replaced: replaced_values} =
+      ModeEffectChange.new_form_values(form_to_compare, next_route_type, effect_name)
+
+    notification_toggle =
+      if edit?,
+        do: true,
+        else:
+          NotificationToggle.get_notification_toggle_default(
+            %{notification_toggle: nil, route_type: next_route_type},
+            effect_name,
+            socket.assigns.form_type
+          )
+
+    updated_source =
+      change(
+        form_to_compare.source,
+        Map.merge(
+          %{
+            route_type: next_route_type,
+            effect_name: effect_name,
+            combination: AlertDataHelpers.combination_for(next_route_type, effect_name),
+            # We want to initialize with the default for the NEW mode/effect
+            notification_toggle: notification_toggle
+          },
+          form_updates
+        )
+      )
+      |> Map.put(:errors, [])
+
+    socket =
+      socket
+      |> assign(%{
+        draft_form: Phoenix.Component.to_form(updated_source),
+        path_effect_name: effect_name,
+        submitted?: false,
+        first_async_load: true
+      })
+
+    # If there are no replaced values, go to form page 2.
+    # Otherwise, show the warning modal.
+    socket =
+      if Enum.empty?(replaced_values) do
+        socket
+        |> assign(%{
+          form: socket.assigns.draft_form,
+          progress: get_step_by_name(socket.assigns.progress.next),
+          change_type: false
+        })
+        |> sync_socket(%{})
+      else
+        send(self(), {:changing_mode_effect, replaced_values})
+        socket
+      end
+
     {:noreply, socket}
   end
 
   @impl true
-  def handle_event("cancelled_gtfs_modal", _params, socket) do
-    {:noreply, socket |> redirect(to: return_to(socket.assigns.return_to || "/"))}
+  def handle_event("push_effect_name", params, socket) do
+    effect_name = Map.get(params, "value")
+    path = PathHelper.path_with_route_type_and_effect_name(socket.assigns, effect_name)
+
+    socket =
+      socket
+      |> assign(:progress, get_step_by_name(socket.assigns.progress.next))
+      |> push_navigate(to: path)
+
+    {:noreply, socket}
   end
 
-  def get_routes([4]) do
-    [4]
-    |> RoutesRepo.by_type(listed_route: false)
-    |> Enum.sort_by(&SelectFormatter.sort_order/1)
+  @impl true
+  def handle_event("reset_search_filter", %{"name" => name}, socket) do
+    # i.e., "alert_data[the_field_we_want_to_clear]"
+    search_filter_name =
+      hd(Regex.run(~r/\[(.*?)\]/, name, capture: :all_but_first))
+
+    params = %{
+      "_target" => ["alert_data", search_filter_name],
+      "alert_data" => %{search_filter_name => nil}
+    }
+
+    {:noreply, sync_socket(socket, params)}
   end
 
-  def get_routes(route_types) do
-    route_types
-    |> RoutesRepo.by_type()
-    |> Enum.filter(&(Map.get(&1, :description) !== :rail_replacement_bus))
-    |> maybe_include_virtual_green_line()
-    |> Enum.sort_by(&SelectFormatter.sort_order/1)
+  @impl true
+  def handle_event("accepted_routes_modal", _params, socket) do
+    # no updates necessary here as the relevant values are already in the
+    # form
+    {:noreply, sync_socket(socket, %{})}
   end
 
-  # get all schedules from today until end of rating
-  def get_schedules_by_date(route_ids, direction, nil) do
-    today =
-      DateTime.utc_now()
-      |> DateTime.shift_zone!("America/New_York")
-      |> ActivePeriod.datetime_to_service_date()
-
-    end_of_rating = SchedulesRepo.end_of_rating()
-
-    schedules =
-      Date.range(today, end_of_rating)
-      |> Task.async_stream(fn date ->
-        route_ids
-        |> get_schedules(direction, date)
-        |> Enum.group_by(& &1.trip.id)
-        |> Enum.map(fn {_k, [first_schedule, last_schedule]} ->
-          update_schedule(first_schedule, last_schedule)
-        end)
-      end)
-      |> Stream.filter(fn {result, _item} -> result == :ok end)
-      |> Stream.flat_map(fn {:ok, item} -> item end)
-      |> Stream.uniq_by(&{&1.trip.id, DateTime.to_time(&1.departure_time), &1.trip.name})
-      |> Enum.to_list()
-      |> Enum.sort_by(&(&1.departure_time |> DateTime.to_time()), Time)
-
-    # get a map (by {departure time, trip name}) of all schedules whose combination of
-    # departure time and trip name occur more than once in the list of schedules
-    freq =
-      schedules
-      |> Enum.frequencies_by(&{DateTime.to_time(&1.departure_time), &1.trip.name})
-      |> Enum.filter(fn {_k, v} -> v > 1 end)
-      |> Enum.into(%{})
-
-    # Some trips can have the same name and departure time but different trip ids, because
-    # they run on different days (eg part of different route patterns)
-    # This sets the `:use_trip_id_in_name?` of all the schedules that appear in the frequency list above
-    # to `true`, so we know to use the trip_id in the display name so users can tell them apart.
-    Enum.map(schedules, fn schedule ->
-      if Map.has_key?(freq, {DateTime.to_time(schedule.departure_time), schedule.trip.name}) do
-        Map.put(schedule, :use_trip_id_in_name?, true)
-      else
-        schedule
-      end
-    end)
-  end
-
-  def get_schedules_by_date(route_ids, direction, date) do
-    # get schedules for 1 day
-    route_ids
-    |> get_schedules(direction, date)
-    |> filter_out_old_trips
-  end
-
-  @spec get_schedules([String.t()], String.t(), Date.t()) :: list()
-  defp get_schedules(route_ids, direction, date) do
-    directions = directions_from_selection(direction)
-    opts = [stop_sequences: [:first, :last], date: date] |> direction_option(directions)
-
-    route_ids
-    |> SchedulesRepo.by_route_ids(opts)
-    |> Enum.map(fn schedule ->
-      map = Map.from_struct(schedule)
-      Kernel.struct(EnhancedSchedule, map)
-    end)
-  end
-
-  # stop route with no route ids (unfiltered)
-  def get_stops_for_stop_route(nil, route_type), do: get_stops(nil, route_type)
-
-  def get_stops_for_stop_route(route_ids, 3) do
-    # stop route with route ids (filtered), bus
-    route_ids
-    |> Enum.join(",")
-    |> List.wrap()
-    |> available_stops_for_bus_stop_route()
-  end
-
-  def get_stops_for_stop_route(route_ids, route_type) do
-    # stop route with route ids (filtered), other types
-    available_stops([0, 1], route_ids, route_type)
-  end
-
-  @spec get_stops([String.t()] | nil, integer() | nil, String.t() | nil) :: list()
-  def get_stops(route_ids, route_type, direction \\ nil)
-
-  def get_stops(nil, 3, nil) do
-    # used for stop-route combination, bus mode.
-
-    # direction filtering does nothing if a route id is not
-    # included with the call. Doing 1 call for every route id
-    # is too many so we have to chunk them up thus.
-    # note- larger chunks take longer. small chunk is good.
-    RoutesRepo.by_type(3)
-    |> Enum.map(& &1.id)
-    |> Enum.chunk_every(10)
-    |> Enum.map(&Enum.join(&1, ","))
-    |> available_stops_for_bus_stop_route()
-    |> Enum.sort_by(&String.downcase(&1.name))
-  end
-
-  def get_stops(nil, 1, nil) do
-    # used for stop-route combination, subway (also gets light rail)
-    (StopsRepo.by_route_type(0, include: "") ++ StopsRepo.by_route_type(1, include: ""))
-    |> Enum.sort_by(&String.downcase(&1.name))
-    |> Enum.uniq()
-  end
-
-  def get_stops(nil, route_type, nil) do
-    # used for stop-route combination, other modes
-    StopsRepo.by_route_type(route_type, include: "") |> Enum.sort_by(&String.downcase(&1.name))
-  end
-
-  def get_stops(["Green"] = route_ids, _route_type, direction) do
-    # used in non stop-route combinations, green line
-    route_ids = Routes.expanding_green_line(route_ids) |> Enum.reverse()
-
-    stops =
-      route_ids
-      |> Enum.map(fn route_id ->
-        stops = StopsRepo.by_route(route_id, 0)
-        {route_id, stops}
-      end)
-      |> GreenLine.put_stops_in_order()
-
-    if direction == "1" do
-      Enum.reverse(stops)
-    else
-      stops
+  @impl true
+  def handle_event("clear_filter", _params, %{assigns: %{selections: selections}} = socket) do
+    case Map.get(selections, :on_filter_clear) do
+      handler when is_function(handler) -> {:noreply, handler.(socket)}
+      _ -> {:noreply, socket}
     end
   end
 
-  def get_stops(route_ids, route_type, direction) do
-    direction
-    |> directions_from_selection()
-    |> available_stops(route_ids, route_type)
+  @impl true
+  def handle_event("clear_filter", _params, socket) do
+    {:noreply, socket}
   end
 
-  def get_routes_by_stop(stop_ids, 3) do
-    Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1, "filter[type]": 3))
-    |> Enum.filter(&(Map.get(&1, :description) !== :rail_replacement_bus))
-    |> Enum.sort_by(&SelectFormatter.sort_order/1)
-    |> Enum.uniq()
+  @impl true
+  def handle_event("review", _params, socket) do
+    # starts review process
+    # shows error flash if errors
+    # otherwise shows warning modals
+    alert_data = Map.merge(socket.assigns.form.source.data, socket.assigns.form.source.changes)
+
+    autotext_data = AlertDetailsSlice.autotext_map(alert_data, socket.assigns)
+
+    socket =
+      socket
+      |> assign(%{
+        submitting?: true,
+        submitted?: true,
+        check_predictions: false,
+        check_trip_end: false
+      })
+      |> sync_socket(%{"alert_data" => autotext_data})
+
+    {:noreply, socket}
   end
 
-  def get_routes_by_stop(stop_ids, _route_type) do
-    Enum.flat_map(stop_ids, &RoutesRepo.by_stop(&1))
-    |> Enum.sort_by(&SelectFormatter.sort_order/1)
-    |> Enum.uniq()
+  @impl true
+  def handle_event("open_review_modal", _params, %{assigns: assigns} = socket) do
+    # actually opens the review modal
+    effect_name = assigns.form[:effect_name].value
+
+    path_route_type =
+      assigns[:path_route_type] || PathHelper.path_route_type_from_socket(socket)
+
+    path =
+      PathHelper.path_with_route_type_and_effect_name(
+        %{assigns | path_route_type: path_route_type},
+        effect_name
+      ) <> "?review=true"
+
+    socket =
+      socket
+      |> assign(
+        check_predictions: false,
+        check_trip_end: false
+      )
+      |> push_patch(to: path)
+
+    {:noreply, socket}
   end
 
-  def get_facilities(facility_types) do
-    facilties_from_api = FacilitiesRepo.get_by_type(facility_types, include: "stop")
+  @impl true
+  def handle_event("continue", _params, socket) do
+    # dismiss the modal and return to the current state of the form
+    {:noreply, socket}
+  end
 
-    available_facilities =
-      facilties_from_api
-      # remove facilities that we don't control
-      |> Enum.filter(&(!is_nil(&1.stop)))
-      |> Enum.uniq()
-      |> Enum.sort_by(&String.downcase(&1.long_name))
+  @impl true
+  def handle_event("cancel", _params, socket) do
+    {:noreply,
+     push_navigate(socket,
+       to: return_to(socket.assigns[:return_to] || "/alerts")
+     )}
+  end
 
-    # gather list of stops associated with facilities, along with array of facility types the stop services
-    available_stops =
-      available_facilities
-      |> Enum.reduce(%{}, fn facility, acc ->
-        stop = facility.stop
+  @impl true
+  def handle_event("save", _params, socket) do
+    {:noreply, persist_valid_alert(socket)}
+  end
 
-        if is_nil(stop) do
-          acc
-        else
-          Map.update(
-            acc,
-            stop.id,
-            stop |> Map.put(:facility_types, [facility.type]),
-            &Map.put(&1, :facility_types, [facility.type | &1.facility_types] |> Enum.uniq())
-          )
-        end
+  @impl true
+  def handle_event("accept_filter", _params, %{assigns: %{selections: selections}} = socket) do
+    case Map.get(selections, :on_filter_accept) do
+      handler when is_function(handler) -> {:noreply, handler.(socket)}
+      _ -> {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("accept_filter", _, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("cancel_filter", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event(
+        "check_for_trip_warnings",
+        _params,
+        %LiveView.Socket{assigns: %{} = assigns} = socket
+      ) do
+    alert_data =
+      socket.assigns.form.data
+
+    trip_arrival_time =
+      TimeRangeSlice.get_trip_arrival_time_for_validate(
+        alert_data.trip_ids,
+        socket.assigns.selections
+      )
+
+    show_trip_end_warning? =
+      TripEndWarningModal.show_warning?(
+        trip_arrival_time,
+        alert_data.active_period_start,
+        alert_data.modal_date
+      )
+
+    if show_trip_end_warning? do
+      {:noreply,
+       assign(socket, %{
+         check_predictions: false,
+         check_trip_end: true
+       })}
+    else
+      effect_name = assigns.form[:effect_name].value
+
+      path_route_type =
+        assigns[:path_route_type] || PathHelper.path_route_type_from_socket(socket)
+
+      path =
+        PathHelper.path_with_route_type_and_effect_name(
+          %{assigns | path_route_type: path_route_type},
+          effect_name
+        ) <> "?review=true"
+
+      {:noreply,
+       socket
+       |> assign(:submitting?, false)
+       |> push_patch(to: path)}
+    end
+  end
+
+  @impl true
+  def handle_event("dismiss_prediction_warning", _params, socket) do
+    {:noreply, socket |> assign(check_predictions: false)}
+  end
+
+  @impl true
+  def handle_event("dismiss_trip_end_warning", _params, socket) do
+    {:noreply, socket |> assign(check_trip_end: false)}
+  end
+
+  @impl true
+  def handle_event("cancel_review", _params, socket) do
+    effect_name = socket.assigns.path_effect_name
+    path = PathHelper.path_with_route_type_and_effect_name(socket.assigns, effect_name)
+
+    socket =
+      assign(socket,
+        check_predictions: false,
+        check_trip_end: false
+      )
+
+    {:noreply, push_patch(socket, to: path)}
+  end
+
+  @impl true
+  def handle_event(
+        "image-preview-size",
+        %{"id" => "size-of-image", "image_preview_size" => image_preview_size},
+        socket
+      ) do
+    {:noreply, assign(socket, :image_preview_size, image_preview_size)}
+  end
+
+  @impl true
+  def handle_event("accepted_gtfs_modal", _params, socket) do
+    {:noreply, socket |> set_modal_open(@gtfs_modal_id, false)}
+  end
+
+  @impl true
+  def handle_event("cancelled_gtfs_modal", _params, socket) do
+    {:noreply,
+     socket
+     |> set_modal_open(@gtfs_modal_id, false)
+     |> redirect(to: return_to(socket.assigns.return_to || "/"))}
+  end
+
+  @impl true
+  def handle_event("accepted_change_mode_effect_modal", _params, socket) do
+    {:noreply,
+     socket
+     |> set_modal_open(@change_mode_effect_modal_id, false)
+     |> assign(%{
+       form: socket.assigns.draft_form,
+       progress: get_step_by_name(socket.assigns.progress.next),
+       change_type: false
+     })
+     |> sync_socket(%{})}
+  end
+
+  @impl true
+  def handle_event("cancelled_change_mode_effect_modal", _params, socket) do
+    original_form = socket.assigns.original_alert_form
+
+    {:noreply,
+     socket
+     |> set_modal_open(@change_mode_effect_modal_id, false)
+     # Revert back to the originally chosen route and effect types
+     |> assign(%{
+       path_route_type:
+         Atom.to_string(
+           PathHelper.path_route_type(original_form[:route_type], original_form[:effect_name])
+         ),
+       path_effect_name: original_form[:effect_name]
+     })}
+  end
+
+  defp set_modal_open(socket, id, state) do
+    new_modal_state =
+      Map.merge(socket.assigns.modal_open_map, %{id => state})
+
+    socket |> assign(modal_open_map: new_modal_state)
+  end
+
+  def check_predictions(params, socket) do
+    # form data with properly capitalized effect name
+    alert_data =
+      socket.assigns.form.data
+      |> Map.update!(:effect_name, &PathHelper.effect_from_url_name/1)
+
+    show_prediction_warning? = PredictionSuppressionWarningModal.show_warning?(alert_data)
+
+    if show_prediction_warning? do
+      assign(socket, %{
+        check_predictions: true
+      })
+    else
+      {_, socket} = handle_event("check_for_trip_warnings", params, socket)
+      socket
+    end
+  end
+
+  @impl true
+  def handle_async(:fetch_selections, {:ok, new_selections}, socket) do
+    socket = handle_obsolete_ids(socket, new_selections)
+
+    first_async_load =
+      if socket.assigns.first_async_load, do: false, else: socket.assigns.first_async_load
+
+    pending_route_ids = Map.get(new_selections, :pending_auto_select_route_ids)
+
+    socket = translate_stop_names_and_ids(socket, new_selections)
+    socket = scroll_stop_list(socket, socket.assigns.first_async_load)
+
+    # Always override route_ids — no guard for pre-existing selections; see design spec.
+    socket =
+      if is_nil(pending_route_ids) do
+        assign(socket, %{selections: new_selections})
+      else
+        socket
+        |> assign(:selections, %{new_selections | pending_auto_select_route_ids: nil})
+        |> sync_socket(%{"alert_data" => %{"route_ids" => pending_route_ids}})
+      end
+      |> assign(first_async_load: first_async_load)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_async(_, {:exit, reason}, socket) do
+    require Logger
+    Logger.error("Selections load failed: #{inspect(reason)}")
+
+    case socket.assigns[:selections] do
+      %{loading: _} = sel -> {:noreply, assign(socket, :selections, %{sel | loading: false})}
+      _ -> {:noreply, socket}
+    end
+  end
+
+  def scroll_stop_list(%{assigns: %{form: form}} = socket, true) do
+    # scrolls to pre-selected stop if editing
+    stop_name_and_id = List.first(form.data.stop_names_and_ids || [])
+
+    if stop_name_and_id do
+      push_event(socket, "scrollToSelection", %{
+        select_name: "stop_names_and_ids",
+        type: "stop",
+        value: stop_name_and_id
+      })
+    else
+      socket
+    end
+  end
+
+  def scroll_stop_list(socket, _), do: socket
+
+  # In the case of converting an alert with stops to SR, we need to adjust the `stop_names_and_ids` because
+  # the names will change depending on direction. For example, in a Bus Delay, we would have both
+  # South Station (inbound) and South Station (outbound). But in SR, we would only have South Station.
+  # This uses `stop_ids` as the source of truth, and then adjusts `stop_names_and_ids` to match fetched stops
+  defp translate_stop_names_and_ids(socket, %{available_stops: available_stops}) do
+    form = socket.assigns.form
+    combination = form[:combination].value
+
+    if combination === :SR do
+      stop_ids = form[:stop_ids].value
+
+      selected_stops =
+        Enum.filter(available_stops, fn stop -> stop.id in stop_ids end)
+        |> Enum.map(fn %Stop{id: id, name: name} -> "#{name}|#{id}" end)
+
+      updated_source =
+        change(
+          form.source,
+          %{stop_names_and_ids: selected_stops}
+        )
+
+      socket
+      |> assign(%{
+        form: Phoenix.Component.to_form(updated_source)
+      })
+    else
+      socket
+    end
+  end
+
+  defp translate_stop_names_and_ids(socket, _), do: socket
+
+  defp handle_obsolete_ids(socket, new_selections) do
+    form = socket.assigns.form
+
+    required_fields =
+      socket.assigns.form[:combination].value
+      |> ServiceEffectCombinations.required_fields()
+      |> Enum.reject(&(&1 == :direction))
+      |> Enum.sort()
+
+    mapping = %{
+      route_ids: :available_routes,
+      trip_ids: :available_schedules,
+      stop_ids: :available_stops,
+      facility_ids: :available_facilities
+    }
+
+    obsolete_ids =
+      Enum.map(required_fields, fn field ->
+        new_selections =
+          new_selections |> Map.from_struct() |> filter_stops_from_facility_result()
+
+        ids =
+          (EntityValidator.get_obsolete_ids(
+             form[field].value,
+             new_selections[mapping[field]]
+           ) || [])
+          |> Enum.reject(&is_nil/1)
+
+        {field, ids}
       end)
-      |> Map.values()
-      |> Enum.sort_by(&String.downcase(&1.name))
+      |> Enum.into(%{})
 
-    %{stops: available_stops, facilities: available_facilities}
+    # socket.assigns.obsolete_ids is only nil on the first check, so this can't happen twice
+    cond do
+      obsolete_ids_found?(obsolete_ids) and is_nil(socket.assigns.obsolete_ids) ->
+        form_data = Map.from_struct(form.data)
+
+        ids_with_obsolete_entities_removed =
+          ObsoleteEntities.all_obsolete_entities_removed(
+            form_data,
+            obsolete_ids,
+            required_fields
+          )
+
+        original_selections =
+          Map.take(form_data, [
+            :original_route_selections,
+            :original_trip_selections,
+            :original_stop_selections,
+            :original_facility_selections
+          ])
+
+        new_form_data =
+          struct(AlertData, Map.merge(form_data, ids_with_obsolete_entities_removed))
+
+        new_form_source = Map.put(form.source, :data, new_form_data)
+        new_form = form |> Map.put(:data, new_form_data) |> Map.put(:source, new_form_source)
+
+        # sending original selections so we can show the names in the modal
+        send(self(), {:got_obsolete_ids, obsolete_ids, original_selections})
+
+        assign(socket, %{obsolete_ids: obsolete_ids, form: new_form})
+        |> sync_socket(%{"alert_data" => ids_with_obsolete_entities_removed})
+
+      is_nil(socket.assigns.obsolete_ids) ->
+        # sets obsolete ids to empty map so we don't go through this loop again.
+        assign(socket, %{obsolete_ids: obsolete_ids})
+
+      true ->
+        socket
+    end
   end
 
-  def handle_info({:selected_routes, selected_routes}, socket) do
-    {:noreply, assign(socket, selected_routes: selected_routes)}
+  defp obsolete_ids_found?(nil), do: false
+
+  defp obsolete_ids_found?(obsolete_ids) do
+    Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)
   end
 
-  def handle_info({:selected_stops, selected_stops}, socket) do
-    {:noreply, assign(socket, selected_stops: selected_stops)}
-  end
-
-  def handle_info({:selected_schedules, selected_schedules}, socket) do
-    {:noreply, assign(socket, selected_schedules: selected_schedules)}
-  end
-
-  def handle_info({:selected_facilities, selected_facilities}, socket) do
-    {:noreply, assign(socket, selected_facilities: selected_facilities)}
-  end
-
-  def handle_info({:got_obsolete_ids, obsolete_ids_map}, socket) do
-    alert_data = socket.assigns.alert_data
-
+  @impl true
+  def handle_info({:got_obsolete_ids, obsolete_ids_map, original_selections}, socket) do
     # builds a list of the text to go in the obsolete ids modal
     obsolete_id_text =
       obsolete_ids_map
@@ -516,7 +778,10 @@ defmodule AlertsUIWeb.CreateAlertLive do
         name_part = field_name |> Atom.to_string() |> String.split("_") |> hd
 
         original_field =
-          Map.get(alert_data, String.to_existing_atom("original_#{name_part}_selections"))
+          Map.get(
+            original_selections,
+            String.to_existing_atom("original_#{name_part}_selections")
+          )
 
         # build map of original selected ids -> names
         original_names_map =
@@ -549,153 +814,234 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
     socket =
       socket
-      |> assign(obsolete_id_text: obsolete_id_text, obsolete_ids: obsolete_ids_map)
-      |> push_event("show-gtfs-modal", %{id: "gtfs-warning-modal"})
-
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_info({:add_errors, errors, name}, socket) do
-    updated_errors = socket.assigns.errors |> Map.put(name, errors)
-    {:noreply, assign(socket, errors: updated_errors)}
-  end
-
-  @impl true
-  def handle_info({:section_completed, changeset}, socket) do
-    assigns =
-      %{
-        alert_data:
-          Map.merge(
-            socket.assigns.alert_data,
-            changeset
-            |> Map.from_struct()
-          )
-      }
-
-    {:noreply, assign(socket, assigns)}
-  end
-
-  @impl true
-  def handle_info({:step_completed, changes}, socket) do
-    alert_data = Map.merge(socket.assigns.alert_data, changes |> Map.from_struct())
-    route_type = Map.get(alert_data, :route_type)
-    effect_name = Map.get(alert_data, :effect_name)
-
-    route_type =
-      if is_nil(route_type) and
-           effect_name in EffectsForRouteTypes.list_effects(:facility) do
-        :facility
-      else
-        route_type
-      end
-
-    # any values put in alert data put here will be read in upon creation but not edit (since this step is only reached
-    # when going to the second page). this makes it a good place to read default values from our config.
-    combination = GetKeyForModeEffect.get_value_of_key(:combination, route_type, effect_name)
-
-    default_severity =
-      GetKeyForModeEffect.get_value_of_key(:default_severity, route_type, effect_name)
-
-    default_cause =
-      GetKeyForModeEffect.get_value_of_key(:default_cause, route_type, effect_name)
-
-    notification_toggle =
-      GetKeyForModeEffect.get_value_of_key(
-        :send_push_notification_on_create,
-        route_type,
-        effect_name
+      |> assign(
+        obsolete_id_text: obsolete_id_text,
+        obsolete_ids: obsolete_ids_map
       )
-
-    assigns = %{
-      progress: get_step_by_name(socket.assigns.progress.next),
-      alert_data:
-        Map.merge(alert_data, %{
-          combination: combination,
-          severity: default_severity,
-          cause_detail: default_cause,
-          notification_toggle: notification_toggle
-        }),
-      combination: combination,
-      selected_schedules: nil,
-      selected_facilities: nil,
-      selected_routes: nil,
-      selected_stops: nil,
-      errors: %{}
-    }
-
-    {:noreply, assign(socket, assigns)}
-  end
-
-  def handle_info(:show_errors, socket) do
-    errors = Map.values(socket.assigns.errors) |> List.flatten()
-
-    socket =
-      if Enum.empty?(errors) do
-        send_update(Submit, id: "submit", show: true)
-        socket
-      else
-        formatted_errors =
-          errors
-          |> Enum.map(fn {_title, {message, _error}} -> "#{message}" end)
-          |> Enum.uniq()
-          |> Enum.join(";")
-
-        display_errors(socket, formatted_errors)
-      end
+      |> set_modal_open(@gtfs_modal_id, true)
+      |> push_event("show-modal", %{id: @gtfs_modal_id})
 
     {:noreply, socket}
   end
 
-  def handle_info(:create_alert, socket) do
-    {:noreply, create_alert(socket)}
+  @impl true
+  def handle_info({:adjust_optgroups, %{data: optgroups_to_adjust}}, socket) do
+    socket = push_event(socket, "adjustOptgroupColor", %{data: optgroups_to_adjust})
+    {:noreply, socket}
   end
 
-  defp create_alert(socket) do
-    form_type = socket.assigns.form_type
+  @impl true
+  def handle_info({:changing_mode_effect, _replaced_values}, socket) do
+    socket =
+      socket
+      |> set_modal_open(@change_mode_effect_modal_id, true)
+      |> push_event("show-modal", %{id: @change_mode_effect_modal_id})
 
-    user = Users.create_or_update_user_from_session(socket.assigns.current_user)
+    {:noreply, socket}
+  end
 
-    alert_data = AlertBuilder.build_alert(socket.assigns.alert_data, socket.assigns.combination)
+  @impl true
+  def handle_info({:persisting_start}, socket) do
+    {:noreply, assign(socket, persisting_alert: true)}
+  end
 
-    existing_alert =
-      if is_nil(socket.assigns.alert_id) || form_type == :duplicating do
-        %Alert{}
-      else
-        Alerts.get_by_alert_id(socket.assigns.alert_id)
+  @impl true
+  def handle_info({:persisting_end}, socket) do
+    {:noreply, assign(socket, persisting_alert: false)}
+  end
+
+  defp get_step_by_name(name) do
+    Enum.find(@steps, &(&1.name == name))
+  end
+
+  defp filter_stops_from_facility_result(%{
+         available_facilities: %{facilities: facilities, stops: _stops}
+       }) do
+    %{available_facilities: facilities}
+  end
+
+  defp filter_stops_from_facility_result(available_entities), do: available_entities
+
+  @doc """
+  Initialize a form. Called from `mount/3`.
+  """
+  # @spec start_socket(LiveView.Socket.t(), LiveView.unsigned_params()) :: LiveView.Socket.t()
+  def start_socket(socket, params) do
+    socket =
+      case {Map.get(params, "alert_id"), socket.assigns.live_action} do
+        {nil, :new} ->
+          create_new_alert(socket, params)
+
+        {alert_id, :new} ->
+          redirect(socket, ~p"/alerts/edit/#{alert_id}")
+
+        {alert_id, :edit} ->
+          edit_existing_alert(socket, params, alert_id)
+
+        {alert_id, :duplicate} ->
+          duplicate_existing_alert(socket, params, alert_id)
+
+        {_alert_id, action} ->
+          raise %ArgumentError{message: "no such action #{action}"}
       end
 
-    alert =
-      alert_data
-      |> Alerts.create_or_update_alert(user, existing_alert)
-      |> case do
-        {:ok, alert} ->
-          alert_id =
-            alert.id
-            |> Alerts.get_by_id()
-            |> Map.get(:alert_id)
+    if Map.get(socket.assigns, :form) do
+      socket |> assign(:original_alert_form, ModeEffectChange.condensed_form(socket.assigns.form))
+    else
+      socket
+    end
+  end
 
+  defp create_new_alert(
+         %{assigns: %{} = _assigns} = socket,
+         %{"effect_name" => effect_name, "route_type" => route_type} = params
+       ) do
+    effect_name = AlertDataHelpers.humanize_effect_name(route_type, effect_name)
+
+    if effect_name === nil do
+      redirect(socket, to: ~p"/alerts/new")
+    else
+      # create a new alert
+      {_, socket} = AlertData.init(socket, params, :new)
+
+      socket
+    end
+  end
+
+  defp create_new_alert(
+         %{assigns: %{} = _assigns} = socket,
+         %{"route_type" => route_type} = params
+       ) do
+    mode_effect = ModeEffect.mode_effects_by_route_type_name(String.to_existing_atom(route_type))
+
+    if mode_effect === nil do
+      redirect(socket, to: ~p"/alerts/new")
+    else
+      {_, socket} = AlertData.init(socket, params, :new)
+      socket
+    end
+  rescue
+    # This would happen if we are given an arbitrary route_type
+    ArgumentError ->
+      redirect(socket, to: ~p"/alerts/new")
+  end
+
+  defp create_new_alert(
+         %{assigns: %{} = _assigns} = socket,
+         params
+       ) do
+    # create a new alert
+    {_, socket} = AlertData.init(socket, params, :new)
+
+    socket
+  end
+
+  defp edit_existing_alert(socket, params, alert_id) do
+    # edit an existing alert
+    alert = Alerts.get_by_alert_id!(alert_id)
+
+    socket
+    |> AlertData.init(params, :edit, alert)
+    |> case do
+      {:ok, socket} -> socket
+      {:error, socket} -> socket
+    end
+  end
+
+  defp duplicate_existing_alert(socket, params, alert_id) do
+    # duplicate an existing alert
+    alert = Alerts.get_by_alert_id!(alert_id)
+
+    socket
+    |> AlertData.init(params, :duplicate, strip_on_duplicate(alert))
+    |> case do
+      {:ok, socket} -> socket
+      {:error, socket} -> socket
+    end
+  end
+
+  @doc """
+  Accept incoming data. Called from `handle_params/3` and the `validate`
+  event handler.
+  """
+  @spec sync_socket(LiveView.Socket.t(), map()) :: LiveView.Socket.t()
+  def sync_socket(%LiveView.Socket{assigns: %{} = assigns} = socket, params) do
+    case AlertData.sync(assigns.form.source, socket, params) do
+      {:ok, socket} ->
+        if assigns.submitting? do
+          socket = assign(socket, :submitting?, false)
+          check_predictions(params, socket)
+        else
           socket
-          |> put_flash(:info, flash_text(socket.assigns.alert_id, alert_id, form_type))
-          |> redirect(to: return_to(socket.assigns.return_to || "/"))
+        end
 
-        {:error, result} ->
-          errors =
-            result
-            |> Alerts.parse_changeset_errors()
-            |> format_errors(socket.assigns.combination)
-
-          display_errors(socket, errors)
-      end
-
-    Phoenix.PubSub.broadcast(
-      AlertsUI.PubSub,
-      "alerts",
-      {:alerts_updated}
-    )
-
-    alert
+      {:error, socket} ->
+        if assigns.submitting? do
+          socket
+          |> assign(:submitting?, false)
+          |> display_errors()
+        else
+          socket
+        end
+    end
   end
+
+  def sync_socket(socket, _), do: socket
+
+  def rendered_service_slice(assigns) do
+    service_slice(assigns).render(assigns)
+  end
+
+  def service_slice(combination) when is_atom(combination) do
+    service_slice_by_combination(combination)
+  end
+
+  def service_slice(assigns) do
+    form = Map.get(assigns, :form)
+    service_slice_by_combination(form[:combination].value)
+  end
+
+  @spec service_slice_by_combination(any()) ::
+          AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice
+          | AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice
+          | AlertsUIWeb.CreateAlertLive.Slices.StopRouteServiceSlice
+          | AlertsUIWeb.CreateAlertLive.Slices.SystemwideServiceSlice
+  def service_slice_by_combination(:SR), do: StopRouteServiceSlice
+  def service_slice_by_combination(:ACCESS), do: AccessAffectedServiceSlice
+  def service_slice_by_combination(nil), do: SystemwideServiceSlice
+  def service_slice_by_combination(_), do: AffectedServiceSlice
+
+  defp strip_on_duplicate(alert), do: alert
+
+  defp display_errors(%{assigns: %{form: form}} = socket), do: display_errors(socket, form.errors)
+
+  defp display_errors(socket, errors) do
+    socket
+    |> clear_flash
+    |> push_event("scroll_to_top", %{})
+    |> put_flash(:error, format_errors(errors))
+    |> put_flash(:title, "Please fix the following errors:")
+  end
+
+  defp format_errors(errors) do
+    errors
+    |> Enum.uniq_by(fn {_k, {message, _}} -> message end)
+    |> Enum.map_join("; ", &format_error/1)
+  end
+
+  defp format_error({_title, {messages, _error}}) when is_list(messages),
+    do:
+      messages
+      |> Enum.map(&format_message/1)
+      |> Enum.uniq()
+      |> Enum.join("; ")
+
+  defp format_error({_title, {message, _error}}), do: format_message(message)
+
+  defp format_message(%{} = messages),
+    do: Enum.map(messages, fn {_key, value} -> format_message(value) end)
+
+  defp format_message(message), do: "#{message}"
 
   def return_to(return_to_value) do
     uri = URI.parse(return_to_value)
@@ -707,6 +1053,14 @@ defmodule AlertsUIWeb.CreateAlertLive do
     end
   end
 
+  def update_schedule(first_schedule, last_schedule) do
+    # updates first schedule with arrival time from last schedule, which is otherwise discarded
+    # last stop name is needed for ferry trip names
+    first_schedule
+    |> Map.put(:time_of_last_trip_arrival, last_schedule.arrival_time)
+    |> Map.put(:last_stop_name, last_schedule.stop.name)
+  end
+
   defp flash_text(nil, alert_id, _form_type), do: "New alert ##{alert_id} created"
 
   defp flash_text(assigns_alert_id, alert_id, :duplicating),
@@ -714,138 +1068,72 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   defp flash_text(_assigns_alert_id, alert_id, _form_type), do: "Alert ##{alert_id} updated"
 
-  defp display_errors(socket, errors) do
-    [
-      {choose_affected_service_component(socket.assigns.combination), "affected_service"},
-      {TimeRange, "time_range"},
-      {AlertDetails, "alert_details"},
-      {Delivery, "delivery"}
-    ]
-    |> Enum.each(fn {module_name, id} -> send_update(module_name, id: id, submitted: true) end)
+  defp persist_valid_alert(socket) do
+    send(self(), {:persisting_start})
 
-    socket
-    |> clear_flash
-    |> push_event("scroll_to_top", %{})
-    |> put_flash(:error, errors)
-    |> put_flash(:title, "Please fix the following errors:")
-  end
+    alert_data = socket.assigns.form.source.data
 
-  @spec directions_from_selection(String.t() | nil) :: [Trip.direction_id_t()]
-  # Both directions
-  defp directions_from_selection("0"), do: [0]
-  defp directions_from_selection("1"), do: [1]
-  defp directions_from_selection(_), do: [0, 1]
+    alert_data =
+      alert_data
+      |> Map.merge(%{
+        effect_name: PathHelper.effect_from_url_name(alert_data.effect_name)
+      })
 
-  @spec direction_option(keyword(), [Trip.direction_id_t()]) :: keyword()
-  defp direction_option(opts, [single_direction_id | []]),
-    do: put_in(opts[:direction_id], single_direction_id)
+    form_type = socket.assigns.form_type
 
-  defp direction_option(opts, _both_directions), do: opts
+    user = Users.create_or_update_user_from_session(socket.assigns.current_user)
 
-  defp format_errors(errors, combination) do
-    errors
-    |> ErrorFormatter.parse_field_errors(combination)
-    |> Enum.uniq()
-    |> Enum.map_join("; ", fn {_title, {message, _error}} -> "#{message}" end)
-  end
+    alert_params =
+      alert_data
+      |> AlertDataHelpers.atomize_fields()
+      |> AlertDataHelpers.strip_banner_text_unless_enabled()
+      |> AlertDataHelpers.strip_recurrence_days_if_one_time()
+      |> AlertBuilder.build_alert(alert_data.combination)
 
-  defp get_step_by_name(name) do
-    Enum.find(@steps, &(&1.name == name))
-  end
-
-  @spec maybe_include_virtual_green_line([Route.t()]) :: [Route.t()]
-  defp maybe_include_virtual_green_line(routes) do
-    if Enum.any?(routes, &green_line_route?/1) do
-      [RoutesRepo.green_line() | routes]
-    else
-      routes
-    end
-  end
-
-  @spec green_line_route?(Route.t()) :: boolean()
-  def green_line_route?(%Route{id: "Green"}), do: true
-  def green_line_route?(%Route{id: "Green-B"}), do: true
-  def green_line_route?(%Route{id: "Green-C"}), do: true
-  def green_line_route?(%Route{id: "Green-D"}), do: true
-  def green_line_route?(%Route{id: "Green-E"}), do: true
-  def green_line_route?(_), do: false
-
-  @spec available_stops_for_bus_stop_route([String.t()]) :: [Stop.t()]
-  defp available_stops_for_bus_stop_route(route_id_lists) do
-    outbound =
-      route_id_lists
-      |> Enum.map(&StopsRepo.by_route(&1, 0, include: ""))
-      |> List.flatten()
-      |> Enum.uniq()
-
-    inbound =
-      route_id_lists
-      |> Enum.map(&StopsRepo.by_route(&1, 1, include: ""))
-      |> List.flatten()
-      |> Enum.uniq()
-
-    both = MapSet.intersection(MapSet.new(outbound), MapSet.new(inbound)) |> MapSet.to_list()
-
-    outbound = (outbound -- both) |> map_direction_names_to_stops(0)
-    inbound = (inbound -- both) |> map_direction_names_to_stops(1)
-
-    (inbound ++ both ++ outbound) |> List.flatten()
-  end
-
-  @spec available_stops([integer()], [String.t()], integer()) :: [Stop.t()]
-  defp available_stops(direction_array, route_ids, route_type) do
-    route_ids
-    |> Enum.flat_map(fn route ->
-      Enum.flat_map(direction_array, &get_stops_by_route(route, &1, route_type))
-    end)
-  end
-
-  @spec get_stops_by_route(String.t(), integer(), integer()) :: [Stop.t()]
-  defp get_stops_by_route(route, direction, 3) do
-    route
-    |> StopsRepo.by_route(direction, include: "")
-    |> map_direction_names_to_stops(direction)
-  end
-
-  defp get_stops_by_route(route, direction, _route_type) do
-    StopsRepo.by_route(route, direction, include: "")
-  end
-
-  defp map_direction_names_to_stops(stops, direction) do
-    direction_word = if direction == 0, do: "outbound", else: "inbound"
-    Enum.map(stops, fn stop -> Map.put(stop, :name, stop.name <> " (#{direction_word})") end)
-  end
-
-  defp choose_affected_service_component(combination) do
-    case combination do
-      :SR -> StopRouteAffectedService
-      :ACCESS -> AccessAffectedService
-      nil -> SystemwideAffectedService
-      _ -> AffectedService
-    end
-  end
-
-  def filter_out_old_trips(schedules, current_time \\ DateTime.utc_now()) do
-    schedules
-    |> Enum.group_by(& &1.trip.id)
-    |> Enum.reduce([], fn {_k, [first_schedule, last_schedule]}, acc ->
-      one_hour_from_arrival = Timex.shift(last_schedule.arrival_time, hours: 1)
-
-      if DateTime.compare(one_hour_from_arrival, current_time) in [:gt, :eq] do
-        [update_schedule(first_schedule, last_schedule) | acc]
+    existing_alert =
+      if is_nil(socket.assigns.alert_id) || form_type == :duplicating do
+        %Alert{}
       else
-        acc
+        Alerts.get_by_alert_id(socket.assigns.alert_id)
       end
-    end)
-    |> Enum.reverse()
-    |> Enum.sort_by(& &1.departure_time, DateTime)
-  end
 
-  def update_schedule(first_schedule, last_schedule) do
-    # updates first schedule with arrival time from last schedule, which is otherwise discarded
-    # last stop name is needed for ferry trip names
-    first_schedule
-    |> Map.put(:time_of_last_trip_arrival, last_schedule.arrival_time)
-    |> Map.put(:last_stop_name, last_schedule.stop.name)
+    alert_params =
+      alert_params
+      |> Alerts.create_or_update_alert(user, existing_alert)
+      |> case do
+        {:ok, alert} ->
+          alert_id =
+            alert.id
+            |> Alerts.get_by_id()
+            |> Map.get(:alert_id)
+
+          flash = flash_text(socket.assigns.alert_id, alert_id, form_type)
+
+          socket
+          |> put_flash(:info, flash)
+          |> redirect(to: return_to(socket.assigns.return_to || "/"))
+
+        {:error, changeset} ->
+          # Form validation should prevent us from getting here
+          # but in case we do, we log an error and show
+          # an error flash to the user
+          send(self(), {:persisting_end})
+
+          errors =
+            changeset
+            |> Alerts.parse_changeset_errors()
+            |> ErrorFormatter.parse_field_errors(socket.assigns.form[:combination].value)
+
+          Logger.error("Errors upon alert submission: #{format_errors(errors)}")
+          display_errors(assign(socket, :submitting?, false), errors)
+      end
+
+    Phoenix.PubSub.broadcast(
+      AlertsUI.PubSub,
+      "alerts",
+      {:alerts_updated}
+    )
+
+    alert_params
   end
 end

@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSliceTest do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory

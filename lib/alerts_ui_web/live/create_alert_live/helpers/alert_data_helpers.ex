@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers do
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.InformedEntity
@@ -8,7 +8,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers do
 
   import Ecto.Changeset, only: [get_field: 2]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Path,
+  import AlertsUIWeb.CreateAlertLive.Helpers.Path,
     only: [path_route_type_from_form: 1, path_route_type: 2]
 
   @forbidden_effects ~w[Summary]

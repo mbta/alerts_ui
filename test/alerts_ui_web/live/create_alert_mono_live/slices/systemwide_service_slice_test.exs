@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.SystemwideServiceSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
@@ -7,9 +7,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSliceTest do
   import Test.Support.Helpers
 
   alias AlertsUI.Alerts
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.Slices.SystemwideServiceSlice
 
   describe "component" do
     @tag :logged_in_user

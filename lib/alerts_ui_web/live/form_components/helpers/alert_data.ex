@@ -9,7 +9,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+  import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [get_single_route_effect_names: 0, get_single_facility_effect_names: 0]
 
   alias MBTAV3API.Routes.Route
@@ -178,7 +178,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
   # if the alert is being duplicated, don't include any of the original metadata
   defp create_and_edit_metadata(_alert, :duplicating), do: %{}
 
-  # if the alert is new (mono flow) it has no history
+  # if the alert is new it has no history
   defp create_and_edit_metadata(%Alert{id: nil}, _), do: %{}
 
   defp create_and_edit_metadata(alert, _form_type) do

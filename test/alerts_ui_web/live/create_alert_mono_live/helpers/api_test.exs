@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.APITest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.APITest do
   @moduledoc false
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.API
+  alias AlertsUIWeb.CreateAlertLive.Helpers.API
 
   describe "async_available/1" do
     test "returns the result when ok? is true" do

@@ -1,15 +1,15 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
+defmodule AlertsUIWeb.CreateAlertLive.AlertData do
   @moduledoc """
   Alert data v2
   """
   alias AlertsUI.Models.Alert
   alias AlertsUI.Repo
-  alias AlertsUIWeb.CreateAlertMonoLive
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertLive
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers
+  alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.AlertData, as: OldAlertData
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.{
+  alias AlertsUIWeb.CreateAlertLive.Slices.{
     AlertDetailsSlice,
     DeliverySlice,
     NotificationPeriodSlice,
@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
   import AlertsUIWeb.FormComponents.Helpers.ErrorFormatter,
     only: [parse_field_errors: 1]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+  import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [combination_for: 2, combination_for: 3]
 
   @combination_values [:ACCESS, :R, :RDS, :RDT, :RDTS, :SR]
@@ -388,7 +388,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.AlertData do
     [
       TimelineSlice,
       UrlSlice,
-      CreateAlertMonoLive.service_slice(combination),
+      CreateAlertLive.service_slice(combination),
       TimeRangeSlice,
       AlertDetailsSlice,
       NotificationPeriodSlice,

@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.ReminderTimesSlice do
   @moduledoc """
   Slice that manages rider reminder datetimes embedded in an alert. Provides
   changeset helpers for casting/dropping reminder entries and renders the
@@ -6,8 +6,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   """
 
   alias AlertsUI.Helpers.ReminderTimes
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slice
   alias Phoenix.HTML.FormField
 
   import Ecto.Changeset
@@ -17,7 +17,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice do
   defstruct [:form_type, reminder_times: []]
 
   defimpl Slice, for: __MODULE__ do
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.ReminderTimesSlice
+    alias AlertsUIWeb.CreateAlertLive.Slices.ReminderTimesSlice
 
     def mount(_slice, socket, _base_params), do: socket
 

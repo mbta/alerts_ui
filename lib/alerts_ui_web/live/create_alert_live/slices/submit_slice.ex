@@ -1,12 +1,12 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SubmitSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.SubmitSlice do
   @moduledoc """
   Slice that renders the bottom action bar with Select Alert Type, Cancel, and Review/Submit
   buttons, and conditionally shows the review modal and prediction-suppression
   warning modal before saving an alert.
   """
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.Helpers.Path, as: PathHelper
+  alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.PredictionSuppressionWarningModal
   alias AlertsUIWeb.ReviewModal
   alias AlertsUIWeb.TripEndWarningModal

@@ -7,13 +7,13 @@ defmodule AlertsUI.CacheWarmingTest do
 
   alias AlertsUI.CacheWarming
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.CreateAlertLive
+  alias AlertsUIWeb.CreateAlertHelpers
 
   describe "warm_all/0" do
     test "calls all warming functions and logs progress" do
       set_log_level(:info)
 
-      with_mock(CreateAlertLive,
+      with_mock(CreateAlertHelpers,
         get_routes: fn _types -> [] end,
         get_stops: fn _routes, _type, _dir -> [] end,
         get_stops_for_stop_route: fn _routes, _type -> [] end,
@@ -28,7 +28,7 @@ defmodule AlertsUI.CacheWarmingTest do
     end
 
     test "warms standard and unlisted route types" do
-      with_mock(CreateAlertLive,
+      with_mock(CreateAlertHelpers,
         get_routes: fn _types -> [] end,
         get_stops: fn _routes, _type, _dir -> [] end,
         get_stops_for_stop_route: fn _routes, _type -> [] end,
@@ -36,12 +36,12 @@ defmodule AlertsUI.CacheWarmingTest do
       ) do
         CacheWarming.warm_all()
 
-        assert_called(CreateAlertLive.get_routes([3]))
+        assert_called(CreateAlertHelpers.get_routes([3]))
       end
     end
 
     test "warms stops for all service modes" do
-      with_mock(CreateAlertLive,
+      with_mock(CreateAlertHelpers,
         get_routes: fn _types -> [] end,
         get_stops: fn _routes, _type, _dir -> [] end,
         get_stops_for_stop_route: fn _routes, _type -> [] end,
@@ -49,15 +49,15 @@ defmodule AlertsUI.CacheWarmingTest do
       ) do
         CacheWarming.warm_all()
 
-        assert_called(CreateAlertLive.get_stops(nil, 3, nil))
-        assert_called(CreateAlertLive.get_stops(nil, 1, nil))
-        assert_called(CreateAlertLive.get_stops_for_stop_route(nil, 2))
-        assert_called(CreateAlertLive.get_stops_for_stop_route(nil, 4))
+        assert_called(CreateAlertHelpers.get_stops(nil, 3, nil))
+        assert_called(CreateAlertHelpers.get_stops(nil, 1, nil))
+        assert_called(CreateAlertHelpers.get_stops_for_stop_route(nil, 2))
+        assert_called(CreateAlertHelpers.get_stops_for_stop_route(nil, 4))
       end
     end
 
     test "warms all facility types" do
-      with_mock(CreateAlertLive,
+      with_mock(CreateAlertHelpers,
         get_routes: fn _types -> [] end,
         get_stops: fn _routes, _type, _dir -> [] end,
         get_stops_for_stop_route: fn _routes, _type -> [] end,
@@ -65,7 +65,7 @@ defmodule AlertsUI.CacheWarmingTest do
       ) do
         CacheWarming.warm_all()
 
-        assert_called(CreateAlertLive.get_facilities(InformedEntity.all_facility_types()))
+        assert_called(CreateAlertHelpers.get_facilities(InformedEntity.all_facility_types()))
       end
     end
   end

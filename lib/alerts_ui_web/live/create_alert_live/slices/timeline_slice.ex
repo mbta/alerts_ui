@@ -1,13 +1,13 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.TimelineSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.TimelineSlice do
   @moduledoc """
   Slice that tracks multi-step form progress and renders the step-navigation
   header bar. Gets the list of "Step" structs from the assigns and
   managers the currently active step.
   """
 
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.CreateAlertMonoLive.Step
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.Step
 
   use AlertsUIWeb, :html
 

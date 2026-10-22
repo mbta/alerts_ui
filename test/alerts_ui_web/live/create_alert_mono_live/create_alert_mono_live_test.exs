@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLiveTest do
+defmodule AlertsUIWeb.CreateAlertLiveTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import Phoenix.LiveViewTest

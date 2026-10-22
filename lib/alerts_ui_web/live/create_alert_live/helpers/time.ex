@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Time do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.Time do
   @moduledoc """
   Date and time utility functions.
   """

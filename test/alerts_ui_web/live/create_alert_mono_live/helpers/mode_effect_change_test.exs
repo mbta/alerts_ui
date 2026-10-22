@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChangeTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.ModeEffectChangeTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange
+  alias AlertsUIWeb.CreateAlertLive.Helpers.ModeEffectChange
 
   describe "changing paradigms" do
     test "RDS to SR retains stops" do

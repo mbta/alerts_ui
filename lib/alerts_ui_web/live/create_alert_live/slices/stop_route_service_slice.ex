@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.StopRouteServiceSlice do
   @moduledoc """
   Slice that handles stop and route selection for bus/subway/ferry/commuter-rail
   alerts. Asynchronously loads available stops, routes, and filter options, and
@@ -6,12 +6,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   """
 
   alias AlertsUI.Models.Alert
-  alias AlertsUIWeb.CreateAlertLive
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertHelpers
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
+  import AlertsUIWeb.CreateAlertLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
   import Ecto.Changeset
@@ -39,7 +39,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   defmodule Selections do
     @moduledoc "Holds async-loaded route and stop option lists for `StopRouteServiceSlice`."
 
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
+    alias AlertsUIWeb.CreateAlertLive.Slices.StopRouteServiceSlice
 
     defstruct available_filter_routes: nil,
               available_routes: nil,
@@ -59,7 +59,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
   end
 
   defimpl Slice, for: __MODULE__ do
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
+    alias AlertsUIWeb.CreateAlertLive.Slices.StopRouteServiceSlice
 
     def mount(_service_data, socket, _base_params), do: socket
 
@@ -187,12 +187,12 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice do
     socket
     |> assign(:selections, %{prev | loading: true})
     |> start_async(:fetch_selections, fn ->
-      available_filter_routes = CreateAlertLive.get_routes(route_type_for_filter)
+      available_filter_routes = CreateAlertHelpers.get_routes(route_type_for_filter)
 
-      available_stops = CreateAlertLive.get_stops_for_stop_route(stop_route_ids, route_type)
+      available_stops = CreateAlertHelpers.get_stops_for_stop_route(stop_route_ids, route_type)
 
       stop_ids = Alert.get_original_ids(stop_names_and_ids)
-      available_routes = CreateAlertLive.get_routes_by_stop(stop_ids, route_type)
+      available_routes = CreateAlertHelpers.get_routes_by_stop(stop_ids, route_type)
 
       available_stop_ids = Enum.map(available_stops, fn stop -> stop.id end)
 

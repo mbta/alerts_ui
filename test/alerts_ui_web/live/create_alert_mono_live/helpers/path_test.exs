@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.PathTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.PathTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
+  alias AlertsUIWeb.CreateAlertLive.Helpers.Path, as: PathHelper
   alias Phoenix.LiveView.Socket
 
   defp map_form(params), do: Phoenix.Component.to_form(params, as: :alert_data)

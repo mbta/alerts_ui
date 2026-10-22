@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.SystemwideServiceSlice do
   @moduledoc """
   Slice that handles affected-service selection for systemwide alerts. Validates
   that at least one service type (bus, commuter rail, ferry, subway) is chosen
@@ -6,10 +6,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.SystemwideServiceSlice do
   """
 
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slice
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
+  import AlertsUIWeb.CreateAlertLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
   use AlertsUIWeb, :html

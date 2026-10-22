@@ -1,14 +1,14 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.DeliverySlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.DeliverySlice do
   @moduledoc """
   Slice that manages alert delivery settings: the push-notification toggle,
   the optional MBTA.com website banner (text, auto-refresh sync, and
   acknowledgement checkbox), and their default values based on route/effect.
   """
 
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.NotificationToggle
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Helpers.NotificationToggle
+  alias AlertsUIWeb.CreateAlertLive.Helpers.Path
+  alias AlertsUIWeb.CreateAlertLive.Slice
   alias Phoenix.HTML.Form
 
   use AlertsUIWeb, :html

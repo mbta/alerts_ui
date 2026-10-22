@@ -1,5 +1,5 @@
-defprotocol AlertsUIWeb.CreateAlertMonoLive.Slice do
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
+defprotocol AlertsUIWeb.CreateAlertLive.Slice do
+  alias AlertsUIWeb.CreateAlertLive.AlertData
   alias Ecto.Changeset
   alias Phoenix.LiveView.Socket
 

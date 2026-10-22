@@ -13,7 +13,7 @@ defmodule AlertsUIWeb.Tickets.EffectPeriodBreakpointTest do
     * Row 1: effect START dropdown + datetime picker + "to"
     * Row 2: effect END dropdown + datetime picker
 
-  The fix (CreateAlertMonoLive.Slices.TimeRangeSlice.one_time_alert/1) groups the
+  The fix (CreateAlertLive.Slices.TimeRangeSlice.one_time_alert/1) groups the
   controls into nested flex containers instead of a single flat flex-wrap row, so
   wrapping happens BETWEEN the start group and the end group, never mid-group.
 

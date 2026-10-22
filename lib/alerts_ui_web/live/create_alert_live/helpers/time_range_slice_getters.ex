@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeSliceGetters do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeSliceGetters do
   @moduledoc """
   Functions to calculate what times/dates/datetimes should be set when a user
   selects things in the TimeRange component

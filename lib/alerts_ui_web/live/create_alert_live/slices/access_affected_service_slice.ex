@@ -1,19 +1,19 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice do
   @moduledoc """
   Slice that handles facility selection for accessibility alerts (elevator/escalator
   closures). Asynchronously loads facilities filtered by stop, and renders the
   facility picker with an optional stop-filter modal.
   """
 
-  alias AlertsUIWeb.CreateAlertLive
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertHelpers
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+  import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [get_single_facility_effect_names: 0, humanize_effect_name: 1, facility_types: 1]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
+  import AlertsUIWeb.CreateAlertLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
   import Ecto.Changeset, only: [get_field: 2, cast: 3]
@@ -32,7 +32,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   defmodule Selections do
     @moduledoc "Holds async-loaded facility and stop option lists for `AccessAffectedServiceSlice`."
 
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice
 
     defstruct available_facilities: [],
               facility_id_options: [],
@@ -45,7 +45,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
   end
 
   defimpl Slice, for: __MODULE__ do
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice
 
     def mount(_service_data, socket, _base_params) do
       socket
@@ -157,7 +157,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice do
     |> assign(:selections, %{prev | loading: true})
     |> start_async(:fetch_selections, fn ->
       available_facilities =
-        CreateAlertLive.get_facilities(facility_types)
+        CreateAlertHelpers.get_facilities(facility_types)
 
       modal_stop_id_options = modal_stop_id_options(available_facilities, form)
 

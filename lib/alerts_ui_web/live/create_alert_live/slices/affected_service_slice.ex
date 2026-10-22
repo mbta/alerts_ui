@@ -1,18 +1,18 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
   @moduledoc """
   Slice that manages affected-service selection for single-route alerts:
   routes, stops, directions, trips, and service-date filtering. Asynchronously
   loads schedules and renders the route/stop/trip picker for the details step.
   """
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+  alias AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice
   use AlertsUIWeb, :html
   alias AlertsUI.Alerts
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUI.SkateDetours.GetDetours
-  alias AlertsUIWeb.CreateAlertLive
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertHelpers
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
   alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
 
@@ -20,10 +20,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   import Phoenix.LiveView, only: [push_event: 3, start_async: 3]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+  import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [get_single_route_effect_names: 0, humanize_effect_name: 1, humanize_effect_name: 2]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation,
+  import AlertsUIWeb.CreateAlertLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
   @min_stops_message "Select 2 or more stops between which service is not running"
@@ -47,7 +47,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
   defmodule Selections do
     @moduledoc "Holds async-loaded route, stop, and schedule option lists for `AffectedServiceSlice`."
 
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice
 
     defstruct available_routes: [],
               available_schedules: [],
@@ -67,8 +67,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defimpl Slice, for: __MODULE__ do
     alias AlertsUI.SkateDetours.GetDetours
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice.Selections
+    alias AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice.Selections
 
     def mount(service_data, socket, _base_params) do
       assign(
@@ -396,10 +396,10 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
     socket
     |> assign(:selections, %{prev | loading: true, filter_title_value: filter_title_value})
     |> start_async(:fetch_selections, fn ->
-      available_routes = CreateAlertLive.get_routes(all_route_types)
+      available_routes = CreateAlertHelpers.get_routes(all_route_types)
 
       available_stops =
-        CreateAlertLive.get_stops(
+        CreateAlertHelpers.get_stops(
           route_ids,
           route_type,
           direction
@@ -490,7 +490,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice do
 
   defp available_schedules(route_ids, direction, modal_date) do
     date = get_schedule_date(modal_date)
-    CreateAlertLive.get_schedules_by_date(route_ids, direction, date)
+    CreateAlertHelpers.get_schedules_by_date(route_ids, direction, date)
   end
 
   defp get_schedule_date("default") do

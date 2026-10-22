@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Time, as: TimeHelper
+  alias AlertsUIWeb.CreateAlertLive.Helpers.Time, as: TimeHelper
 
   describe "today/0" do
     test "returns today's date in America/New_York" do

@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.DurationText do
   @moduledoc """
   Helpers to ghenerate time range durations
   """

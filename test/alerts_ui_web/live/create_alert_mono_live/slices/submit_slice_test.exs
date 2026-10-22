@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
+defmodule AlertsUIWeb.CreateAlertLive.SubmitSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
 
@@ -20,7 +20,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
 
   describe "Cancel button" do
     @tag :logged_in_user
-    test "navigates away from the mono flow when clicked", %{conn: conn} do
+    test "navigates away from the flow when clicked", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new/bus/delay")
 
       assert has_element?(view, "#cancel")

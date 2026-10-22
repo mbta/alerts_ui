@@ -8,9 +8,6 @@ defmodule AlertsUIWeb.Tickets.EditAutoclosableElevatorAlertTest do
   is closed") and submitting dropped its auto-close flag, because `enforce_defaults` reset
   `can_close_automatically` back to its schema default whenever the submitted value matched
   the existing one (`get_change` is nil for unchanged fields).
-
-  This is the mono-flow counterpart of the original test, driving the
-  `/alerts/edit/:alert_id` flow.
   """
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase

@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.API do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.API do
   @moduledoc """
   API access helpers.
   """

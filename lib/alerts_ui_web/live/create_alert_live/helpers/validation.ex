@@ -1,6 +1,6 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.Validation do
   @moduledoc """
-  Shared changeset validation helpers for the mono alert creation form. Provides
+  Shared changeset validation helpers for the alert creation form. Provides
   `always_validate_required/3` which adds an error whenever a field is nil, empty
   string, or empty list — regardless of whether the field appears in changeset changes.
   """

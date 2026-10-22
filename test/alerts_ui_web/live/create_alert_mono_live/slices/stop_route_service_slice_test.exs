@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.StopRouteServiceSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSliceTest do
   import Mock
   import Test.Support.Helpers
   alias AlertsUI.Alerts
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.StopRouteServiceSlice
+  alias AlertsUIWeb.CreateAlertLive.Slices.StopRouteServiceSlice
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route

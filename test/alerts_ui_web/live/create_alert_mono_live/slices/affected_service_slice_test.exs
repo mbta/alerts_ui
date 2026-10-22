@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
 
@@ -9,9 +9,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSliceTest do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo
   alias MBTAV3API.RoutePatterns.RoutePattern
   alias MBTAV3API.Routes.Repo, as: RoutesRepo

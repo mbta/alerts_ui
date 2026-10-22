@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
   @moduledoc """
   Slice that manages the core alert details: header text, description, cause,
   severity, URL, and image. Drives auto-text generation from route/effect context
@@ -8,9 +8,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   import Ecto.Changeset
 
   alias AlertsUI.Models.{Alert, Cause, SeverityLevel}
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: EffectHelper
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
+  alias AlertsUIWeb.CreateAlertLive.Helpers.Path, as: EffectHelper
+  alias AlertsUIWeb.CreateAlertLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUIWeb.FormComponents.Helpers.{DateTimeHelpers, GetKeyForModeEffect}
   alias MBTAV3API.Stops.Stop
@@ -52,8 +52,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.AlertDetailsSlice do
   defimpl Slice, for: __MODULE__ do
     import Ecto.Changeset
     alias AlertsUI.Models.Alert
-    alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.AccessAffectedServiceSlice
+    alias AlertsUIWeb.CreateAlertLive.Helpers.Validation
+    alias AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice
     alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
     alias MBTAV3API.Stops.Stop
     alias Phoenix.LiveView.AsyncResult

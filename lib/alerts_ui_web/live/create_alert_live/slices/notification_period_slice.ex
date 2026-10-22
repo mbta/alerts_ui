@@ -1,10 +1,10 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.NotificationPeriodSlice do
   @moduledoc """
     Live Component for notification period of form
   """
 
   alias AlertsUI.Models.ActivePeriod
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias Phoenix.HTML.Form
 
@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
 
   import Ecto.Changeset
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+  import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [put_over_nil: 3, values_to_options: 1]
 
   @notification_values [
@@ -31,9 +31,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice do
   ]
 
   defimpl Slice, for: __MODULE__ do
-    alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-    alias AlertsUIWeb.CreateAlertMonoLive.Helpers.TimeRangeValidators
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSlice
+    alias AlertsUIWeb.CreateAlertLive.AlertData
+    alias AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeValidators
+    alias AlertsUIWeb.CreateAlertLive.Slices.NotificationPeriodSlice
 
     def mount(_slice, socket, _params) do
       assign(socket, :current_time, DateTimeHelpers.current_time())

@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.Path do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.Path do
   @moduledoc """
   Utilities for computing paths for `push_patch/2`.
   """

@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.NotificationPeriodSliceTest do
   @moduledoc false
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase

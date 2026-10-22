@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.UrlSlice do
   @moduledoc """
   Slice that manages URL-derived parameters: route type, effect name, and their
   combined `combination` key. Renders the route-type and effect-name picker shown
@@ -6,8 +6,8 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   """
 
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slice
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slice
   alias Ecto.Changeset
 
   use AlertsUIWeb, :html
@@ -20,7 +20,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
   import AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect,
     only: [get_value_of_key: 3]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+  import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [humanize_effect_name: 2, list_effect_path_names: 1]
 
   defstruct [
@@ -33,9 +33,9 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
 
   defimpl Slice, for: __MODULE__ do
     import Ecto.Changeset, only: [get_field: 2, cast: 3]
-    alias AlertsUIWeb.CreateAlertMonoLive
-    alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-    alias AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice
+    alias AlertsUIWeb.CreateAlertLive
+    alias AlertsUIWeb.CreateAlertLive.AlertData
+    alias AlertsUIWeb.CreateAlertLive.Slices.UrlSlice
 
     def mount(_url_data, socket, _base_params), do: socket
 
@@ -65,7 +65,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.UrlSlice do
         if alert_id == nil && (path_route_type == nil || path_effect_name == nil) do
           socket
           |> assign(:halt_flushing, true)
-          |> CreateAlertMonoLive.start_socket(params)
+          |> CreateAlertLive.start_socket(params)
         else
           socket
         end

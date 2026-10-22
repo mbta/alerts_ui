@@ -1,4 +1,4 @@
-import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
   only: [
     combination_for: 2,
     facility_types: 1,
@@ -6,7 +6,7 @@ import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
     humanize_effect_name: 2
   ]
 
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ModeEffectChange do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.ModeEffectChange do
   @moduledoc """
   Helpers for converting an alert's mode or effect type.
   """
