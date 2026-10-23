@@ -1,9 +1,9 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText do
   @moduledoc """
     Constructs auto-text for header from affected service.
   """
   alias AlertsUI.Models.{EnhancedSchedule, InformedEntity, SeverityLevel}
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AutoTextDuration
   alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, DateTimeHelpers}
   alias AlertsUIWeb.CreateAlertLive.Helpers.{SelectFormatter}
   alias MBTAV3API.Facilities.Facility

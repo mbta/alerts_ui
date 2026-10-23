@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.Templates do
   @moduledoc """
     Text templates for auto-text.
     Header templates: returns a string with interpolated variables.
@@ -11,11 +11,13 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.Templates do
     to determine if they appear or not.
   """
 
-  alias AlertsUIWeb.FormComponents.Helpers.{
+  alias AlertsUIWeb.CreateAlertLive.Helpers.{
     AutoText.BuildAutoText,
     AutoText.BuildDescriptionText,
     EffectsForRouteTypes
   }
+
+  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
 
   @systemwide_effects EffectsForRouteTypes.list_effects(:systemwide)
 

@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildDescriptionText do
   @moduledoc """
     Constructs auto-text for description from affected service.
   """
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText
   alias AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter
 
   @spec affected_routes(BuildAutoText.t()) :: String.t()

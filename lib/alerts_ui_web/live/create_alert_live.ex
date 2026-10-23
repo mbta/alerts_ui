@@ -57,12 +57,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   alias AlertsUIWeb.CreateAlertLive.Step
 
-  alias AlertsUIWeb.FormComponents.Helpers.{
-    EntityValidator,
-    ObsoleteEntities
-  }
-
-  alias AlertsUIWeb.CreateAlertLive.Helpers.{ErrorFormatter, ServiceEffectCombinations}
+  alias AlertsUIWeb.CreateAlertLive.Helpers.{EntityValidator, ErrorFormatter, ObsoleteEntities, ServiceEffectCombinations}
 
   alias AlertsUIWeb.{PredictionSuppressionWarningModal, TripEndWarningModal}
 

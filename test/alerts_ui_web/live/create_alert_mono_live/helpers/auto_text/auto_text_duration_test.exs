@@ -1,10 +1,10 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextDurationTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoTextDurationTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AutoTextDuration
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
 
   @schedule_1 %EnhancedSchedule{

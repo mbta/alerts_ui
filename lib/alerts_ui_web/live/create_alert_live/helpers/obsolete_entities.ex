@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.ObsoleteEntities do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.ObsoleteEntities do
   @moduledoc """
   extracted shared functions for processing obsolete entities inside async handlers
   """

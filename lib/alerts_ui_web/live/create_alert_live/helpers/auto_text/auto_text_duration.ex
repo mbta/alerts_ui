@@ -1,10 +1,10 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AutoTextDuration do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AutoTextDuration do
   @moduledoc """
     Durations for auto text.
     All datetimes are naive and in EST.
   """
   alias AlertsUI.Models.ActivePeriod
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
 

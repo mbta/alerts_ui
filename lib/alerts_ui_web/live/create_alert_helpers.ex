@@ -40,7 +40,7 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
   }
 
   alias AlertsUIWeb.FormComponents.Helpers.{
-    AlertData,
+    AlertDataBuilder,
     EffectsForRouteTypes
   }
 
@@ -196,7 +196,7 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
 
       alert ->
         alert
-        |> AlertData.build_alert_data(form_type)
+        |> AlertDataBuilder.build_alert_data(form_type)
         |> Map.from_struct()
     end
     |> adjust_by_form_type(form_type)

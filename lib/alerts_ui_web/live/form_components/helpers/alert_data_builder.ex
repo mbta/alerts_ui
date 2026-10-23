@@ -5,6 +5,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataBuilder do
   Can take an Alert struct or an alert_id
   """
 
+  #TODO quite a general helper
+
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
   alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect

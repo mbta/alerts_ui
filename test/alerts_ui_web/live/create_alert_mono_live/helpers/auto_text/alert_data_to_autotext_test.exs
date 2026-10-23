@@ -1,9 +1,9 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoTextTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AlertDataToAutoTextTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   import Mock
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AlertDataToAutoText
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo

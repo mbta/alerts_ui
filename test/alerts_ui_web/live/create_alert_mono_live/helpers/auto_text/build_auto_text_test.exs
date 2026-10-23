@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoTextTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoTextTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Trip

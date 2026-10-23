@@ -11,7 +11,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
   alias AlertsUIWeb.CreateAlertLive.Helpers.Path, as: EffectHelper
   alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
   alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
   alias MBTAV3API.Stops.Stop

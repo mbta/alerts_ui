@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidator do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.EntityValidator do
   @moduledoc """
     Takes in an id or list of ids, and an AsyncResult containing
     a list of entities in the result. Returns list of IDs not found

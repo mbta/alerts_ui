@@ -1,7 +1,7 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.EntityValidatorTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.EntityValidatorTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
-  alias AlertsUIWeb.FormComponents.Helpers.EntityValidator
+  alias AlertsUIWeb.CreateAlertLive.Helpers.EntityValidator
 
   describe "get_obsolete_ids/2" do
     test "returns list of ids not in given list" do

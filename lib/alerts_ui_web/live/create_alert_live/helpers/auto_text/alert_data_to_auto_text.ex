@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AlertDataToAutoText do
   @moduledoc """
     Converts alert data to an auto text struct
   """
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText
   alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   def build_autotext_data(alert_data) do

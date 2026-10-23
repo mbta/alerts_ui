@@ -4,8 +4,8 @@ defmodule AlertsUI.Trapeze.WorkOrder do
   """
 
   alias AlertsUI.Trapeze.WorkOrder
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.AlertDataToAutoText
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.Templates
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AlertDataToAutoText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.Templates
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
 
