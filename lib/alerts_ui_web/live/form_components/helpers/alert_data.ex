@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}
-  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
+  alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
 
   import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [get_single_route_effect_names: 0, get_single_facility_effect_names: 0]

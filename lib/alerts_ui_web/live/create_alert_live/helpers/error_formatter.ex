@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatter do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.ErrorFormatter do
   @moduledoc """
   Formats errors for form
   """

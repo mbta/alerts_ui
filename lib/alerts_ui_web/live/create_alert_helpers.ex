@@ -41,12 +41,15 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
 
   alias AlertsUIWeb.FormComponents.Helpers.{
     AlertData,
-    EffectsForRouteTypes,
-    ErrorFormatter,
-    GetKeyForModeEffect
+    EffectsForRouteTypes
   }
 
-  alias AlertsUIWeb.CreateAlertLive.Helpers.{GreenLine, SelectFormatter}
+  alias AlertsUIWeb.CreateAlertLive.Helpers.{
+    ErrorFormatter,
+    GetKeyForModeEffect,
+    GreenLine,
+    SelectFormatter
+  }
 
   alias AlertsUIWeb.Step
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo

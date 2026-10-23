@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.PredictionSuppressionWarningModal do
 
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.Formatting
-  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
+  alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
 
   @doc """
   Renders the warning modal

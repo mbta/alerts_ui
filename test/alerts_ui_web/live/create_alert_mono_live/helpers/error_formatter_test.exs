@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.ErrorFormatterTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.ErrorFormatterTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   alias AlertsUI.Models.Alert
-  alias AlertsUIWeb.FormComponents.Helpers.ErrorFormatter
+  alias AlertsUIWeb.CreateAlertLive.Helpers.ErrorFormatter
 
   describe "parse_field_errors/1" do
     test "puts errors for fields in correct format from list" do

@@ -2,7 +2,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ObsoleteEntities do
   @moduledoc """
   extracted shared functions for processing obsolete entities inside async handlers
   """
-    #TODO possibly remove?
+
+  # TODO possibly remove?
 
   @spec send_obsolete_ids?(map(), list()) :: boolean()
   def send_obsolete_ids?(obsolete_ids, required_fields) do

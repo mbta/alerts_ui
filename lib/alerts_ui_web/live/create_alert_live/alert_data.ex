@@ -31,7 +31,7 @@ defmodule AlertsUIWeb.CreateAlertLive.AlertData do
 
   import Component, only: [assign: 3, to_form: 1]
 
-  import AlertsUIWeb.FormComponents.Helpers.ErrorFormatter,
+  import AlertsUIWeb.CreateAlertLive.Helpers.ErrorFormatter,
     only: [parse_field_errors: 1]
 
   import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,

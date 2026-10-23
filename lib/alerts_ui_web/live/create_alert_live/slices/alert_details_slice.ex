@@ -12,7 +12,8 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
   alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AlertDataToAutoText, Templates}
-  alias AlertsUIWeb.FormComponents.Helpers.{DateTimeHelpers, GetKeyForModeEffect}
+  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+  alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
   alias MBTAV3API.Stops.Stop
   alias Phoenix.LiveView.AsyncResult
 

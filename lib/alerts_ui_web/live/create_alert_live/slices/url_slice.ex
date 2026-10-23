@@ -17,7 +17,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.UrlSlice do
   import AlertsUIWeb.FormComponents.Helpers.ContentFormatter,
     only: [route_atom_to_string: 1]
 
-  import AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect,
+  import AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect,
     only: [get_value_of_key: 3]
 
   import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,

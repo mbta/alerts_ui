@@ -3,7 +3,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
   Utility functions for formatting dates and times.
   """
 
-  #TODO general helper
+  # TODO general helper
 
   alias AlertsUI.Helpers.DateTime, as: DTHelpers
   alias AlertsUI.Models.ActivePeriod

@@ -1,9 +1,9 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffectTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffectTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   import Mock
   alias AlertsUI.Configs.ModeEffect
-  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
+  alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
 
   @fake_mode_effect_table %{
     subway: %{

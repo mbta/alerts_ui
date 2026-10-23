@@ -1,4 +1,4 @@
-alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
+alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
 
 defmodule AlertsUIWeb.CreateAlertLive.Helpers.NotificationToggle do
   @moduledoc """

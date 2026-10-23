@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect do
   @moduledoc """
   Gives back the default severity given a mode and effect.
   """
