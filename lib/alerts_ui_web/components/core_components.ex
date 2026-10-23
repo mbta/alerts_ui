@@ -24,7 +24,7 @@ defmodule AlertsUIWeb.CoreComponents do
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
 
-  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  alias AlertsUIWeb.Helpers.EffectsForRouteTypes
 
   @doc """
   Renders flash notices.

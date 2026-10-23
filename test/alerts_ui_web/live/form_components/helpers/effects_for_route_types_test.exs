@@ -1,7 +1,7 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypesTest do
+defmodule AlertsUIWeb.Helpers.EffectsForRouteTypesTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
-  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  alias AlertsUIWeb.Helpers.EffectsForRouteTypes
 
-  doctest AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  doctest AlertsUIWeb.Helpers.EffectsForRouteTypes
 end

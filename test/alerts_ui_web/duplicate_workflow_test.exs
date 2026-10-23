@@ -76,7 +76,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
           build(:user, first_name: "Original", last_name: "Creator")
         )
 
-      {:ok, view, _html} = live(conn, "/alerts/legacy/duplicate?alert_id=123")
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
 
       open_review_modal(view)
       refute render(view) =~ ~r/Created by.*\s* Original Creator/
@@ -160,7 +160,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                  }
                ],
                original_route_selections: ["bus route 1|1"],
-               original_stop_selections: nil,
+               original_stop_selections: [],
                recurrence_days: [],
                recurrence_text: nil,
                reminder_times: [],
@@ -189,7 +189,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
        [
          by_route: fn _route, _direction, _opts -> [@stop] end,
          get_parent: fn nil -> nil end,
-         all: fn ["filter[id]": "stop-id"], _ -> [@stop] end
+         all: fn _, _ -> [@stop] end
        ]}
     ]) do
       alert_params =
@@ -208,15 +208,15 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
       {:ok, _} =
         Alerts.create_or_update_alert(alert_params, build(:user))
 
-      {:ok, view, _html} = live(conn, "/alerts/legacy/duplicate?alert_id=123")
+      {:ok, view, _html} = live(conn, "/alerts/duplicate/123")
 
       assert render_async(view) =~
                ~r/<option value="default" selected="">.*All Stops.*<\/option>/s
 
       view
-      |> element("#service_form")
+      |> element("form")
       |> render_change(%{
-        affected_service: %{
+        alert_data: %{
           stop_names_and_ids: ["Stop Name (outbound)|stop-id"]
         }
       })
@@ -241,7 +241,7 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                active_period_start: _,
                alert_lifecycle: nil,
                banner_text: nil,
-               cause: nil,
+               cause: :UNKNOWN_CAUSE,
                cause_detail: nil,
                closed_timestamp: nil,
                created_timestamp: _,

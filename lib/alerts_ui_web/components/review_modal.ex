@@ -8,10 +8,10 @@ defmodule AlertsUIWeb.ReviewModal do
   import AlertsUIWeb.CoreComponents
   import AlertsUIWeb.SharedComponents
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers,
+  import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [humanize_effect_name: 2, display_alert_timing: 1]
 
-  import AlertsUIWeb.CreateAlertMonoLive.Helpers.Value,
+  import AlertsUIWeb.CreateAlertLive.Helpers.Value,
     only: [blank?: 1]
 
   import PhoenixHTMLHelpers.Format, only: [text_to_html: 2]
@@ -20,14 +20,14 @@ defmodule AlertsUIWeb.ReviewModal do
   alias AlertsUI.Helpers.ReminderTimes
   alias AlertsUI.Models.{Alert, SeverityLevel}
 
-  alias AlertsUIWeb.FormComponents.Helpers.{
-    ContentFormatter,
+  alias AlertsUIWeb.CreateAlertLive.Helpers.{
     RecurringDurationText,
     SelectFormatter,
     TimeRangeDurationText
   }
 
-  alias AlertsUIWeb.FormComponents.Helpers.Helpers, as: FormHelpers
+  alias AlertsUIWeb.Helpers.ContentFormatter
+
   alias AlertsUIWeb.UserHelpers
 
   alias Phoenix.LiveView.JS
@@ -539,6 +539,12 @@ defmodule AlertsUIWeb.ReviewModal do
     Map.get(reminder, :time, Map.get(reminder, :reminder_time))
   end
 
+  defp upcase_first_letter(string) do
+    {first_letter, rest} = String.next_grapheme(string)
+
+    String.upcase(first_letter) <> rest
+  end
+
   defp submit_with_notifications do
     assigns = %{}
 
@@ -597,7 +603,7 @@ defmodule AlertsUIWeb.ReviewModal do
           {RecurringDurationText.recurring_duration_recurrence_days(%{
             "recurrence_days" => @alert_data.recurrence_days
           })
-          |> FormHelpers.upcase_first_letter()}
+          |> upcase_first_letter()}
         </p>
         <p :if={!@closed_before_start?}>
           {RecurringDurationText.recurring_duration_time_range(

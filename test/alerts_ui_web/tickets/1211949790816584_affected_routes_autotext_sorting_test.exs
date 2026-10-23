@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.Tickets.AffectedRoutesAutotextSortingTest do
   """
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText
   alias MBTAV3API.Routes.Route
 
   # type: 1 = subway/heavy rail, 0 = light rail, 2 = commuter rail, 3 = bus, 4 = ferry

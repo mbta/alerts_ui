@@ -25,7 +25,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
   import Mock
   import Test.Support.Helpers
 
-  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+  alias AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
@@ -152,7 +152,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
     test "search term filters stop list to only matching stops", %{conn: conn} do
       with_mocks(bus_stop_closure_mocks()) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
+        view = get_to_submission_page(conn, view, "Bus", "Stop closure")
         render_async(view)
 
         # All stops should be visible before searching
@@ -185,7 +185,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
     test "lowercase and uppercase search terms return identical stop sets", %{conn: conn} do
       with_mocks(bus_stop_closure_mocks()) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
+        view = get_to_submission_page(conn, view, "Bus", "Stop closure")
         render_async(view)
 
         send_stop_search(view, "south station")
@@ -217,7 +217,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
     test "searching the same term after a different term gives consistent results", %{conn: conn} do
       with_mocks(bus_stop_closure_mocks()) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
+        view = get_to_submission_page(conn, view, "Bus", "Stop closure")
         render_async(view)
 
         # First search for "south station" — baseline
@@ -251,7 +251,7 @@ defmodule AlertsUIWeb.Tickets.StopSearchFilterConsistencyTest do
     test "searching the same term three times always returns the same set", %{conn: conn} do
       with_mocks(bus_stop_closure_mocks()) do
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Stop closure")
+        view = get_to_submission_page(conn, view, "Bus", "Stop closure")
         render_async(view)
 
         searches =

@@ -9,9 +9,9 @@ defmodule AlertsUIWeb.ViewAlertsLive do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert}
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
-  alias AlertsUIWeb.FormComponents.Helpers.{AlertData, DateTimeFormatters, DateTimeHelpers}
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.Helpers.{AlertDataBuilder, DateTimeFormatters, DateTimeHelpers}
   alias AlertsUIWeb.UserHelpers
 
   require Logger
@@ -108,7 +108,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     else
       alert_data =
         alert
-        |> AlertData.build_alert_data()
+        |> AlertDataBuilder.build_alert_data()
         |> AlertDataHelpers.normalize_effect_name()
 
       {:noreply,
@@ -385,7 +385,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     else
       alert_data =
         alert
-        |> AlertData.build_alert_data()
+        |> AlertDataBuilder.build_alert_data()
         |> AlertDataHelpers.normalize_effect_name()
 
       {:noreply,
@@ -428,16 +428,14 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def handle_event("edit_alert", %{"alert_id" => alert_id}, socket) do
     socket = assign(socket, scroll_to_top: false)
 
-    {:noreply,
-     push_navigate(socket, to: form_path_edit(socket.assigns.use_legacy_form, alert_id))}
+    {:noreply, push_navigate(socket, to: form_path_edit(alert_id))}
   end
 
   @impl true
   def handle_event("duplicate_alert", %{"alert_id" => alert_id}, socket) do
     socket = assign(socket, scroll_to_top: true)
 
-    {:noreply,
-     push_navigate(socket, to: form_path_duplicate(socket.assigns.use_legacy_form, alert_id))}
+    {:noreply, push_navigate(socket, to: form_path_duplicate(alert_id))}
   end
 
   @impl true
@@ -628,29 +626,21 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   defp order_directions(_, direction, _, _),
     do: [String.to_existing_atom(direction || "asc")]
 
-  def form_path_new(true = _use_legacy_form) do
-    "/alerts/legacy/new"
-  end
-
-  def form_path_new(_use_legacy_form) do
+  def form_path_new do
     "/alerts/new"
   end
 
-  def form_path_edit(true = _use_legacy_form, alert_id) do
-    "/alerts/legacy/edit?alert_id=#{alert_id}"
-  end
-
-  def form_path_edit(_use_legacy_form, alert_id) do
+  def form_path_edit(alert_id) do
     "/alerts/edit/#{alert_id}"
   end
 
-  def form_path_duplicate(true = _use_legacy_form, alert_id) do
-    "/alerts/legacy/duplicate?alert_id=#{alert_id}"
-  end
-
-  def form_path_duplicate(_use_legacy_form, alert_id) do
+  def form_path_duplicate(alert_id) do
     "/alerts/duplicate/#{alert_id}"
   end
+
+  def alert_is_closed(%{closed_timestamp: nil}), do: false
+  def alert_is_closed(%{closed_timestamp: _}), do: true
+  def alert_is_closed(_), do: false
 
   ### END Helpers section ###
 

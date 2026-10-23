@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
+defmodule AlertsUIWeb.CreateAlertLive.Slices.NotificationPeriodSliceTest do
   @moduledoc false
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
@@ -51,14 +51,14 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     @tag :logged_in_user
     test "renders", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
       assert render(view) =~ ~s(id="notification_period_view")
     end
 
     @tag :logged_in_user
     test "'when alert is closed' hidden when same_as_effect_period selected", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       # Default specifier (:now) shows the "When alert is closed" placeholder
       assert render(view) =~ ~s(id="closed-placeholder")
@@ -75,7 +75,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     @tag :logged_in_user
     test "start date picker appears when start_of_service selected", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       # Default specifier (:now) does not show the date picker
       refute render(view) =~ ~s(phx-feedback-for="alert_data[notification_period_start_date]")
@@ -92,7 +92,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     @tag :logged_in_user
     test "displays error if start invalid", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -108,7 +108,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     @tag :logged_in_user
     test "scheduled start time must not be in the past", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -125,7 +125,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     @tag :logged_in_user
     test "scheduled start time must be before active period start", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -160,7 +160,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
         |> DateTime.to_naive()
         |> NaiveDateTime.truncate(:second)
 
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -199,7 +199,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.Slices.NotificationPeriodSliceTest do
     test "maximum time on calendar is the effect start when creating", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       view
       |> element("form")

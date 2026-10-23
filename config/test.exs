@@ -44,8 +44,6 @@ config :laboratory,
     {:show_components_page, "Show Components Style Guide page",
      "Shows the menu link to a page showing a guide to our components"},
     {:show_stop_ids, "Show stop ids", "Show a list of selected stop ids in the form."},
-    {:use_legacy_form, "Use legacy form",
-     "When enabled, goes back to the legacy version of the form, not the new refactor"},
     {:show_bulk_download_page, "Show Commuter Rail download page", "Shows a page where you
     can download bulk Commuter Rail alerts."},
     {:show_new_bus_detours, "Show New Bus Detours", "Makes bus detours w skate available"}

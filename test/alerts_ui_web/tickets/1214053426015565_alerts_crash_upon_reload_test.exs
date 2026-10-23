@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.Tickets.AlertsCrashUponReloadTest do
   "🐛 Alerts crash upon reload"
   https://app.asana.com/1/15492006741476/project/1167196461144361/task/1214053426015565
 
-  Observed: the mono alert form crashed with "Internal server error" when the
+  Observed: the alert form crashed with "Internal server error" when the
   page was RELOADED for alerts whose effect is a 2-word effect, e.g.:
 
     * Bus • Multi-route detour   (URL: /alerts/new/bus/multi-route_detour)
@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.Tickets.AlertsCrashUponReloadTest do
     * Any systemwide alert       (URL: /alerts/new/systemwide/amber_alert)
 
   A reload re-mounts the LiveView and re-parses the `effect_name` segment from
-  the URL via `CreateAlertMonoLive.Helpers.Path.effect_from_url_name/1`. The bug
+  the URL via `CreateAlertLive.Helpers.Path.effect_from_url_name/1`. The bug
   was that the 2-word / hyphenated effect URL segment could not be reconstructed
   into a valid effect display name on the fresh mount, crashing the render.
 
@@ -34,8 +34,8 @@ defmodule AlertsUIWeb.Tickets.AlertsCrashUponReloadTest do
   import Mock
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Path, as: PathHelper
-  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  alias AlertsUIWeb.CreateAlertLive.Helpers.Path, as: PathHelper
+  alias AlertsUIWeb.Helpers.EffectsForRouteTypes
 
   # Each tuple is {route_type_segment, effect_url_segment, expected_title_fragment}.
   # All three were called out in the ticket as crashing on reload, and each has a
@@ -46,7 +46,7 @@ defmodule AlertsUIWeb.Tickets.AlertsCrashUponReloadTest do
     {"systemwide", "amber_alert", "Amber Alert"}
   ]
 
-  describe "reloading the mono form with a 2-word effect does not crash" do
+  describe "reloading the form with a 2-word effect does not crash" do
     @tag :logged_in_user
     test "the disconnected static render (hard reload) returns 200, not a 500", %{conn: conn} do
       for {route_type, effect, title_fragment} <- @reload_cases do

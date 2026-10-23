@@ -13,7 +13,7 @@ defmodule AlertsUIWeb.SharedComponents do
   import AlertsUIWeb.IconComponents
 
   alias AlertsUIWeb.CoreComponents
-  alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
+  alias AlertsUIWeb.Helpers.ContentFormatter
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
 

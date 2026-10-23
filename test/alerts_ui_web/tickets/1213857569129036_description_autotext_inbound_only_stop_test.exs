@@ -29,7 +29,7 @@ defmodule AlertsUIWeb.Tickets.DescriptionAutotextInboundOnlyStopTest do
   """
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildDescriptionText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildDescriptionText
 
   # A stop that only serves the inbound direction (has "(inbound)" in its name)
   @inbound_only_stop %{name: "Ring Rd @ Boylston St (inbound)"}

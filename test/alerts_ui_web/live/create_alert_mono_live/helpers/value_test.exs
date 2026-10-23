@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ValueTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.ValueTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Value
+  alias AlertsUIWeb.CreateAlertLive.Helpers.Value
 
   describe "blank?/1" do
     test "returns true for nil" do

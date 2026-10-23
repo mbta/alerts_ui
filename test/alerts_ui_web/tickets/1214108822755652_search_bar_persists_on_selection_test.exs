@@ -31,7 +31,7 @@ defmodule AlertsUIWeb.Tickets.SearchBarPersistsOnSelectionTest do
 
   # Parking Closure is a multi-select facility effect, the ticket's example.
   defp navigate_to_parking_closure(conn, view) do
-    get_to_submission_page_refactor(conn, view, "Facility", "Parking closure")
+    get_to_submission_page(conn, view, "Facility", "Parking closure")
   end
 
   defp type_in_filter(view, field, term) do

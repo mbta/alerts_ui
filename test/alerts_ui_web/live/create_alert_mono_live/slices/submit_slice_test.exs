@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
+defmodule AlertsUIWeb.CreateAlertLive.SubmitSliceTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
 
@@ -20,7 +20,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
 
   describe "Cancel button" do
     @tag :logged_in_user
-    test "navigates away from the mono flow when clicked", %{conn: conn} do
+    test "navigates away from the flow when clicked", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new/bus/delay")
 
       assert has_element?(view, "#cancel")
@@ -39,7 +39,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
     test "clicking review before filling out form doesn't show modal", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new/")
 
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
       render_async(view, 1000)
       open_review_modal(view)
       assert view |> element("#flash") |> render() =~ "Please fix the following errors"
@@ -64,7 +64,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         view
         |> element("form")
@@ -102,7 +102,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
         # --- Same as before ---
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         view
         |> element("form")
@@ -150,7 +150,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
         # --- Same as before ---
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         view
         |> element("form")
@@ -205,7 +205,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
       ]) do
         {:ok, view, _html} = live(conn, "/alerts/new")
 
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         view
         |> element("form")
@@ -343,7 +343,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
     test "'select alert type' button returns to previous step", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       view
       |> element("button#select-alert-type")
@@ -356,7 +356,7 @@ defmodule AlertsUIWeb.CreateAlertMonoLive.SubmitSliceTest do
     test "cancel button returns to alerts list page", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
 
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       {:ok, new_view, _} =
         view

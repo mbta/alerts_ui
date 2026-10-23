@@ -1,7 +1,7 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.ContentFormatterTest do
+defmodule AlertsUIWeb.Helpers.ContentFormatterTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
-  alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
+  alias AlertsUIWeb.Helpers.ContentFormatter
 
-  doctest AlertsUIWeb.FormComponents.Helpers.ContentFormatter
+  doctest AlertsUIWeb.Helpers.ContentFormatter
 end

@@ -1,11 +1,11 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.AlertDataTest do
+defmodule AlertsUIWeb.CreateAlertLive.AlertDataTest do
   use ExUnit.Case, async: false
   use AlertsUIWeb.ConnCase
 
   import Phoenix.LiveViewTest
 
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.FormComponents.Helpers.TimeRangeDurationText
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeDurationText
 
   describe "slices/1" do
     test "AC-1: slices/1 returns non-empty list when form is nil" do
