@@ -1,15 +1,15 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
+defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataBuilderTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.ActivePeriod
-  alias AlertsUIWeb.FormComponents.Helpers.AlertData
+  alias AlertsUIWeb.FormComponents.Helpers.AlertDataBuilder
 
   describe "build_alert_data/1" do
     test "it returns empty map given nil" do
-      assert AlertData.build_alert_data(nil) == %AlertData{}
+      assert AlertDataBuilder.build_alert_data(nil) == %AlertDataBuilder{}
     end
 
     test "works if given alert instead of alert id" do
@@ -27,7 +27,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       reminder_time_id = hd(alert.reminder_times).id
 
-      assert %AlertData{
+      assert %AlertDataBuilder{
                combination: :ACCESS,
                direction: "default",
                effect_name: "Access Issue",
@@ -42,7 +42,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],
                notification_specifier: :same_as_effect_period,
                alert_timing: :"one-time"
-             } = AlertData.build_alert_data(alert)
+             } = AlertDataBuilder.build_alert_data(alert)
     end
 
     test "works if informed entities empty" do
@@ -60,7 +60,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       reminder_id = hd(alert.reminder_times).id
 
-      assert %AlertData{
+      assert %AlertDataBuilder{
                combination: :ACCESS,
                direction: "default",
                effect_name: "Access Issue",
@@ -75,7 +75,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                reminder_times: [%{id: ^reminder_id, time: ~N[2024-09-24 20:01:00]}],
                notification_specifier: :same_as_effect_period,
                alert_timing: :"one-time"
-             } = AlertData.build_alert_data("1")
+             } = AlertDataBuilder.build_alert_data("1")
     end
 
     test "handles directions correctly" do
@@ -98,7 +98,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       reminder_time_id = hd(alert.reminder_times).id
 
-      assert %AlertData{
+      assert %AlertDataBuilder{
                combination: :RDS,
                direction: "default",
                effect_name: "Delay",
@@ -113,7 +113,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],
                notification_specifier: :same_as_effect_period,
                alert_timing: :"one-time"
-             } = AlertData.build_alert_data("1")
+             } = AlertDataBuilder.build_alert_data("1")
     end
 
     test "gets facility id correctly" do
@@ -132,7 +132,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       reminder_id = hd(alert.reminder_times).id
 
-      assert %AlertData{
+      assert %AlertDataBuilder{
                combination: :ACCESS,
                direction: "default",
                effect_name: "Bike Issue",
@@ -146,7 +146,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                reminder_times: [%{id: ^reminder_id, time: ~N[2024-09-24 20:01:00]}],
                alert_timing: :"one-time",
                notification_specifier: :same_as_effect_period
-             } = AlertData.build_alert_data("1")
+             } = AlertDataBuilder.build_alert_data("1")
     end
 
     test "gets facility id correctly for alerts with single facility" do
@@ -166,7 +166,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       reminder_id = hd(alert.reminder_times).id
 
-      assert %AlertData{
+      assert %AlertDataBuilder{
                combination: :ACCESS,
                direction: "default",
                effect_name: "Elevator Closure",
@@ -181,7 +181,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                reminder_times: [%{id: ^reminder_id, time: ~N[2024-09-24 20:01:00]}],
                alert_timing: :"one-time",
                notification_specifier: :same_as_effect_period
-             } = AlertData.build_alert_data("1")
+             } = AlertDataBuilder.build_alert_data("1")
     end
 
     test "builds alert data from alert" do
@@ -221,7 +221,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       [%{id: reminder_time_id1}, %{id: reminder_time_id2}] = alert.reminder_times
 
-      assert %AlertData{
+      assert %AlertDataBuilder{
                combination: :RDS,
                direction: "default",
                effect_name: "Delay",
@@ -251,7 +251,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                  %{id: ^reminder_time_id2, time: ~N[2024-05-02 12:11:34]}
                ],
                alert_timing: :"one-time"
-             } = AlertData.build_alert_data("1")
+             } = AlertDataBuilder.build_alert_data("1")
     end
 
     test "handles detour alert with one route" do
@@ -276,7 +276,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         primary_service_type: "3"
       })
 
-      result = AlertData.build_alert_data("1")
+      result = AlertDataBuilder.build_alert_data("1")
       assert result.single_route_id == "1"
     end
 
@@ -303,7 +303,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         primary_service_type: "3"
       })
 
-      result = AlertData.build_alert_data("1")
+      result = AlertDataBuilder.build_alert_data("1")
       assert result.single_route_id == nil
       assert result.route_ids == []
     end
@@ -330,7 +330,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         primary_service_type: "access"
       })
 
-      result = AlertData.build_alert_data("1")
+      result = AlertDataBuilder.build_alert_data("1")
       assert result.single_route_id == nil
     end
 
@@ -360,7 +360,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         original_route_selections: ["Green", "Blue"]
       })
 
-      result = AlertData.build_alert_data("1")
+      result = AlertDataBuilder.build_alert_data("1")
       assert result.route_ids == ["Green", "Blue"]
     end
 
@@ -380,7 +380,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       reminder_time_id = hd(alert.reminder_times).id
 
-      assert %AlertData{
+      assert %AlertDataBuilder{
                combination: nil,
                effect_name: "Delay",
                service_types: [3],
@@ -394,7 +394,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],
                notification_specifier: :same_as_effect_period,
                alert_timing: :"one-time"
-             } = AlertData.build_alert_data("1")
+             } = AlertDataBuilder.build_alert_data("1")
     end
 
     test "builds data for a systemwide alert affecting the subway" do
@@ -415,7 +415,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
 
       reminder_time_id = hd(alert.reminder_times).id
 
-      assert %AlertData{
+      assert %AlertDataBuilder{
                combination: nil,
                effect_name: "Delay",
                service_types: [1, 3],
@@ -429,7 +429,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
                reminder_times: [%{id: ^reminder_time_id, time: ~N[2024-09-24 20:01:00]}],
                alert_timing: :"one-time",
                notification_specifier: :same_as_effect_period
-             } = AlertData.build_alert_data("1")
+             } = AlertDataBuilder.build_alert_data("1")
     end
 
     test "handles unknown duration" do
@@ -447,7 +447,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :UNKNOWN
       })
 
-      assert AlertData.build_alert_data("1").active_period_end_specifier == "until_further_notice"
+      assert AlertDataBuilder.build_alert_data("1").active_period_end_specifier == "until_further_notice"
     end
 
     test "handles estimated duration" do
@@ -469,7 +469,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         reminder_times: []
       })
 
-      result = AlertData.build_alert_data("1")
+      result = AlertDataBuilder.build_alert_data("1")
       assert result.active_period_end_specifier == "later_today"
       assert result.active_period_end == ~N[2024-05-03 02:00:00]
       assert result.active_period_end_date == ~D[2024-05-02]
@@ -498,7 +498,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         reminder_times: []
       })
 
-      alert_data = AlertData.build_alert_data("1")
+      alert_data = AlertDataBuilder.build_alert_data("1")
       assert alert_data.active_period_end_specifier == "end_of_service"
       assert alert_data.active_period_end_date == ~D[2024-05-02]
     end
@@ -523,7 +523,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :KNOWN
       })
 
-      result = AlertData.build_alert_data("1")
+      result = AlertDataBuilder.build_alert_data("1")
       assert result.active_period_end_specifier == "custom"
       assert result.active_period_end == local_naive_from_utc(~U[2024-05-02 17:09:34Z])
     end
@@ -549,7 +549,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :KNOWN
       })
 
-      assert AlertData.build_alert_data("1").active_period_start_specifier == "start_of_service"
+      assert AlertDataBuilder.build_alert_data("1").active_period_start_specifier == "start_of_service"
     end
 
     test "handles start specifier at other time" do
@@ -572,7 +572,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         duration_certainty: :KNOWN
       })
 
-      assert AlertData.build_alert_data("1").active_period_start_specifier == "custom"
+      assert AlertDataBuilder.build_alert_data("1").active_period_start_specifier == "custom"
     end
 
     test "handles recurring alert" do
@@ -607,7 +607,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         recurring: true
       })
 
-      alert = AlertData.build_alert_data("1")
+      alert = AlertDataBuilder.build_alert_data("1")
       assert alert.alert_timing == :recurring
       assert alert.recurrence_days == ["thursday", "friday", "saturday"]
       assert alert.active_period_start_specifier == "custom"
@@ -650,7 +650,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         recurring: true
       })
 
-      alert = AlertData.build_alert_data("1")
+      alert = AlertDataBuilder.build_alert_data("1")
       assert alert.alert_timing == :recurring
       assert alert.active_period_end_date == ~D[2024-05-04]
     end
@@ -689,7 +689,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         recurring: true
       })
 
-      alert = AlertData.build_alert_data("1")
+      alert = AlertDataBuilder.build_alert_data("1")
       assert alert.alert_timing == :recurring
       assert alert.recurrence_days == ["thursday", "saturday"]
       assert alert.active_period_start_specifier == "custom"
@@ -719,7 +719,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
         reminder_times: []
       })
 
-      result = AlertData.build_alert_data("1", :duplicating)
+      result = AlertDataBuilder.build_alert_data("1", :duplicating)
 
       assert result.notification_period_end == nil
     end
@@ -760,7 +760,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       :timer.sleep(1000)
       Alerts.create_or_update_alert(new_params, seconduser, existing_alert)
 
-      alert = AlertData.build_alert_data("123", :duplicating)
+      alert = AlertDataBuilder.build_alert_data("123", :duplicating)
 
       assert alert.created_timestamp == nil
 
@@ -806,7 +806,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       :timer.sleep(1000)
       Alerts.create_or_update_alert(new_params, seconduser, existing_alert)
 
-      alert = AlertData.build_alert_data("123")
+      alert = AlertDataBuilder.build_alert_data("123")
 
       assert DateTime.to_date(alert.created_timestamp) == Date.utc_today()
 
@@ -835,7 +835,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
       :timer.sleep(1000)
       Alerts.close(existing_alert, "closed automatically", false)
 
-      alert = AlertData.build_alert_data("123")
+      alert = AlertDataBuilder.build_alert_data("123")
 
       assert DateTime.to_date(alert.created_timestamp) == Date.utc_today()
 
@@ -864,7 +864,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
     existing_alert = Alerts.get_by_alert_id("123")
     assert existing_alert.work_order_id == "123-abc"
 
-    alert_data = AlertData.build_alert_data("123", :editing)
+    alert_data = AlertDataBuilder.build_alert_data("123", :editing)
 
     assert alert_data.work_order_id == "123-abc"
   end
@@ -888,7 +888,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
     existing_alert = Alerts.get_by_alert_id("123")
     assert existing_alert.work_order_id == "123-abc"
 
-    alert_data = AlertData.build_alert_data("123", :duplicating)
+    alert_data = AlertDataBuilder.build_alert_data("123", :duplicating)
 
     assert is_nil(alert_data.work_order_id)
   end
@@ -912,7 +912,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
     existing_alert = Alerts.get_by_alert_id("123")
     assert existing_alert.skate_detour_id == 3
 
-    alert_data = AlertData.build_alert_data("123", :editing)
+    alert_data = AlertDataBuilder.build_alert_data("123", :editing)
 
     assert alert_data.skate_detour_id == 3
   end
@@ -936,7 +936,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataTest do
     existing_alert = Alerts.get_by_alert_id("123")
     assert existing_alert.skate_detour_id == 3
 
-    alert_data = AlertData.build_alert_data("123", :duplicating)
+    alert_data = AlertDataBuilder.build_alert_data("123", :duplicating)
 
     assert is_nil(alert_data.skate_detour_id)
   end

@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.CreateAlertLive.AlertData do
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers
   alias AlertsUIWeb.CreateAlertLive.Slice
-  alias AlertsUIWeb.FormComponents.Helpers.AlertData, as: OldAlertData
+  alias AlertsUIWeb.FormComponents.Helpers.AlertDataBuilder
 
   alias AlertsUIWeb.CreateAlertLive.Slices.{
     AlertDetailsSlice,
@@ -249,7 +249,7 @@ defmodule AlertsUIWeb.CreateAlertLive.AlertData do
     base_params =
       alert
       |> Repo.preload([:informed_entity, :reminder_times])
-      |> OldAlertData.build_alert_data(form_type)
+      |> AlertDataBuilder.build_alert_data(form_type)
       |> Map.from_struct()
       |> Map.put(:alert_id, alert.alert_id)
       |> AlertDataHelpers.atomize_fields()

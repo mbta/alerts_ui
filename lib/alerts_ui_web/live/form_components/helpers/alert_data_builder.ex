@@ -1,4 +1,4 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AlertData do
+defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataBuilder do
   @moduledoc """
   Builds alert data from existing alert
   Used to populate form when editing an alert

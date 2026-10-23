@@ -10,7 +10,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert}
   alias AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers
-  alias AlertsUIWeb.FormComponents.Helpers.{AlertData, DateTimeFormatters, DateTimeHelpers}
+  alias AlertsUIWeb.FormComponents.Helpers.{AlertDataBuilder, DateTimeFormatters, DateTimeHelpers}
   alias AlertsUIWeb.FormComponents.Helpers.AutoText.BuildAutoText
   alias AlertsUIWeb.UserHelpers
 
@@ -108,7 +108,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     else
       alert_data =
         alert
-        |> AlertData.build_alert_data()
+        |> AlertDataBuilder.build_alert_data()
         |> AlertDataHelpers.normalize_effect_name()
 
       {:noreply,
@@ -385,7 +385,7 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     else
       alert_data =
         alert
-        |> AlertData.build_alert_data()
+        |> AlertDataBuilder.build_alert_data()
         |> AlertDataHelpers.normalize_effect_name()
 
       {:noreply,
