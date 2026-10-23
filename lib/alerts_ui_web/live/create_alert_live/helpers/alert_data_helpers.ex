@@ -2,8 +2,8 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers do
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.Helpers.ContentFormatter
   alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
+  alias AlertsUIWeb.Helpers.ContentFormatter
   alias Phoenix.HTML.Form
 
   import Ecto.Changeset, only: [get_field: 2]

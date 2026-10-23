@@ -12,9 +12,9 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
   alias AlertsUI.SkateDetours.GetDetours
   alias AlertsUIWeb.CreateAlertHelpers
   alias AlertsUIWeb.CreateAlertLive.AlertData
-  alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
   alias AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter
+  alias AlertsUIWeb.CreateAlertLive.Slice
 
   alias Ecto.Changeset
 

@@ -8,12 +8,12 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
   import Ecto.Changeset
 
   alias AlertsUI.Models.{Alert, Cause, SeverityLevel}
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.{AlertDataToAutoText, Templates}
+  alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
   alias AlertsUIWeb.CreateAlertLive.Helpers.Path, as: EffectHelper
   alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice
-  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUIWeb.Helpers.DateTimeHelpers
-  alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
   alias MBTAV3API.Stops.Stop
   alias Phoenix.LiveView.AsyncResult
 

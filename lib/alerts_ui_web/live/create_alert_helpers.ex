@@ -1,57 +1,14 @@
-defmodule AlertsUIWeb.Step do
-  @moduledoc "Describe a step in the multi-step form and where it can go."
-
-  @doc """
-  Returns list of atoms allowed in alert lifecycle field of alert
-
-  ## Examples
-      iex> %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
-      %AlertsUIWeb.Step{name: "example", previous: "cool", next: "bean", label: "hi"}
-  """
-  defstruct [:name, :previous, :next, :label]
-
-  @type t :: %__MODULE__{
-          name: String.t(),
-          previous: String.t() | nil,
-          next: String.t() | nil,
-          label: String.t()
-        }
-end
-
 defmodule AlertsUIWeb.CreateAlertHelpers do
   @moduledoc "API functions for Create Alert."
   use AlertsUIWeb, :live_view
 
-  alias AlertsUI.AlertBuilder
-  alias AlertsUI.Alerts
-  alias AlertsUI.DBContexts.Users
-  alias AlertsUI.Models.{ActivePeriod, Alert, Effect, EnhancedSchedule, InformedEntity}
-  alias AlertsUI.Routes
-
-  alias AlertsUIWeb.{
-    AccessAffectedService,
-    AffectedService,
-    AlertDetails,
-    Delivery,
-    StopRouteAffectedService,
-    Submit,
-    SystemwideAffectedService,
-    TimeRange
-  }
-
-  alias AlertsUIWeb.Helpers.{
-    AlertDataBuilder,
-    EffectsForRouteTypes
-  }
-
   alias AlertsUIWeb.CreateAlertLive.Helpers.{
-    ErrorFormatter,
-    GetKeyForModeEffect,
     GreenLine,
     SelectFormatter
   }
 
-  alias AlertsUIWeb.Step
+  alias AlertsUI.Models.{ActivePeriod, Effect, EnhancedSchedule, InformedEntity}
+  alias AlertsUI.Routes
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
@@ -59,87 +16,6 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
-
-  @steps [
-    %Step{
-      name: "route_type_and_effect",
-      previous: nil,
-      next: "details",
-      label: "Select Alert Type"
-    },
-    %Step{
-      name: "details",
-      previous: "route_type_and_effect",
-      next: "preview",
-      label: "Alert Details"
-    },
-    %Step{name: "preview", previous: nil, next: nil, label: "Review and Submit"}
-  ]
-
-  @impl true
-  def mount(params, session, socket) do
-    socket = socket |> assign_new(:return_to, fn -> session["return_to"] end)
-
-    alert_id = Map.get(params, "alert_id")
-    existing_alert_or_nil = alert_id && Alerts.get_by_alert_id(alert_id)
-
-    form_type = form_type_from_socket(socket)
-    form_title = form_title_from_type(form_type)
-    alert_data = alert_data_on_mount(params, form_type, existing_alert_or_nil)
-
-    {
-      :ok,
-      assign(socket, %{
-        page_title: "#{form_title} an Alert",
-        progress: progress_on_mount(params, form_type, @steps),
-        steps: @steps,
-        alert_data: alert_data,
-        combination: Map.get(alert_data, :combination),
-        selected_routes: [],
-        selected_stops: [],
-        selected_schedules: [],
-        selected_facilities: [],
-        selected_route_type: route_type_from_params!(params),
-        selected_effect: effect_name_from_params!(params),
-        alert_uuid: nil,
-        alert_id: alert_id,
-        form_type: form_type,
-        errors: %{},
-        submitted: false,
-        obsolete_ids: %{},
-        obsolete_id_text: [],
-        remounted: remounting?(socket),
-        debug_tag: :crypto.strong_rand_bytes(8) |> Base.encode64()
-      })
-    }
-  end
-
-  defp form_type_from_socket(socket) do
-    case socket.assigns.live_action do
-      :edit -> :editing
-      :duplicate -> :duplicating
-      _ -> :creating
-    end
-  end
-
-  defp form_title_from_type(title) do
-    case title do
-      :editing -> "Edit"
-      :duplicating -> "Duplicating"
-      :creating -> "Create"
-    end
-  end
-
-  defp progress_on_mount(params, form_type, [first_step, second_step | _]) do
-    route_type = Map.get(params, "route_type")
-    effect = Map.get(params, "effect")
-
-    if form_type == :creating && (is_nil(route_type) || is_nil(effect)) do
-      first_step
-    else
-      second_step
-    end
-  end
 
   def effect_from_url_name(nil), do: nil
 
@@ -187,112 +63,6 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
           raise ArgumentError, "no such route type #{route_type}"
         end
     end
-  end
-
-  defp alert_data_on_mount(params, form_type, existing_alert_or_nil) do
-    case existing_alert_or_nil do
-      nil ->
-        assign_from_params(%{}, params)
-
-      alert ->
-        alert
-        |> AlertDataBuilder.build_alert_data(form_type)
-        |> Map.from_struct()
-    end
-    |> adjust_by_form_type(form_type)
-  end
-
-  @spec adjust_by_form_type(AlertData.t(), atom()) :: AlertData.t()
-
-  defp adjust_by_form_type(alert_data, :duplicating) do
-    if AlertsUI.ActiveStatus.get_alert_status(alert_data) == :past do
-      now = DateTime.utc_now() |> DateTime.shift_zone!("America/New_York")
-
-      active_period_end_specifier =
-        if Map.get(alert_data, :alert_timing, :"one-time") == :"one-time" do
-          :later_today
-        else
-          :until_further_notice
-        end
-
-      Map.merge(alert_data, %{
-        start_datetime: now,
-        end_datetime: nil,
-        active_period_start_specifier: :now,
-        active_period_start: now,
-        active_period_start_date: now |> DateTime.to_date(),
-        active_period_end_specifier: active_period_end_specifier,
-        active_period_end: nil,
-        active_period_end_date: nil,
-        notification_specifier: :now,
-        notification_period_start: now
-      })
-    else
-      alert_data
-    end
-    |> Map.put(:reminder_times, [])
-  end
-
-  defp adjust_by_form_type(alert_data, _), do: alert_data
-
-  defp assign_from_params(alert_data, params) do
-    effect_name = effect_name_from_params!(params)
-
-    route_type_mapping =
-      case route_type_from_params!(params) do
-        nil ->
-          nil
-
-        route_type ->
-          mapping =
-            route_type
-            |> String.to_existing_atom()
-            |> InformedEntity.route_type_mapping()
-
-          if is_nil(mapping) && effect_name in EffectsForRouteTypes.list_effects(:facility) do
-            :facility
-          else
-            mapping
-          end
-      end
-
-    combination =
-      GetKeyForModeEffect.get_value_of_key(
-        :combination,
-        route_type_mapping,
-        effect_name
-      )
-
-    alert_data
-    |> Map.put(:route_type, Map.get(alert_data, :route_type, route_type_mapping))
-    |> Map.put(:effect_name, Map.get(alert_data, :effect, effect_name))
-    |> Map.put(:combination, Map.get(alert_data, :combination, combination))
-  end
-
-  @impl true
-  def handle_params(_params, _url, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("move_progress", %{"value" => "route_type_and_effect"}, socket) do
-    {:noreply,
-     assign(socket, progress: get_step_by_name("route_type_and_effect"), alert_data: %{})}
-  end
-
-  @impl true
-  def handle_event("move_progress", %{"value" => name}, socket) do
-    {:noreply, assign(socket, :progress, get_step_by_name(name))}
-  end
-
-  @impl true
-  def handle_event("accepted_gtfs_modal", _params, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("cancelled_gtfs_modal", _params, socket) do
-    {:noreply, socket |> redirect(to: return_to(socket.assigns.return_to || "/"))}
   end
 
   def get_routes([4]) do
@@ -559,148 +329,6 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
     {:noreply, socket}
   end
 
-  @impl true
-  def handle_info({:add_errors, errors, name}, socket) do
-    updated_errors = socket.assigns.errors |> Map.put(name, errors)
-    {:noreply, assign(socket, errors: updated_errors)}
-  end
-
-  @impl true
-  def handle_info({:section_completed, changeset}, socket) do
-    assigns =
-      %{
-        alert_data:
-          Map.merge(
-            socket.assigns.alert_data,
-            changeset
-            |> Map.from_struct()
-          )
-      }
-
-    {:noreply, assign(socket, assigns)}
-  end
-
-  @impl true
-  def handle_info({:step_completed, changes}, socket) do
-    alert_data = Map.merge(socket.assigns.alert_data, changes |> Map.from_struct())
-    route_type = Map.get(alert_data, :route_type)
-    effect_name = Map.get(alert_data, :effect_name)
-
-    route_type =
-      if is_nil(route_type) and
-           effect_name in EffectsForRouteTypes.list_effects(:facility) do
-        :facility
-      else
-        route_type
-      end
-
-    # any values put in alert data put here will be read in upon creation but not edit (since this step is only reached
-    # when going to the second page). this makes it a good place to read default values from our config.
-    combination = GetKeyForModeEffect.get_value_of_key(:combination, route_type, effect_name)
-
-    default_severity =
-      GetKeyForModeEffect.get_value_of_key(:default_severity, route_type, effect_name)
-
-    default_cause =
-      GetKeyForModeEffect.get_value_of_key(:default_cause, route_type, effect_name)
-
-    notification_toggle =
-      GetKeyForModeEffect.get_value_of_key(
-        :send_push_notification_on_create,
-        route_type,
-        effect_name
-      )
-
-    assigns = %{
-      progress: get_step_by_name(socket.assigns.progress.next),
-      alert_data:
-        Map.merge(alert_data, %{
-          combination: combination,
-          severity: default_severity,
-          cause_detail: default_cause,
-          notification_toggle: notification_toggle
-        }),
-      combination: combination,
-      selected_schedules: nil,
-      selected_facilities: nil,
-      selected_routes: nil,
-      selected_stops: nil,
-      errors: %{}
-    }
-
-    {:noreply, assign(socket, assigns)}
-  end
-
-  def handle_info(:show_errors, socket) do
-    errors = Map.values(socket.assigns.errors) |> List.flatten()
-
-    socket =
-      if Enum.empty?(errors) do
-        send_update(Submit, id: "submit", show: true)
-        socket
-      else
-        formatted_errors =
-          errors
-          |> Enum.map(fn {_title, {message, _error}} -> "#{message}" end)
-          |> Enum.uniq()
-          |> Enum.join(";")
-
-        display_errors(socket, formatted_errors)
-      end
-
-    {:noreply, socket}
-  end
-
-  def handle_info(:create_alert, socket) do
-    {:noreply, create_alert(socket)}
-  end
-
-  defp create_alert(socket) do
-    form_type = socket.assigns.form_type
-
-    user = Users.create_or_update_user_from_session(socket.assigns.current_user)
-
-    alert_data = AlertBuilder.build_alert(socket.assigns.alert_data, socket.assigns.combination)
-
-    existing_alert =
-      if is_nil(socket.assigns.alert_id) || form_type == :duplicating do
-        %Alert{}
-      else
-        Alerts.get_by_alert_id(socket.assigns.alert_id)
-      end
-
-    alert =
-      alert_data
-      |> Alerts.create_or_update_alert(user, existing_alert)
-      |> case do
-        {:ok, alert} ->
-          alert_id =
-            alert.id
-            |> Alerts.get_by_id()
-            |> Map.get(:alert_id)
-
-          socket
-          |> put_flash(:info, flash_text(socket.assigns.alert_id, alert_id, form_type))
-          |> redirect(to: return_to(socket.assigns.return_to || "/"))
-
-        {:error, result} ->
-          errors =
-            result
-            |> Alerts.parse_changeset_errors()
-            |> format_errors(socket.assigns.combination)
-
-          display_errors(socket, errors)
-      end
-
-    Phoenix.PubSub.broadcast(
-      AlertsUI.PubSub,
-      "alerts",
-      {:alerts_updated}
-    )
-
-    alert
-  end
-
   def return_to(return_to_value) do
     uri = URI.parse(return_to_value)
 
@@ -709,29 +337,6 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
     else
       "/"
     end
-  end
-
-  defp flash_text(nil, alert_id, _form_type), do: "New alert ##{alert_id} created"
-
-  defp flash_text(assigns_alert_id, alert_id, :duplicating),
-    do: "Alert ##{alert_id} duplicated from ##{assigns_alert_id}"
-
-  defp flash_text(_assigns_alert_id, alert_id, _form_type), do: "Alert ##{alert_id} updated"
-
-  defp display_errors(socket, errors) do
-    [
-      {choose_affected_service_component(socket.assigns.combination), "affected_service"},
-      {TimeRange, "time_range"},
-      {AlertDetails, "alert_details"},
-      {Delivery, "delivery"}
-    ]
-    |> Enum.each(fn {module_name, id} -> send_update(module_name, id: id, submitted: true) end)
-
-    socket
-    |> clear_flash
-    |> push_event("scroll_to_top", %{})
-    |> put_flash(:error, errors)
-    |> put_flash(:title, "Please fix the following errors:")
   end
 
   @spec directions_from_selection(String.t() | nil) :: [Trip.direction_id_t()]
@@ -745,17 +350,6 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
     do: put_in(opts[:direction_id], single_direction_id)
 
   defp direction_option(opts, _both_directions), do: opts
-
-  defp format_errors(errors, combination) do
-    errors
-    |> ErrorFormatter.parse_field_errors(combination)
-    |> Enum.uniq()
-    |> Enum.map_join("; ", fn {_title, {message, _error}} -> "#{message}" end)
-  end
-
-  defp get_step_by_name(name) do
-    Enum.find(@steps, &(&1.name == name))
-  end
 
   @spec maybe_include_virtual_green_line([Route.t()]) :: [Route.t()]
   defp maybe_include_virtual_green_line(routes) do
@@ -818,15 +412,6 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
   defp map_direction_names_to_stops(stops, direction) do
     direction_word = if direction == 0, do: "outbound", else: "inbound"
     Enum.map(stops, fn stop -> Map.put(stop, :name, stop.name <> " (#{direction_word})") end)
-  end
-
-  defp choose_affected_service_component(combination) do
-    case combination do
-      :SR -> StopRouteAffectedService
-      :ACCESS -> AccessAffectedService
-      nil -> SystemwideAffectedService
-      _ -> AffectedService
-    end
   end
 
   def filter_out_old_trips(schedules, current_time \\ DateTime.utc_now()) do

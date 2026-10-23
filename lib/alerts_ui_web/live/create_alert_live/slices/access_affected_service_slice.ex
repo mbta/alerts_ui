@@ -7,8 +7,8 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice do
 
   alias AlertsUIWeb.CreateAlertHelpers
   alias AlertsUIWeb.CreateAlertLive.AlertData
-  alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter
+  alias AlertsUIWeb.CreateAlertLive.Slice
 
   import AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers,
     only: [get_single_facility_effect_names: 0, humanize_effect_name: 1, facility_types: 1]
