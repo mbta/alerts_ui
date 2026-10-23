@@ -1,9 +1,7 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers do
+defmodule AlertsUIWeb.Helpers.DateTimeHelpers do
   @moduledoc """
   Utility functions for manipulating / interpreting dates and times.
   """
-
-  # TODO general helper
 
   alias AlertsUI.ActivePeriodBuilder
   alias AlertsUI.Models.ActivePeriod

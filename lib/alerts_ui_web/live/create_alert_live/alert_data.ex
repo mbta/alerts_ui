@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.CreateAlertLive.AlertData do
   alias AlertsUIWeb.CreateAlertLive
   alias AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers
   alias AlertsUIWeb.CreateAlertLive.Slice
-  alias AlertsUIWeb.FormComponents.Helpers.AlertDataBuilder
+  alias AlertsUIWeb.Helpers.AlertDataBuilder
 
   alias AlertsUIWeb.CreateAlertLive.Slices.{
     AlertDetailsSlice,

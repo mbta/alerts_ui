@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
   alias AlertsUIWeb.CreateAlertLive.Slice
   alias AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice
   alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.{AlertDataToAutoText, Templates}
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+  alias AlertsUIWeb.Helpers.DateTimeHelpers
   alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
   alias MBTAV3API.Stops.Stop
   alias Phoenix.LiveView.AsyncResult
@@ -55,7 +55,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
     alias AlertsUI.Models.Alert
     alias AlertsUIWeb.CreateAlertLive.Helpers.Validation
     alias AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice
-    alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+    alias AlertsUIWeb.Helpers.DateTimeHelpers
     alias MBTAV3API.Stops.Stop
     alias Phoenix.LiveView.AsyncResult
 

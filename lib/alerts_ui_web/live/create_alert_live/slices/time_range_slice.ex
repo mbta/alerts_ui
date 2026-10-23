@@ -13,7 +13,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
   alias AlertsUIWeb.CreateAlertLive.Helpers.DurationText
   alias AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeSliceGetters, as: TimeGetters
   alias AlertsUIWeb.CreateAlertLive.Slice
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+  alias AlertsUIWeb.Helpers.DateTimeHelpers
   alias AlertsUIWeb.TripEndWarningModal
   alias Phoenix.LiveView.AsyncResult
 

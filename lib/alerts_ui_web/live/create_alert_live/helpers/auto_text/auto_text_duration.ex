@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AutoTextDuration do
   """
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+  alias AlertsUIWeb.Helpers.DateTimeHelpers
   alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
 
   @spec build_duration_text(BuildAutoText.t()) :: String.t()

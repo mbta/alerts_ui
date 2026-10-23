@@ -1,13 +1,11 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters do
+defmodule AlertsUIWeb.Helpers.DateTimeFormatters do
   @moduledoc """
   Utility functions for formatting dates and times.
   """
 
-  # TODO general helper
-
   alias AlertsUI.Helpers.DateTime, as: DTHelpers
   alias AlertsUI.Models.ActivePeriod
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+  alias AlertsUIWeb.Helpers.DateTimeHelpers
 
   @one_minute_in_seconds 60
   @one_hour_in_seconds @one_minute_in_seconds * 60

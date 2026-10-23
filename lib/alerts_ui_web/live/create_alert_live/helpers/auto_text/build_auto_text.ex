@@ -4,8 +4,8 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText do
   """
   alias AlertsUI.Models.{EnhancedSchedule, InformedEntity, SeverityLevel}
   alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AutoTextDuration
-  alias AlertsUIWeb.FormComponents.Helpers.{ContentFormatter, DateTimeHelpers}
   alias AlertsUIWeb.CreateAlertLive.Helpers.{SelectFormatter}
+  alias AlertsUIWeb.Helpers.{ContentFormatter, DateTimeHelpers}
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Stop

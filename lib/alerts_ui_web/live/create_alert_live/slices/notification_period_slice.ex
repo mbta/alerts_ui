@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.NotificationPeriodSlice do
 
   alias AlertsUI.Models.ActivePeriod
   alias AlertsUIWeb.CreateAlertLive.Slice
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+  alias AlertsUIWeb.Helpers.DateTimeHelpers
   alias Phoenix.HTML.Form
 
   use AlertsUIWeb, :html

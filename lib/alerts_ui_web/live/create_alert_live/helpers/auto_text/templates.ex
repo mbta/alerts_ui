@@ -17,7 +17,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.Templates do
     EffectsForRouteTypes
   }
 
-  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  alias AlertsUIWeb.Helpers.EffectsForRouteTypes
 
   @systemwide_effects EffectsForRouteTypes.list_effects(:systemwide)
 

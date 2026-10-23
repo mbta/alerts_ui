@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSliceTest do
   import Test.Support.Helpers
   alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
+  alias AlertsUIWeb.Helpers.DateTimeFormatters
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.RoutePatterns.Repo, as: RoutePatternsRepo

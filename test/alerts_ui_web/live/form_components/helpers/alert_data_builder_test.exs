@@ -1,11 +1,11 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataBuilderTest do
+defmodule AlertsUIWeb.Helpers.AlertDataBuilderTest do
   @moduledoc false
   use AlertsUIWeb.ConnCase
   import AlertsUI.Support.Factory
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.ActivePeriod
-  alias AlertsUIWeb.FormComponents.Helpers.AlertDataBuilder
+  alias AlertsUIWeb.Helpers.AlertDataBuilder
 
   describe "build_alert_data/1" do
     test "it returns empty map given nil" do
@@ -447,7 +447,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataBuilderTest do
         duration_certainty: :UNKNOWN
       })
 
-      assert AlertDataBuilder.build_alert_data("1").active_period_end_specifier == "until_further_notice"
+      assert AlertDataBuilder.build_alert_data("1").active_period_end_specifier ==
+               "until_further_notice"
     end
 
     test "handles estimated duration" do
@@ -549,7 +550,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataBuilderTest do
         duration_certainty: :KNOWN
       })
 
-      assert AlertDataBuilder.build_alert_data("1").active_period_start_specifier == "start_of_service"
+      assert AlertDataBuilder.build_alert_data("1").active_period_start_specifier ==
+               "start_of_service"
     end
 
     test "handles start specifier at other time" do

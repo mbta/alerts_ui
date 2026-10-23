@@ -1,11 +1,9 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.AlertDataBuilder do
+defmodule AlertsUIWeb.Helpers.AlertDataBuilder do
   @moduledoc """
   Builds alert data from existing alert
   Used to populate form when editing an alert
   Can take an Alert struct or an alert_id
   """
-
-  #TODO quite a general helper
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect}

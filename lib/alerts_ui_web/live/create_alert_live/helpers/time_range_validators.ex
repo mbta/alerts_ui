@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeValidators do
   period constraints are satisfied.
   """
 
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+  alias AlertsUIWeb.Helpers.DateTimeHelpers
 
   import Ecto.Changeset
 

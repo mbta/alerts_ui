@@ -8,7 +8,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoTextTest do
   alias MBTAV3API.Schedules.Trip
   alias MBTAV3API.Stops.Stop
 
-  @now AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers.current_time()
+  @now AlertsUIWeb.Helpers.DateTimeHelpers.current_time()
   @one_hour_from_now NaiveDateTime.add(@now, 1, :hour)
 
   @stop_1 %Stop{id: "place-lech", name: "Lechmere"}

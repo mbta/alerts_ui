@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter do
 
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUI.Models.SkateDetour
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
+  alias AlertsUIWeb.Helpers.DateTimeFormatters
   alias MBTAV3API.Facilities.Facility
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Trip

@@ -4,7 +4,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.Path do
   """
 
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  alias AlertsUIWeb.Helpers.EffectsForRouteTypes
   alias Phoenix.HTML.Form
   alias Phoenix.LiveView.Socket
 

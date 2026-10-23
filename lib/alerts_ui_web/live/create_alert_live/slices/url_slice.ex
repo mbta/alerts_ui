@@ -14,7 +14,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.UrlSlice do
 
   import Ecto.Changeset, only: [cast: 3]
 
-  import AlertsUIWeb.FormComponents.Helpers.ContentFormatter,
+  import AlertsUIWeb.Helpers.ContentFormatter,
     only: [route_atom_to_string: 1]
 
   import AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect,

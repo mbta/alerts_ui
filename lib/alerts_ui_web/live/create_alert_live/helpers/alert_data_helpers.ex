@@ -2,7 +2,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers do
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Alert
   alias AlertsUI.Models.InformedEntity
-  alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
+  alias AlertsUIWeb.Helpers.ContentFormatter
   alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
   alias Phoenix.HTML.Form
 

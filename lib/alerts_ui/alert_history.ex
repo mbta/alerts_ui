@@ -7,7 +7,7 @@ defmodule AlertsUI.AlertHistory do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{Alert, SeverityLevel}
-  alias AlertsUIWeb.FormComponents.Helpers.ContentFormatter
+  alias AlertsUIWeb.Helpers.ContentFormatter
 
   @history_keys [
     :alert_id,

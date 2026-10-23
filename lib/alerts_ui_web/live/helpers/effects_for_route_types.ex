@@ -1,9 +1,7 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes do
+defmodule AlertsUIWeb.Helpers.EffectsForRouteTypes do
   @moduledoc """
   associates route types with their subset of effects
   """
-
-  #TODO general helper
   alias AlertsUI.Configs.ModeEffect
   alias AlertsUI.Models.Effect
 

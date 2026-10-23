@@ -10,8 +10,8 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   alias AlertsUI.Alerts
   alias AlertsUI.Models.{ActivePeriod, Alert}
   alias AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers
-  alias AlertsUIWeb.FormComponents.Helpers.{AlertDataBuilder, DateTimeFormatters, DateTimeHelpers}
   alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText
+  alias AlertsUIWeb.Helpers.{AlertDataBuilder, DateTimeFormatters, DateTimeHelpers}
   alias AlertsUIWeb.UserHelpers
 
   require Logger
@@ -637,6 +637,10 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   def form_path_duplicate(alert_id) do
     "/alerts/duplicate/#{alert_id}"
   end
+
+  def alert_is_closed(%{closed_timestamp: nil}), do: false
+  def alert_is_closed(%{closed_timestamp: _}), do: true
+  def alert_is_closed(_), do: false
 
   ### END Helpers section ###
 

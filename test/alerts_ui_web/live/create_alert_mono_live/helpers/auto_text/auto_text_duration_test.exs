@@ -5,7 +5,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoTextDurationTest
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AutoTextDuration
   alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers
+  alias AlertsUIWeb.Helpers.DateTimeHelpers
 
   @schedule_1 %EnhancedSchedule{
     departure_time: ~U[2024-02-21 14:01:00.00Z]

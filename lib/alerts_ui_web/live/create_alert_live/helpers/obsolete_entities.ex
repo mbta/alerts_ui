@@ -3,8 +3,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.ObsoleteEntities do
   extracted shared functions for processing obsolete entities inside async handlers
   """
 
-  # TODO possibly remove?
-
   @spec send_obsolete_ids?(map(), list()) :: boolean()
   def send_obsolete_ids?(obsolete_ids, required_fields) do
     obsolete_ids_found = Enum.any?(obsolete_ids, fn {_k, v} -> !Enum.empty?(v) end)

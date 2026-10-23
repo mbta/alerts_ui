@@ -5,7 +5,7 @@ defmodule AlertsUI.Models.InformedEntity do
   use AlertsUI.Schema
   import Ecto.Changeset
   alias AlertsUI.Models.{Activity, Alert, TripDescriptor}
-  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  alias AlertsUIWeb.Helpers.EffectsForRouteTypes
   alias MBTAV3API.Routes.Route
 
   @facility_activities [

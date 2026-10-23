@@ -1,9 +1,7 @@
-defmodule AlertsUIWeb.FormComponents.Helpers.ContentFormatter do
+defmodule AlertsUIWeb.Helpers.ContentFormatter do
   @moduledoc """
     various formatters for webpage content
   """
-
-  # TODO general helper
 
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive.Helpers.ServiceEffectCombinations

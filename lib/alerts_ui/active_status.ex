@@ -4,7 +4,7 @@ defmodule AlertsUI.ActiveStatus do
   """
 
   alias AlertsUI.Models.Alert
-  alias AlertsUIWeb.FormComponents.Helpers.DateTimeHelpers, as: DTHelpers
+  alias AlertsUIWeb.Helpers.DateTimeHelpers, as: DTHelpers
 
   @type status :: :published_current | :published_upcoming | :future | :past
 

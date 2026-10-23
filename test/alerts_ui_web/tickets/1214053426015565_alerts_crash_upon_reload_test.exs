@@ -35,7 +35,7 @@ defmodule AlertsUIWeb.Tickets.AlertsCrashUponReloadTest do
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
 
   alias AlertsUIWeb.CreateAlertLive.Helpers.Path, as: PathHelper
-  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  alias AlertsUIWeb.Helpers.EffectsForRouteTypes
 
   # Each tuple is {route_type_segment, effect_url_segment, expected_title_fragment}.
   # All three were called out in the ticket as crashing on reload, and each has a

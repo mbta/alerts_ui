@@ -28,7 +28,7 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
   alias AlertsUI.Models.{ActivePeriod, Alert, Effect, EnhancedSchedule, InformedEntity}
   alias AlertsUI.Routes
 
-  alias AlertsUIWeb.FormComponents.{
+  alias AlertsUIWeb.{
     AccessAffectedService,
     AffectedService,
     AlertDetails,
@@ -39,7 +39,7 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
     TimeRange
   }
 
-  alias AlertsUIWeb.FormComponents.Helpers.{
+  alias AlertsUIWeb.Helpers.{
     AlertDataBuilder,
     EffectsForRouteTypes
   }
