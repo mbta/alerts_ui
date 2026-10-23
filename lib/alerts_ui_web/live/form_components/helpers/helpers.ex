@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.FormComponents.Helpers.Helpers do
   @moduledoc """
     Miscellaneous shared functions for AlertsUIWeb
   """
+  #TODO general helper
 
   def async_available?(assigns, key) do
     Map.get(assigns, key) && Map.get(assigns[key], :result) && assigns[key].ok? &&

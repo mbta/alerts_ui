@@ -3,6 +3,8 @@ defmodule AlertsUIWeb.FormComponents.Helpers.ContentFormatter do
     various formatters for webpage content
   """
 
+  #TODO general helper
+
   alias AlertsUI.Models.InformedEntity
   alias AlertsUIWeb.CreateAlertLive.Helpers.ServiceEffectCombinations
 
