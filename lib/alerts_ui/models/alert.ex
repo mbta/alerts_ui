@@ -87,7 +87,8 @@ defmodule AlertsUI.Models.Alert do
   skate_detour_id
   source
   recurring
-  can_close_automatically)a
+  trapeze_autoclosable
+  skate_autoclosable)a
 
   @cause Cause.causes()
   @effect Effect.effects()
@@ -103,7 +104,8 @@ defmodule AlertsUI.Models.Alert do
           alert_id: String.t(),
           alert_lifecycle: atom() | nil,
           banner_text: String.t() | nil,
-          can_close_automatically: boolean(),
+          trapeze_autoclosable: boolean(),
+          skate_autoclosable: boolean(),
           cause: atom() | nil,
           cause_detail: String.t() | nil,
           closed_timestamp: DateTime.t() | nil,
@@ -238,7 +240,8 @@ defmodule AlertsUI.Models.Alert do
     has_many :active_period, ActivePeriod, on_replace: :delete_if_exists
     field :active_period_start, :utc_datetime
     field :active_period_end, :utc_datetime
-    field :can_close_automatically, :boolean, default: false
+    field :trapeze_autoclosable, :boolean, default: false
+    field :skate_autoclosable, :boolean, default: false
     field :image_url, :string
     field :image_alternative_text, :string
     field :tts_header_text, :string
@@ -275,7 +278,11 @@ defmodule AlertsUI.Models.Alert do
   def changeset(%__MODULE__{} = alert, params, options \\ []) do
     alert
     |> cast(params, @permitted_fields)
-    |> enforce_defaults(source: :ALERTS_MANAGER, can_close_automatically: false)
+    |> enforce_defaults(
+      source: :ALERTS_MANAGER,
+      trapeze_autoclosable: false,
+      skate_autoclosable: false
+    )
     |> cast_assoc(:reminder_times, required: false, with: &ReminderTime.changeset/2)
     |> remove_lingering_recurrence_values()
     |> validate_recurrence_days(options)

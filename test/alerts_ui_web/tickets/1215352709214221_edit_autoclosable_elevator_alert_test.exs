@@ -6,7 +6,7 @@ defmodule AlertsUIWeb.Tickets.EditAutoclosableElevatorAlertTest do
 
   Bug: editing an imported Trapeze elevator/escalator alert (whose end is "When work order
   is closed") and submitting dropped its auto-close flag, because `enforce_defaults` reset
-  `can_close_automatically` back to its schema default whenever the submitted value matched
+  `trapeze_autoclosable` back to its schema default whenever the submitted value matched
   the existing one (`get_change` is nil for unchanged fields).
   """
   use ExUnit.Case, async: false
@@ -69,7 +69,7 @@ defmodule AlertsUIWeb.Tickets.EditAutoclosableElevatorAlertTest do
             effect_detail: "ESCALATOR_CLOSURE",
             effect_name: "Escalator Closure",
             primary_service_type: "access",
-            can_close_automatically: true,
+            trapeze_autoclosable: true,
             duration_certainty: :UNKNOWN,
             active_period_start: DateTime.to_naive(now_et),
             active_period_end: nil,
@@ -96,7 +96,7 @@ defmodule AlertsUIWeb.Tickets.EditAutoclosableElevatorAlertTest do
       assert is_nil(updated.active_period_end),
              "an auto-closable alert should persist with no end time"
 
-      assert updated.can_close_automatically,
+      assert updated.trapeze_autoclosable,
              "an auto-closable alert should stay auto-closable after editing"
     end
   end

@@ -445,7 +445,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
-    test "autoselects start time of 'now' and end time of 'later_today' when skate detour with no end selected",
+    test "autoselects start time of 'now' and end time of 'when_skate_detour_is_closed' when skate detour selected",
          %{conn: conn} do
       with_mocks([
         {RoutesRepo, [],
@@ -482,49 +482,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSliceTest do
         })
 
         assert selected_start_specifier(view) == "now"
-        assert selected_end_specifier(view) == "later_today"
-      end
-    end
-
-    @tag :logged_in_user
-    test "autoselects custom end time when skate detour has autoclose_on field", %{conn: conn} do
-      with_mocks([
-        {RoutesRepo, [],
-         [
-           by_type: fn _ -> [@detour_bus_route] end,
-           get: fn _, _ -> @detour_bus_route end
-         ]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [] end]}
-      ]) do
-        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
-        {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page(conn, view, "Bus", "Detour")
-
-        render_async(view)
-
-        view
-        |> element("form")
-        |> render_change(%{
-          "alert_data" => %{
-            "route_ids" => ["1"],
-            "single_route_id" => "1"
-          }
-        })
-
-        render_async(view)
-
-        view
-        |> element("form")
-        |> render_change(%{
-          "_target" => ["alert_data", "skate_detour_id"],
-          "alert_data" => %{"skate_detour_id" => 10}
-        })
-
-        assert selected_start_specifier(view) == "now"
-        assert selected_end_specifier(view) == "custom"
-
-        assert view |> element("#alert_data_active_period_end") |> render =~
-                 ~s(value="2026-04-10T03:00")
+        assert selected_end_specifier(view) == "when_skate_detour_is_closed"
       end
     end
 
@@ -2048,34 +2006,8 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSliceTest do
     end
   end
 
-  describe "extract/3 when editing an auto-closable alert" do
-    test "derives can_close_automatically true from a when_work_order_is_closed end specifier" do
-      slice = %TimeRangeSlice{
-        form_type: :editing,
-        active_period_end_specifier: :when_work_order_is_closed,
-        can_close_automatically: nil
-      }
-
-      result = Slice.extract(slice, %AlertData{}, %{})
-
-      assert result.can_close_automatically == true
-    end
-
-    test "derives can_close_automatically false from a non-auto-closing end specifier" do
-      slice = %TimeRangeSlice{
-        form_type: :editing,
-        active_period_end_specifier: :until_further_notice,
-        can_close_automatically: nil
-      }
-
-      result = Slice.extract(slice, %AlertData{}, %{})
-
-      assert result.can_close_automatically == false
-    end
-  end
-
-  describe "ensure_end_values/5 and can_close_automatically" do
-    test "sets can_close_automatically true for :when_work_order_is_closed" do
+  describe "ensure_end_values/5 and trapeze_autoclosable" do
+    test "sets trapeze_autoclosable true for :when_work_order_is_closed" do
       changeset =
         Ecto.Changeset.cast(
           %AlertData{},
@@ -2092,10 +2024,10 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSliceTest do
           :"one-time"
         )
 
-      assert Ecto.Changeset.get_field(result, :can_close_automatically) == true
+      assert Ecto.Changeset.get_field(result, :trapeze_autoclosable) == true
     end
 
-    test "sets can_close_automatically false for other end specifiers" do
+    test "sets trapeze_autoclosable false for other end specifiers" do
       changeset =
         Ecto.Changeset.cast(
           %AlertData{},
@@ -2112,7 +2044,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSliceTest do
           :"one-time"
         )
 
-      assert Ecto.Changeset.get_field(result, :can_close_automatically) == false
+      assert Ecto.Changeset.get_field(result, :trapeze_autoclosable) == false
     end
   end
 

@@ -281,7 +281,7 @@ defmodule AlertsUIWeb.AlertHistoryTest do
              } =
                AlertHistory.build_history(
                  {%{
-                    can_close_automatically: true,
+                    trapeze_autoclosable: true,
                     primary_service_type: "access",
                     effect_name: "Elevator Closure"
                   }, 1}
@@ -292,9 +292,20 @@ defmodule AlertsUIWeb.AlertHistoryTest do
              } =
                AlertHistory.build_history(
                  {%{
-                    can_close_automatically: true,
+                    trapeze_autoclosable: true,
                     primary_service_type: "access",
                     effect_name: "Escalator Closure"
+                  }, 1}
+               )
+    end
+
+    test "generates the right effect_end for Skate alerts" do
+      assert %AlertHistory{
+               effect_end: "from Skate"
+             } =
+               AlertHistory.build_history(
+                 {%{
+                    skate_autoclosable: true
                   }, 1}
                )
     end

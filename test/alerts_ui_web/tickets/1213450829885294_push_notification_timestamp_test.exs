@@ -61,7 +61,7 @@ defmodule AlertsUIWeb.Tickets.PushNotificationTimestampTest do
         active_period_start: ~N[2025-01-01 12:00:00],
         alert_timing: :"one-time",
         active_period_end_specifier: :until_further_notice,
-        can_close_automatically: false,
+        trapeze_autoclosable: false,
         active_period_start_specifier: :custom,
         cause_detail: nil,
         url: nil,

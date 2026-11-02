@@ -174,8 +174,13 @@ defmodule AlertsUI.ActivePeriodBuilder do
   end
 
   defp active_period_end_specifier_to_duration_certainty(:later_today), do: :ESTIMATED
+
+  defp active_period_end_specifier_to_duration_certainty(:when_skate_detour_is_closed),
+    do: :UNKNOWN
+
   defp active_period_end_specifier_to_duration_certainty(:until_further_notice), do: :UNKNOWN
   defp active_period_end_specifier_to_duration_certainty(:when_work_order_is_closed), do: :UNKNOWN
+
   defp active_period_end_specifier_to_duration_certainty(:end_of_service), do: :KNOWN
   defp active_period_end_specifier_to_duration_certainty(:custom), do: :KNOWN
 
@@ -190,6 +195,8 @@ defmodule AlertsUI.ActivePeriodBuilder do
   defp build_one_time_active_period_end(nil, _, _, _), do: nil
 
   defp build_one_time_active_period_end(_, :when_work_order_is_closed, _, _), do: nil
+
+  defp build_one_time_active_period_end(_, :when_skate_detour_is_closed, _, _), do: nil
 
   defp build_one_time_active_period_end(_, :until_further_notice, _, _), do: nil
 

@@ -46,7 +46,8 @@ defmodule AlertsUI.AlertBuilderTest do
           active_period_start: ~N[2024-04-30 11:54:00],
           alert_timing: :"one-time",
           active_period_end_specifier: :until_further_notice,
-          can_close_automatically: false,
+          trapeze_autoclosable: false,
+          skate_autoclosable: false,
           active_period_start_specifier: :custom,
           cause_detail: "DISABLED_TRAIN",
           url: "http://www.example.com",
@@ -118,12 +119,13 @@ defmodule AlertsUI.AlertBuilderTest do
                  closed_timestamp: nil,
                  created_timestamp: nil,
                  last_modified_timestamp: ~U[2024-04-30 05:54:00Z],
-                 source: nil,
                  notification_duration_certainty: nil,
                  work_order_id: nil,
                  skate_detour_id: 3,
                  recurring: false,
-                 can_close_automatically: false
+                 trapeze_autoclosable: false,
+                 skate_autoclosable: false,
+                 source: nil
                }
 
         Alerts.create_or_update_alert(result, build(:user))
@@ -1096,7 +1098,9 @@ defmodule AlertsUI.AlertBuilderTest do
           active_period_start: ~N[2024-04-30 11:54:00],
           active_period_end_specifier: :until_further_notice,
           active_period_start_specifier: :custom,
-          cause_detail: ""
+          cause_detail: "",
+          trapeze_autoclosable: false,
+          skate_autoclosable: false
         }
 
         result_1 = AlertBuilder.build_alert(alert_data, :R, ~U[2024-04-30 05:54:00Z])

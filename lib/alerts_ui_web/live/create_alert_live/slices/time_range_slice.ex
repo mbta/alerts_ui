@@ -37,10 +37,12 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
     :active_period_end_date,
     :active_period_end_time,
     :recurrence_days,
-    :can_close_automatically,
+    :trapeze_autoclosable,
+    :skate_autoclosable,
     active_period_start_specifier: :now,
     active_period_end_specifier: nil,
-    alert_timing: "one-time"
+    alert_timing: "one-time",
+    skate_detour_id: nil
   ]
 
   defimpl Slice, for: __MODULE__ do
@@ -73,19 +75,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
       |> put_over_nil(:active_period_end_time_specifier, :end_of_service)
       |> put_over_nil(:recurrence_days, [])
       |> update_times_if_duplicating(slice.form_type, now, alert)
-      |> sync_can_close_automatically()
-    end
-
-    # Auto-close is derived from the end specifier. Keep it in sync when populating the
-    # form so editing an auto-closable (Trapeze) alert doesn't drop the flag (mirrors the
-    # transform/validate path's `ensure_end_values` and the old TimeRange component). Runs
-    # after `update_times_if_duplicating`, which may itself change the end specifier.
-    defp sync_can_close_automatically(slice) do
-      %{
-        slice
-        | can_close_automatically:
-            ensure_atom(slice.active_period_end_specifier) == :when_work_order_is_closed
-      }
     end
 
     def transform(_slice, changeset, params, socket) do
@@ -111,6 +100,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
       changeset
       |> TimeRangeSlice.normalize_alert_timing()
       |> TimeRangeSlice.prevent_recurrence_day_deselection(previous_recurrence_days)
+      |> TimeRangeSlice.set_values_for_detour(target, socket.assigns.skate_detours)
       |> TimeRangeSlice.ensure_start_values(
         previous_start_specifier,
         previous_start_time_specifier,
@@ -123,7 +113,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
         current_time,
         timing
       )
-      |> TimeRangeSlice.set_values_from_detour(target, socket.assigns.skate_detours, current_time)
       |> TimeRangeSlice.set_start_end_from_trip_selection(
         target,
         socket.assigns.selections,
@@ -213,8 +202,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
 
     def update_times_if_duplicating(slice, _, _, _), do: slice
 
-    # Elevator/escalator alerts close when the work order closes, so duplicating a past
-    # one mirrors the create flow's auto-selected end specifier instead of "later today".
     defp duplicate_end_specifier(alert) do
       if TimeRangeSlice.elevator_escalator_alert?(alert),
         do: :when_work_order_is_closed,
@@ -222,43 +209,25 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
     end
   end
 
-  def set_values_from_detour(
+  def set_values_for_detour(
         changeset,
         "skate_detour_id",
         %AsyncResult{
           ok?: true,
-          result: skate_detours
-        },
-        current_time
+          result: _skate_detours
+        }
       ) do
-    detour_id = get_field(changeset, :skate_detour_id)
-
-    detour = Enum.find(skate_detours, &(&1.id == detour_id))
-
-    end_changes =
-      if is_nil(detour.autoclose_on) do
-        %{
-          active_period_end_specifier: :later_today,
-          active_period_end: ActivePeriod.end_of_service_datetime_naive(current_time)
-        }
-      else
-        detour_end = utc_datetime_to_naive(detour.autoclose_on)
-
-        %{
-          active_period_end_specifier: :custom,
-          active_period_end: detour_end,
-          active_period_end_time: NaiveDateTime.to_time(detour_end),
-          active_period_end_date: Date.new!(detour_end.year, detour_end.month, detour_end.day)
-        }
-      end
-
-    Map.merge(%{alert_timing: :"one-time", active_period_start_specifier: :now}, end_changes)
+    %{
+      alert_timing: :"one-time",
+      active_period_start_specifier: :now,
+      active_period_end_specifier: :when_skate_detour_is_closed
+    }
     |> Enum.reduce(changeset, fn {key, value}, changeset ->
       force_change(changeset, key, value)
     end)
   end
 
-  def set_values_from_detour(changeset, _, _, _), do: changeset
+  def set_values_for_detour(changeset, _, _), do: changeset
 
   def ensure_start_values(
         changeset,
@@ -364,11 +333,10 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
     end_datetime =
       TimeGetters.get_recurring_end_datetime(end_date, end_time)
 
-    can_close_automatically = specifier == :when_work_order_is_closed
-
     changeset
     |> force_change(:active_period_end_specifier, specifier)
-    |> force_change(:can_close_automatically, can_close_automatically)
+    |> force_change(:trapeze_autoclosable, false)
+    |> force_change(:skate_autoclosable, false)
     |> force_change(:active_period_end, end_datetime)
     |> force_change(:active_period_end_time, end_time)
     |> force_change(:active_period_end_date, end_date)
@@ -393,11 +361,13 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
 
     end_date = TimeGetters.get_onetime_end_date(end_datetime)
 
-    can_close_automatically = specifier == :when_work_order_is_closed
+    trapeze_autoclosable = specifier == :when_work_order_is_closed
+    skate_autoclosable = specifier == :when_skate_detour_is_closed
 
     changeset
     |> force_change(:active_period_end_specifier, specifier)
-    |> force_change(:can_close_automatically, can_close_automatically)
+    |> force_change(:trapeze_autoclosable, trapeze_autoclosable)
+    |> force_change(:skate_autoclosable, skate_autoclosable)
     |> force_change(:active_period_end, end_datetime)
     |> force_change(:active_period_end_date, end_date)
   end
@@ -523,21 +493,17 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
     ]
 
   defp end_values(form) do
-    if elevator_escalator_alert?(form.data) do
-      [
-        :later_today,
-        :end_of_service,
-        :until_further_notice,
-        :when_work_order_is_closed,
-        :custom
-      ]
-    else
-      [
-        :later_today,
-        :end_of_service,
-        :until_further_notice,
-        :custom
-      ]
+    base_values = [
+      :later_today,
+      :end_of_service,
+      :until_further_notice,
+      :custom
+    ]
+
+    cond do
+      elevator_escalator_alert?(form.data) -> base_values ++ [:when_work_order_is_closed]
+      !is_nil(form.data.skate_detour_id) -> base_values ++ [:when_skate_detour_is_closed]
+      true -> base_values
     end
   end
 

@@ -117,10 +117,8 @@ config :alerts_ui, Oban,
        {"*/1 * * * *", AlertsUI.Jobs.FeedChecker, max_attempts: 1},
        # Read the Trapeze Elevator/Escalator feed, every minute
        {"*/1 * * * *", AlertsUI.Trapeze.Importer, max_attempts: 1},
-       # Update recurring alerts every day at 3:01 am EST
-       {"1 8 * * *", AlertsUI.Jobs.RecurringAlertUpdater},
-       # Validate alerts against production every day at 4:00 am EST
-       {"0 9 * * *", AlertsUI.Jobs.AlertValidationDailyWorker},
+       # Look for outdated skate alerts to close, every minute
+       {"*/1 * * * *", AlertsUI.Jobs.SkateDetourAutocloseWorker, max_attempts: 1},
        # Check if we need to validate alerts against dev every minute
        {
          "*/1 * * * *",
@@ -128,7 +126,11 @@ config :alerts_ui, Oban,
          max_attempts: 1
        },
        # Refresh MBTA API caches every 55 minutes (TTL is 1 hour)
-       {"*/55 * * * *", AlertsUI.Jobs.CacheRefreshWorker, max_attempts: 1}
+       {"*/55 * * * *", AlertsUI.Jobs.CacheRefreshWorker, max_attempts: 1},
+       # Update recurring alerts every day at 3:01 am EST
+       {"1 8 * * *", AlertsUI.Jobs.RecurringAlertUpdater},
+       # Validate alerts against production every day at 4:00 am EST
+       {"0 9 * * *", AlertsUI.Jobs.AlertValidationDailyWorker}
      ]}
   ],
   queues: [default: 10]

@@ -184,7 +184,7 @@ defmodule AlertsUI.Trapeze.Importer do
       |> Alert.changeset(
         alert_data_params
         |> Map.merge(%{
-          can_close_automatically: true,
+          trapeze_autoclosable: true,
           last_modified_timestamp: DateTime.now!("Etc/UTC"),
           last_push_notification_timestamp: DateTime.now!("Etc/UTC")
         })
@@ -209,7 +209,7 @@ defmodule AlertsUI.Trapeze.Importer do
   defp maybe_close(
          %Alert{
            closed_timestamp: nil,
-           can_close_automatically: true,
+           trapeze_autoclosable: true,
            created_at: created_at,
            source: source
          } = alert,

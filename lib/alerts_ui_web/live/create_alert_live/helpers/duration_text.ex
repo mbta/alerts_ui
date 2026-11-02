@@ -46,21 +46,18 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.DurationText do
     Calendar.strftime(start_dt, "%a %b %-d, %Y @ %-I:%M %p")
   end
 
-  defp end_text(:until_further_notice, end_dt), do: end_text("until_further_notice", end_dt)
-
-  defp end_text("until_further_notice", _end_dt) do
-    "alert is manually closed"
+  defp end_text(end_text, end_dt) when is_binary(end_text) do
+    end_text |> String.to_existing_atom() |> end_text(end_dt)
   end
 
-  defp end_text(:when_work_order_is_closed, end_dt),
-    do: end_text("when_work_order_is_closed", end_dt)
+  defp end_text(:until_further_notice, _end_dt), do: "alert is manually closed"
 
-  defp end_text("when_work_order_is_closed", _end_dt) do
+  defp end_text(:when_work_order_is_closed, _end_dt) do
     "a work order with this facility ID is closed"
   end
 
-  defp end_text("later_today", _end_dt) do
-    "later today"
+  defp end_text(:when_skate_detour_is_closed, _end_dt) do
+    "the associated Skate detour is closed"
   end
 
   defp end_text(:later_today, _end_dt) do
@@ -73,18 +70,20 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.DurationText do
     Calendar.strftime(end_dt, "%a %b %-d, %Y @ %-I:%M %p")
   end
 
+  defp duration(end_text, start_dt, end_dt) when is_binary(end_text) do
+    end_text |> String.to_existing_atom() |> duration(start_dt, end_dt)
+  end
+
   defp duration(:until_further_notice, _, _), do: "(indefinite)"
-  defp duration("until_further_notice", _, _), do: "(indefinite)"
 
   defp duration(:when_work_order_is_closed, _, _), do: ""
-  defp duration("when_work_order_is_closed", _, _), do: ""
+
+  defp duration(:when_skate_detour_is_closed, _, _), do: ""
 
   defp duration(_, nil, _), do: ""
   defp duration(_, _, nil), do: ""
 
-  defp duration(:later_today, start_dt, end_dt), do: duration("later_today", start_dt, end_dt)
-
-  defp duration("later_today", start_dt, end_dt) do
+  defp duration(:later_today, start_dt, end_dt) do
     "(max #{duration_text(start_dt, end_dt)})"
   end
 

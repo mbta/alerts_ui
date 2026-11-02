@@ -663,7 +663,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
               effect_detail: "ESCALATOR_CLOSURE",
               effect_name: "Escalator Closure",
               primary_service_type: "access",
-              can_close_automatically: true,
+              trapeze_autoclosable: true,
               duration_certainty: :KNOWN,
               active_period_start: now,
               active_period_end: now |> NaiveDateTime.add(3, :minute),

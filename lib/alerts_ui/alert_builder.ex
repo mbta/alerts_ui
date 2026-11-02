@@ -100,12 +100,13 @@ defmodule AlertsUI.AlertBuilder do
       :image_alternative_text,
       :recurrence_days,
       :severity,
-      :source,
       :created_timestamp,
       :closed_timestamp,
       :work_order_id,
       :skate_detour_id,
-      :can_close_automatically
+      :source,
+      :trapeze_autoclosable,
+      :skate_autoclosable
     ]
 
     Enum.reduce(direct_from_alert_data_keys, %{}, fn key, params ->

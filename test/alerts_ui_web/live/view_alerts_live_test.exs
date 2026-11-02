@@ -1761,7 +1761,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         build(:alert, %{
           alert_id: "123",
           duration_certainty: :UNKNOWN,
-          can_close_automatically: true,
+          trapeze_autoclosable: true,
           primary_service_type: "access",
           effect_name: "Elevator Closure"
         })
@@ -1773,7 +1773,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           alert.active_period_end,
           alert.duration_certainty,
           %{
-            can_close_automatically: alert.can_close_automatically,
+            trapeze_autoclosable: alert.trapeze_autoclosable,
             primary_service_type: alert.primary_service_type,
             effect_name: alert.effect_name
           }
@@ -1788,7 +1788,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           alert.active_period_end,
           alert.duration_certainty,
           %{
-            can_close_automatically: alert.can_close_automatically,
+            trapeze_autoclosable: alert.trapeze_autoclosable,
             primary_service_type: alert.primary_service_type,
             effect_name: alert.effect_name
           }
@@ -1804,7 +1804,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           active_period_end: ~U[2023-10-12 00:02:00Z],
           closed_timestamp: ~U[2023-10-12 00:02:00Z],
           duration_certainty: :KNOWN,
-          can_close_automatically: true,
+          trapeze_autoclosable: true,
           primary_service_type: "access",
           effect_name: "Elevator Closure"
         })
@@ -1816,7 +1816,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
           alert.active_period_end,
           alert.duration_certainty,
           %{
-            can_close_automatically: alert.can_close_automatically,
+            trapeze_autoclosable: alert.trapeze_autoclosable,
             primary_service_type: alert.primary_service_type,
             effect_name: alert.effect_name
           }

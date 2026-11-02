@@ -104,7 +104,7 @@
         <div
           title={
             safe_format_timestamp(alert.active_period_end, alert.duration_certainty, %{
-              can_close_automatically: alert.can_close_automatically,
+              trapeze_autoclosable: alert.trapeze_autoclosable,
               primary_service_type: alert.primary_service_type,
               effect_name: alert.effect_name
             })
@@ -120,7 +120,8 @@
             alert.active_period_end,
             alert.duration_certainty,
             %{
-              can_close_automatically: alert.can_close_automatically,
+              skate_autoclosable: alert.skate_autoclosable,
+              trapeze_autoclosable: alert.trapeze_autoclosable,
               primary_service_type: alert.primary_service_type,
               effect_name: alert.effect_name
             }
