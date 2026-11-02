@@ -1,5 +1,5 @@
 # --- Set up Elixir build ---
-FROM hexpm/elixir:1.20.4-erlang-29.0.6-debian-trixie-20260824-slim AS elixir-builder
+FROM hexpm/elixir:1.20.4-erlang-29.0.6-debian-trixie-20261027-slim AS elixir-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
