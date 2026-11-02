@@ -22,7 +22,7 @@ defmodule AlertsUIWeb.Tickets.AlertDurationShowEndTimeTodayTest do
   use AlertsUIWeb.ConnCase, async: true
 
   alias AlertsUI.Models.EnhancedSchedule
-  alias AlertsUIWeb.FormComponents.Helpers.AutoText.{AutoTextDuration, BuildAutoText}
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.{AutoTextDuration, BuildAutoText}
 
   # Midday "now" so that a 3:00 PM end is "later today" within the same service day.
   @current_time ~N[2025-05-09 13:00:00]

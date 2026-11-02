@@ -2166,7 +2166,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         updated_header = "I am a totally new alert!"
         assert html2 =~ "No alerts found"
 
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+        view = get_to_submission_page(conn, view, "Bus", "Delay")
 
         view
         |> element("form")

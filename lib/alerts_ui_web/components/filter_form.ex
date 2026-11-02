@@ -13,7 +13,7 @@ defmodule AlertsUIWeb.FilterForm do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Effect
-  alias AlertsUIWeb.FormComponents.Helpers.SelectFormatter
+  alias AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
 

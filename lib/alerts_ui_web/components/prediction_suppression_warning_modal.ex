@@ -11,8 +11,8 @@ defmodule AlertsUIWeb.PredictionSuppressionWarningModal do
   import AlertsUIWeb.IconComponents
 
   alias AlertsUI.Models.InformedEntity
+  alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
   alias AlertsUIWeb.Formatting
-  alias AlertsUIWeb.FormComponents.Helpers.GetKeyForModeEffect
 
   @doc """
   Renders the warning modal

@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.ValidationTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.ValidationTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.Validation
+  alias AlertsUIWeb.CreateAlertLive.Helpers.Validation
 
   defp changeset_with(value) do
     Ecto.Changeset.cast({%{f: value}, %{f: :string}}, %{}, [:f])

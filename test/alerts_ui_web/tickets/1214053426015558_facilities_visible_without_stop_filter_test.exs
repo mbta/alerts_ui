@@ -57,7 +57,7 @@ defmodule AlertsUIWeb.Tickets.FacilitiesVisibleWithoutStopFilterTest do
 
   # Navigate to the Facility • Bike Issue form (combination :ACCESS).
   defp navigate_to_access(conn, view),
-    do: get_to_submission_page_refactor(conn, view, "Facility", "Bike issue")
+    do: get_to_submission_page(conn, view, "Facility", "Bike issue")
 
   describe "facility list is populated when no stop filter is applied" do
     @tag :logged_in_user

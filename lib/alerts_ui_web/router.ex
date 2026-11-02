@@ -108,23 +108,18 @@ defmodule AlertsUIWeb.Router do
         AlertsUIWeb.PutFlagsInAssignsHook,
         AlertsUIWeb.PutMetadataInAssigns
       ] do
-      live("/alerts/legacy/new", CreateAlertLive, :new)
-      live("/alerts/legacy/new/:route_type/", CreateAlertLive, :new)
-      live("/alerts/legacy/new/:route_type/:effect", CreateAlertLive, :new)
-      live("/alerts/legacy/edit", CreateAlertLive, :edit)
-      live("/alerts/legacy/duplicate", CreateAlertLive, :duplicate)
-      live("/alerts/new", CreateAlertMonoLive, :new)
-      live("/alerts/new/:route_type/", CreateAlertMonoLive, :new)
-      live("/alerts/new/:route_type/:effect_name", CreateAlertMonoLive, :new)
-      live("/alerts/edit/:alert_id", CreateAlertMonoLive, :edit)
-      live("/alerts/edit/:alert_id/:route_type/", CreateAlertMonoLive, :edit)
-      live("/alerts/edit/:alert_id/:route_type/:effect_name", CreateAlertMonoLive, :edit)
-      live("/alerts/duplicate/:alert_id", CreateAlertMonoLive, :duplicate)
-      live("/alerts/duplicate/:alert_id/:route_type/", CreateAlertMonoLive, :duplicate)
+      live("/alerts/new", CreateAlertLive, :new)
+      live("/alerts/new/:route_type/", CreateAlertLive, :new)
+      live("/alerts/new/:route_type/:effect_name", CreateAlertLive, :new)
+      live("/alerts/edit/:alert_id", CreateAlertLive, :edit)
+      live("/alerts/edit/:alert_id/:route_type/", CreateAlertLive, :edit)
+      live("/alerts/edit/:alert_id/:route_type/:effect_name", CreateAlertLive, :edit)
+      live("/alerts/duplicate/:alert_id", CreateAlertLive, :duplicate)
+      live("/alerts/duplicate/:alert_id/:route_type/", CreateAlertLive, :duplicate)
 
       live(
         "/alerts/duplicate/:alert_id/:route_type/:effect_name",
-        CreateAlertMonoLive,
+        CreateAlertLive,
         :duplicate
       )
     end

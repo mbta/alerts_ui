@@ -1,10 +1,10 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpersTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpersTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
   alias AlertsUI.Models.Alert
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData, as: AlertDataSchema
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.AlertDataHelpers
+  alias AlertsUIWeb.CreateAlertLive.AlertData, as: AlertDataSchema
+  alias AlertsUIWeb.CreateAlertLive.Helpers.AlertDataHelpers
 
   # AlertDataHelpers.alert_data_from_form/2 and humanize_route_type/1 read via
   # Ecto.Changeset.get_field on form.source, so the form must wrap a changeset

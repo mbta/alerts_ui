@@ -410,7 +410,7 @@ defmodule AlertsUIWeb.UserAuthTest do
   describe "routes that require :author role" do
     @tag :logged_in_user
     test "author users can access the alert creation flow", %{conn: conn} do
-      {:ok, _view, html} = live(conn, "/alerts/legacy/new")
+      {:ok, _view, html} = live(conn, "/alerts/new")
       assert html =~ "Creating New Alert"
     end
 
@@ -419,13 +419,13 @@ defmodule AlertsUIWeb.UserAuthTest do
       {:error,
        {:redirect,
         %{to: "/", flash: %{"error" => "You don't have permission to access that page"}}}} =
-        live(conn, "/alerts/legacy/new")
+        live(conn, "/alerts/new")
     end
 
     @tag :logged_in_user
     test "author users can access alert editing flow", %{conn: conn} do
       insert(:alert, alert_id: "1")
-      {:ok, _view, html} = live(conn, "/alerts/legacy/edit?alert_id=1")
+      {:ok, _view, html} = live(conn, "/alerts/edit/1")
       assert html =~ "Editing Alert"
     end
 
@@ -434,7 +434,7 @@ defmodule AlertsUIWeb.UserAuthTest do
       {:error,
        {:redirect,
         %{to: "/", flash: %{"error" => "You don't have permission to access that page"}}}} =
-        live(conn, "/alerts/legacy/edit?alert_id=1")
+        live(conn, "/alerts/edit/1")
     end
   end
 

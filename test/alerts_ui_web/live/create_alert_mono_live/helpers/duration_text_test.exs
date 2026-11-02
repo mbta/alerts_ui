@@ -1,8 +1,8 @@
-defmodule AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationTextTest do
+defmodule AlertsUIWeb.CreateAlertLive.Helpers.DurationTextTest do
   @moduledoc false
   use ExUnit.Case, async: true
 
-  alias AlertsUIWeb.CreateAlertMonoLive.Helpers.DurationText
+  alias AlertsUIWeb.CreateAlertLive.Helpers.DurationText
 
   # Build a Phoenix.HTML.Form whose `form[:field].value` returns the typed value
   # we pass in. The map-backed FormData impl looks up by stringified key in

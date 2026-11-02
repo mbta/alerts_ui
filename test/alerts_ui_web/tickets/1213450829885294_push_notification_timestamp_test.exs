@@ -16,7 +16,7 @@ defmodule AlertsUIWeb.Tickets.PushNotificationTimestampTest do
 
   The fix lives in `AlertsUI.AlertBuilder.last_push_notification_timestamp/2`.
   These tests exercise that function via `AlertBuilder.build_alert/3` — the same
-  code path that `CreateAlertMonoLive` calls on save
+  code path that `CreateAlertLive` calls on save
   (`AlertData.alert_data_v2_to_v1 |> AlertBuilder.build_alert(combination)`).
 
   Verified passing on dev-green (2026-06-08): all active alerts have

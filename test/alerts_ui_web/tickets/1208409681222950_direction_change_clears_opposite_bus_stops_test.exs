@@ -30,8 +30,8 @@ defmodule AlertsUIWeb.Tickets.DirectionChangeClearsOppositeBusStopsTest do
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
-  alias AlertsUIWeb.CreateAlertMonoLive.AlertData
-  alias AlertsUIWeb.CreateAlertMonoLive.Slices.AffectedServiceSlice
+  alias AlertsUIWeb.CreateAlertLive.AlertData
+  alias AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
@@ -203,7 +203,7 @@ defmodule AlertsUIWeb.Tickets.DirectionChangeClearsOppositeBusStopsTest do
       ]) do
         # Step 1: Create a Bus - Detour alert
         {:ok, view, _html} = live(conn, "/alerts/new")
-        view = get_to_submission_page_refactor(conn, view, "Bus", "Detour")
+        view = get_to_submission_page(conn, view, "Bus", "Detour")
         render_async(view)
 
         # Step 2: Select route SL1

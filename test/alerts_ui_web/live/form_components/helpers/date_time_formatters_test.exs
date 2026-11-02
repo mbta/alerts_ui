@@ -1,7 +1,7 @@
 defmodule AlertsUIWeb.DateTimeFormattersTest do
   use ExUnit.Case, async: true
 
-  import AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
+  import AlertsUIWeb.Helpers.DateTimeFormatters
 
-  doctest AlertsUIWeb.FormComponents.Helpers.DateTimeFormatters
+  doctest AlertsUIWeb.Helpers.DateTimeFormatters
 end

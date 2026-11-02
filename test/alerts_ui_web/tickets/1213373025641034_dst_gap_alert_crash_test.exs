@@ -66,7 +66,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
     @tag :logged_in_user
     test "shows exact DST error when effect start is in the 2026 DST gap", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       # Set start specifier to custom to expose the datetime field
       view
@@ -94,7 +94,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
     @tag :logged_in_user
     test "shows exact DST error when effect end is in the 2026 DST gap", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       # Set both specifiers to custom
       view
@@ -133,7 +133,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
       conn: conn
     } do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -163,7 +163,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
     @tag :logged_in_user
     test "no DST error for valid times just before and just after the gap", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       view
       |> element("form")
@@ -199,7 +199,7 @@ defmodule AlertsUIWeb.Tickets.DstGapAlertCrashTest do
       # first so errors on `active_period_start` are recorded before the
       # localise-dependent validators skip them.
       {:ok, view, _html} = live(conn, "/alerts/new")
-      view = get_to_submission_page_refactor(conn, view, "Bus", "Delay")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
 
       view
       |> element("form")

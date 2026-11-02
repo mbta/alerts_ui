@@ -8,7 +8,7 @@ defmodule AlertsUI.Alerts do
   alias AlertsUI.Helpers.DateTime, as: DTHelpers
   alias AlertsUI.Models.{ActivePeriod, Alert, User}
   alias AlertsUI.Repo
-  alias AlertsUIWeb.FormComponents.Helpers.EffectsForRouteTypes
+  alias AlertsUIWeb.Helpers.EffectsForRouteTypes
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
 
   @spec create_or_update_alert(map(), User.t(), any()) :: {:ok | :error, any()}
