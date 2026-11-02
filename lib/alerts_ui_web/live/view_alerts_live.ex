@@ -626,10 +626,6 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   defp order_directions(_, direction, _, _),
     do: [String.to_existing_atom(direction || "asc")]
 
-  def form_path_new do
-    "/alerts/new"
-  end
-
   def form_path_edit(alert_id) do
     "/alerts/edit/#{alert_id}"
   end
