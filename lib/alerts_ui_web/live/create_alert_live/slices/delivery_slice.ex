@@ -116,11 +116,14 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.DeliverySlice do
             check_class="mr-3"
           />
 
-          <div
-            :if={Form.normalize_value("checkbox", @form[:notification_toggle].value)}
-            class="text-warning ml-8"
-          >
-            Warning: Notifications will be sent to alert subscribers.
+          <%!-- Announce the warning to screen readers when it appears --%>
+          <div aria-live="polite">
+            <div
+              :if={Form.normalize_value("checkbox", @form[:notification_toggle].value)}
+              class="text-warning ml-8"
+            >
+              Warning: Notifications will be sent to alert subscribers.
+            </div>
           </div>
         </div>
         <div id="banner_div" class="flex flex-col gap-1">
@@ -130,46 +133,54 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.DeliverySlice do
             check_class="mr-3"
           />
 
-          <div
-            :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
-            class="ml-8 flex flex-col gap-1"
-          >
-            <div class="text-warning mb-2">
-              Warning: This will post a high priority alert banner on every page of MBTA.com.
+          <div class="ml-8">
+            <%!-- Announce the warning to screen readers when it appears --%>
+            <div aria-live="polite">
+              <div
+                :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
+                class="text-warning mb-2"
+              >
+                Warning: This will post a high priority alert banner on every page of MBTA.com.
+              </div>
             </div>
 
-            <div class="flex flex-col md:flex-row">
-              <div class="flex flex-col md:w-[50%]" id="banner-container">
-                <.textarea
-                  field={@form[:banner_text]}
-                  label="Website banner text"
-                  phx-debounce={120}
-                  maxlength="255"
-                  id="banner_input"
-                  class={
-                    [
-                      "w-[100%] min-h-[10rem] z-20 mt-3",
-                      if(String.length(@form[:header_text].value || "") >= 4000,
-                        do: "!border-error border-b-1",
-                        else: "border-b-0"
-                      )
-                    ]
-                    |> Enum.join(" ")
-                  }
-                  value={@form[:banner_text].value}
-                />
-                <.textarea_footer
-                  character_limit={4000}
-                  copy_id="#alert_data_banner_text"
-                  copy_title="Copy banner text to Clipboard"
-                  field={@form[:banner_text]}
+            <div
+              :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
+              class="flex flex-col gap-1"
+            >
+              <div class="flex flex-col md:flex-row">
+                <div class="flex flex-col md:w-[50%]" id="banner-container">
+                  <.textarea
+                    field={@form[:banner_text]}
+                    label="Website banner text"
+                    phx-debounce={120}
+                    maxlength="255"
+                    id="banner_input"
+                    class={
+                      [
+                        "w-[100%] min-h-[10rem] z-20 mt-3",
+                        if(String.length(@form[:header_text].value || "") >= 4000,
+                          do: "!border-error border-b-1",
+                          else: "border-b-0"
+                        )
+                      ]
+                      |> Enum.join(" ")
+                    }
+                    value={@form[:banner_text].value}
+                  />
+                  <.textarea_footer
+                    character_limit={4000}
+                    copy_id="#alert_data_banner_text"
+                    copy_title="Copy banner text to Clipboard"
+                    field={@form[:banner_text]}
+                  />
+                </div>
+                <.form_checkbox
+                  class="mt-2 md:ml-4 md:mt-8"
+                  field={@form[:banner_sync_toggle]}
+                  label="Auto refresh"
                 />
               </div>
-              <.form_checkbox
-                class="mt-2 md:ml-4 md:mt-8"
-                field={@form[:banner_sync_toggle]}
-                label="Auto refresh"
-              />
             </div>
           </div>
         </div>
