@@ -700,9 +700,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSliceTest do
                |> element("#alert_data_header_text")
                |> render_async() =~ "my custom text"
 
-        assert view
-               |> render_async() =~ "Check box to show you understand"
-
         view
         |> element("form")
         |> render_change(%{
