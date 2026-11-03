@@ -25,6 +25,8 @@ defmodule AlertsUI.Jobs.FeedChecker do
     )
   end
 
+  # Does not need to be a strong hash since we are only comparing files
+  # sobelow_skip ["Crypto.WeakHash"]
   defp get_checksum(flavor) do
     {:ok, file} = FeedReader.alerts_json(flavor)
     :crypto.hash(:md5, file) |> Base.encode16()

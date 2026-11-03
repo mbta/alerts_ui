@@ -61,6 +61,8 @@ defmodule AlertsUI.Trapeze.Monitor do
     )
   end
 
+  # Does not need to generate a strong hash since we only want a checksum
+  # sobelow_skip ["Crypto.WeakHash"]
   @spec processing([String.t()], NaiveDateTime.t()) :: any
   def processing(feed, mtime) do
     now = now!()

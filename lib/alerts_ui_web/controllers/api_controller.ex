@@ -37,7 +37,7 @@ defmodule AlertsUIWeb.ApiController do
 
     params
     |> Jason.encode!()
-    |> Jason.decode!(keys: :atoms)
+    |> Jason.decode!(keys: :atoms!)
     |> AlertFromApi.fill_in_alert()
     |> Alerts.create_or_update_alert(user)
     |> case do
