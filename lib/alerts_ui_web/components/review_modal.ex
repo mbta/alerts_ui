@@ -676,18 +676,19 @@ defmodule AlertsUIWeb.ReviewModal do
       <p class="leading-tight mt-2 mb-8 min-h-[1.3rem]">
         Are you sure you want to close alert #{@alert_id}?
       </p>
-      <div class="flex row">
-        <div class="mr-4">
-          <input type="hidden" name="all-clear-checkbox" value="false" />
-          <.checkbox
-            id={"all-clear-checkbox-#{@id}-#{@alert_id}"}
-            name="all-clear-checkbox"
-            value="true"
-            phx-click="all_clear_checkbox"
-            checked={@send_all_clear?}
-          />
-        </div>
-        <AlertsUIWeb.SharedComponents.label for="all-clear-checkbox">
+
+      <div>
+        <input type="hidden" name="all-clear-checkbox" value="false" />
+        <.checkbox
+          id={"all-clear-checkbox-#{@id}-#{@alert_id}"}
+          name="all-clear-checkbox"
+          value="true"
+          phx-click="all_clear_checkbox"
+          checked={@send_all_clear?}
+          class="mr-3"
+        />
+
+        <AlertsUIWeb.SharedComponents.label for={"all-clear-checkbox-#{@id}-#{@alert_id}"}>
           Send "all clear" message to alert subscribers
         </AlertsUIWeb.SharedComponents.label>
       </div>

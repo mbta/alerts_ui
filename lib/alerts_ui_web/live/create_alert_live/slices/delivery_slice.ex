@@ -107,69 +107,81 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.DeliverySlice do
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
         Delivery
       </.h5>
-      <div class="flex flex-col gap-1">
-        <div class="flex flex-row">
-          <.form_checkbox field={@form[:notification_toggle]} id="notification-toggle" />
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1">
+          <.form_checkbox
+            field={@form[:notification_toggle]}
+            id="notification-toggle"
+            label="Send notifications to alert subscribers"
+            check_class="mr-3"
+          />
 
-          <span class="ml-4">
-            Send notifications to alert subscribers
-          </span>
-        </div>
-        <div
-          :if={Form.normalize_value("checkbox", @form[:notification_toggle].value)}
-          class="text-warning mb-4 ml-8"
-        >
-          Warning: Notifications will be sent to alert subscribers.
-        </div>
-        <div id="banner_div" class="flex flex-col">
-          <div class="flex flex-row mb-2">
-            <.form_checkbox field={@form[:view_banner]} />
-            <span class="ml-4">Banner on all MBTA.com pages</span>
-          </div>
-          <div
-            :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
-            class="flex flex-col md:flex-row"
-          >
-            <div class="flex flex-col md:w-[50%]" id="banner-container">
-              <.textarea
-                field={@form[:banner_text]}
-                label="Website banner text"
-                phx-debounce={120}
-                maxlength="255"
-                id="banner_input"
-                class={
-                  [
-                    "w-[100%] min-h-[10rem] z-20 mt-3",
-                    if(String.length(@form[:header_text].value || "") >= 4000,
-                      do: "!border-error border-b-1",
-                      else: "border-b-0"
-                    )
-                  ]
-                  |> Enum.join(" ")
-                }
-                value={@form[:banner_text].value}
-              />
-              <.textarea_footer
-                character_limit={4000}
-                copy_id="#alert_data_banner_text"
-                copy_title="Copy banner text to Clipboard"
-                field={@form[:banner_text]}
-              />
+          <%!-- Announce the warning to screen readers when it appears --%>
+          <div aria-live="polite">
+            <div
+              :if={Form.normalize_value("checkbox", @form[:notification_toggle].value)}
+              class="text-warning ml-8"
+            >
+              Warning: Notifications will be sent to alert subscribers.
             </div>
-            <.form_checkbox
-              class="mt-2 md:ml-4 md:mt-8"
-              field={@form[:banner_sync_toggle]}
-              label="Auto refresh"
-            />
           </div>
-          <div
-            :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
-            class="flex flex-row mt-4"
-          >
-            <.form_checkbox
-              field={@form[:accept_banner]}
-              label="I understand this will post a high priority alert banner on every page of MBTA.com."
-            />
+        </div>
+        <div id="banner_div" class="flex flex-col gap-1">
+          <.form_checkbox
+            field={@form[:view_banner]}
+            label="Banner on all MBTA.com pages"
+            check_class="mr-3"
+          />
+
+          <div class="ml-8">
+            <%!-- Announce the warning to screen readers when it appears --%>
+            <div aria-live="polite">
+              <div
+                :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
+                class="text-warning mb-2"
+              >
+                Warning: This will post a high priority alert banner on every page of MBTA.com.
+              </div>
+            </div>
+
+            <div
+              :if={Form.normalize_value("checkbox", @form[:view_banner].value)}
+              class="flex flex-col gap-1"
+            >
+              <div class="flex flex-col md:flex-row">
+                <div class="flex flex-col md:w-[50%]" id="banner-container">
+                  <.textarea
+                    field={@form[:banner_text]}
+                    label="Website banner text"
+                    phx-debounce={120}
+                    maxlength="255"
+                    id="banner_input"
+                    class={
+                      [
+                        "w-[100%] min-h-[10rem] z-20 mt-3",
+                        if(String.length(@form[:header_text].value || "") >= 4000,
+                          do: "!border-error border-b-1",
+                          else: "border-b-0"
+                        )
+                      ]
+                      |> Enum.join(" ")
+                    }
+                    value={@form[:banner_text].value}
+                  />
+                  <.textarea_footer
+                    character_limit={4000}
+                    copy_id="#alert_data_banner_text"
+                    copy_title="Copy banner text to Clipboard"
+                    field={@form[:banner_text]}
+                  />
+                </div>
+                <.form_checkbox
+                  class="mt-2 md:ml-4 md:mt-8"
+                  field={@form[:banner_sync_toggle]}
+                  label="Auto refresh"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
