@@ -39,6 +39,7 @@ defmodule AlertsUIWeb.CoreComponents do
   attr :title, :string, default: nil
   attr :kind, :atom, values: [:info, :error], doc: "used for styling and flash lookup"
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
+  attr :class, :string, default: nil, doc: "extra classes to add to the flash container"
 
   slot :inner_block, doc: "the optional inner block that renders the flash message"
 
@@ -52,7 +53,8 @@ defmodule AlertsUIWeb.CoreComponents do
       class={[
         "fixed top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
         @kind == :info && "bg-emerald-50 text-emerald-800 ring-emerald-500 fill-cyan-900",
-        @kind == :error && "bg-rose-50 text-rose-900 shadow-md ring-rose-500 fill-rose-900"
+        @kind == :error && "bg-rose-50 text-rose-900 shadow-md ring-rose-500 fill-rose-900",
+        @class
       ]}
       {@rest}
     >
@@ -89,6 +91,7 @@ defmodule AlertsUIWeb.CoreComponents do
     <.flash kind={:error} title={Flash.get(@flash, :title) || "Error!"} flash={@flash} />
     <.flash
       id="client-error"
+      class="delay-[2s]"
       kind={:error}
       title="We can't find the internet"
       phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
@@ -106,7 +109,7 @@ defmodule AlertsUIWeb.CoreComponents do
       phx-connected={hide("#server-error") |> JS.set_attribute({"hidden", ""})}
       hidden
     >
-      Hang in there while we get back on track
+      If the problem persists, try refreshing the page.
       <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
     </.flash>
     """
