@@ -60,7 +60,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeDurationTextTest do
       params = %{
         "active_period_start_specifier" => "start_of_service",
         "active_period_start" => ~N[2024-11-28 01:00:01],
-        "active_period_end_specifier" => "end_of_service",
+        "active_period_end_specifier" => :end_of_service,
         "active_period_end" => ~N[2024-11-28 03:00:03]
       }
 
@@ -91,6 +91,32 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeDurationTextTest do
       }
 
       expected = "Wed Nov 27, 2024 @ 9:00 AM until alert is manually closed (indefinite)"
+      actual = TimeRangeDurationText.one_time_duration_text(params)
+      assert expected == actual
+    end
+
+    test "end of when_work_order_is_closed" do
+      params = %{
+        "active_period_start_specifier" => "start_of_service",
+        "active_period_start" => ~N[2024-11-27 09:00:00],
+        "active_period_end_specifier" => :when_work_order_is_closed,
+        "active_period_end" => ""
+      }
+
+      expected = "Wed Nov 27, 2024 @ 9:00 AM until a work order for this facility is closed "
+      actual = TimeRangeDurationText.one_time_duration_text(params)
+      assert expected == actual
+    end
+
+    test "end of when_skate_detour_is_closed" do
+      params = %{
+        "active_period_start_specifier" => "start_of_service",
+        "active_period_start" => ~N[2024-11-27 09:00:00],
+        "active_period_end_specifier" => :when_skate_detour_is_closed,
+        "active_period_end" => ""
+      }
+
+      expected = "Wed Nov 27, 2024 @ 9:00 AM until the associated Skate detour is closed "
       actual = TimeRangeDurationText.one_time_duration_text(params)
       assert expected == actual
     end

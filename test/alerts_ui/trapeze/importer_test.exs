@@ -318,7 +318,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           closed_timestamp: nil,
           original_facility_selections: ["stop|123"],
           work_order_id: nil,
-          can_close_automatically: true,
+          trapeze_autoclosable: true,
           created_at: ~U[2026-02-18 08:01:00Z]
         })
 
@@ -345,7 +345,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           closed_timestamp: nil,
           original_facility_selections: ["stop|123"],
           work_order_id: nil,
-          can_close_automatically: true,
+          trapeze_autoclosable: true,
           created_at: ~U[2026-02-20 08:01:00Z],
           source: :ALERTS_MANAGER
         })
@@ -376,7 +376,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           closed_timestamp: nil,
           original_facility_selections: ["stop|123"],
           work_order_id: nil,
-          can_close_automatically: true,
+          trapeze_autoclosable: true,
           created_at: ~U[2026-02-20 08:01:00Z],
           source: :TRAPEZE
         })
@@ -404,7 +404,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           closed_timestamp: nil,
           original_facility_selections: ["stop|123"],
           work_order_id: nil,
-          can_close_automatically: false
+          trapeze_autoclosable: false
         })
 
       result =
@@ -427,7 +427,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
         insert(:alert, %{
           work_order_id: "TESTORDER1",
           closed_timestamp: nil,
-          can_close_automatically: true,
+          trapeze_autoclosable: true,
           created_at: ~U[2026-02-18 08:01:00Z]
         })
 

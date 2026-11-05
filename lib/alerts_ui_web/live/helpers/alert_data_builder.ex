@@ -29,7 +29,8 @@ defmodule AlertsUIWeb.Helpers.AlertDataBuilder do
     :alert_timing,
     :banner_text,
     :banner_sync_toggle,
-    :can_close_automatically,
+    :trapeze_autoclosable,
+    :skate_autoclosable,
     :cause_detail,
     :combination,
     :created_timestamp,
@@ -86,7 +87,8 @@ defmodule AlertsUIWeb.Helpers.AlertDataBuilder do
           active_period_start_time_specifier: String.t() | nil,
           alert_timing: atom() | nil,
           banner_text: String.t() | nil,
-          can_close_automatically: boolean(),
+          trapeze_autoclosable: boolean(),
+          skate_autoclosable: boolean(),
           cause_detail: String.t() | nil,
           combination: atom() | nil,
           created_timestamp: DateTime.t() | nil,
@@ -367,7 +369,8 @@ defmodule AlertsUIWeb.Helpers.AlertDataBuilder do
       determine_end_specifier(
         shifted_active_period_end,
         alert.duration_certainty,
-        alert.can_close_automatically
+        alert.trapeze_autoclosable,
+        alert.skate_autoclosable
       )
 
     %{
@@ -403,7 +406,12 @@ defmodule AlertsUIWeb.Helpers.AlertDataBuilder do
       active_period_end: shifted_active_period_end,
       active_period_start_time_specifier: determine_start_specifier(start_datetime),
       active_period_end_time_specifier:
-        determine_end_specifier(end_datetime, :KNOWN, alert.can_close_automatically),
+        determine_end_specifier(
+          end_datetime,
+          :KNOWN,
+          alert.trapeze_autoclosable,
+          alert.skate_autoclosable
+        ),
       active_period_start_specifier: "custom",
       active_period_end_specifier: end_specifier,
       active_period_start_time: recurrence_start_time,
@@ -462,16 +470,16 @@ defmodule AlertsUIWeb.Helpers.AlertDataBuilder do
     end
   end
 
-  @spec determine_end_specifier(NaiveDateTime.t(), atom() | nil, boolean()) ::
+  @spec determine_end_specifier(NaiveDateTime.t(), atom() | nil, boolean(), boolean()) ::
           String.t() | nil
-  def determine_end_specifier(ap_end, certainty, autoclosable \\ false)
+  def determine_end_specifier(ap_end, certainty, trapeze_autoclosable, skate_autoclosable)
+  def determine_end_specifier(nil, nil, _, _), do: nil
+  def determine_end_specifier(nil, _, true, _), do: "when_work_order_is_closed"
+  def determine_end_specifier(nil, _, _, true), do: "when_skate_detour_is_closed"
+  def determine_end_specifier(_, :ESTIMATED, _, _), do: "later_today"
+  def determine_end_specifier(nil, _, _, _), do: "until_further_notice"
 
-  def determine_end_specifier(nil, nil, _), do: nil
-  def determine_end_specifier(nil, _, true), do: "when_work_order_is_closed"
-  def determine_end_specifier(_, :ESTIMATED, _), do: "later_today"
-  def determine_end_specifier(nil, _, _), do: "until_further_notice"
-
-  def determine_end_specifier(ap_end, :KNOWN, _) do
+  def determine_end_specifier(ap_end, :KNOWN, _, _) do
     if ap_end |> NaiveDateTime.to_time() == ActivePeriod.end_of_service_time() do
       "end_of_service"
     else

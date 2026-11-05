@@ -183,6 +183,14 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeSliceGetters do
   end
 
   def get_onetime_end_datetime(
+        %{active_period_end_specifier: :when_skate_detour_is_closed},
+        _current_time,
+        _previous_state
+      ) do
+    nil
+  end
+
+  def get_onetime_end_datetime(
         %{
           active_period_end_specifier: :custom,
           active_period_end: active_period_end,
@@ -196,6 +204,9 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeSliceGetters do
         current_time
 
       previous_state == :when_work_order_is_closed ->
+        current_time
+
+      previous_state == :when_skate_detour_is_closed ->
         current_time
 
       # for trips
@@ -254,6 +265,9 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeSliceGetters do
         nil
 
       :when_work_order_is_closed ->
+        nil
+
+      :when_skate_detour_is_closed ->
         nil
 
       _ ->

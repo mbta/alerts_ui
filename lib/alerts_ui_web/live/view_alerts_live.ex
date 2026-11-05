@@ -663,14 +663,14 @@ defmodule AlertsUIWeb.ViewAlertsLive do
   defp format_timestamp(timestamp, certainty, opts)
 
   defp format_timestamp(_, :UNKNOWN, %{
-         can_close_automatically: true,
+         trapeze_autoclosable: true,
          primary_service_type: "access",
          effect_name: "Elevator Closure"
        }),
        do: "When work order is closed in Trapeze"
 
   defp format_timestamp(_, :UNKNOWN, %{
-         can_close_automatically: true,
+         trapeze_autoclosable: true,
          primary_service_type: "access",
          effect_name: "Escalator Closure"
        }),
@@ -724,19 +724,11 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     end
   end
 
-  defp format_end_time(_, _, %{
-         can_close_automatically: true,
-         primary_service_type: "access",
-         effect_name: "Elevator Closure"
-       }),
-       do: "from Trapeze"
+  defp format_end_time(_, _, %{trapeze_autoclosable: true}),
+    do: "from Trapeze"
 
-  defp format_end_time(_, _, %{
-         can_close_automatically: true,
-         primary_service_type: "access",
-         effect_name: "Escalator Closure"
-       }),
-       do: "from Trapeze"
+  defp format_end_time(_, _, %{skate_autoclosable: true}),
+    do: "from Skate"
 
   defp format_end_time(_, :UNKNOWN, _), do: "further notice"
   defp format_end_time(_, :ESTIMATED, _), do: "later today"

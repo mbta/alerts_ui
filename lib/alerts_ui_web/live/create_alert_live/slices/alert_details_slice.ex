@@ -127,7 +127,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
            %AsyncResult{ok?: true, result: skate_detours}
          ) do
       detour_id = get_field(changeset, :skate_detour_id)
-      detour = Enum.find(skate_detours, &(&1.id == detour_id))
+      detour = Enum.find(skate_detours, &(&1.id == detour_id)) || %{}
       new_cause = (Map.get(detour, :reason) || "") |> String.upcase() |> String.replace(" ", "_")
 
       force_change(changeset, :cause_detail, new_cause)

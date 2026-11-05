@@ -224,7 +224,8 @@ defmodule AlertsUI.AlertHistory do
       Map.get(map, :duration_certainty) || "UNKNOWN",
       Map.get(map, :active_period_end),
       %{
-        can_close_automatically: Map.get(map, :can_close_automatically),
+        skate_autoclosable: Map.get(map, :skate_autoclosable),
+        trapeze_autoclosable: Map.get(map, :trapeze_autoclosable),
         primary_service_type: Map.get(map, :primary_service_type),
         effect_name: Map.get(map, :effect_name)
       }
@@ -425,18 +426,23 @@ defmodule AlertsUI.AlertHistory do
   end
 
   defp effect_end(_, _, %{
-         can_close_automatically: true,
+         trapeze_autoclosable: true,
          primary_service_type: "access",
          effect_name: "Elevator Closure"
        }),
        do: "from Trapeze"
 
   defp effect_end(_, _, %{
-         can_close_automatically: true,
+         trapeze_autoclosable: true,
          primary_service_type: "access",
          effect_name: "Escalator Closure"
        }),
        do: "from Trapeze"
+
+  defp effect_end(_, _, %{
+         skate_autoclosable: true
+       }),
+       do: "from Skate"
 
   defp effect_end("ESTIMATED", _, _), do: "later today"
   defp effect_end("UNKNOWN", _, _), do: "further notice"

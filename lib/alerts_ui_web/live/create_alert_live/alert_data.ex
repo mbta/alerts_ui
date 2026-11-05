@@ -51,6 +51,7 @@ defmodule AlertsUIWeb.CreateAlertLive.AlertData do
     :end_of_service,
     :until_further_notice,
     :when_work_order_is_closed,
+    :when_skate_detour_is_closed,
     :custom
   ]
   @type end_values ::
@@ -58,6 +59,7 @@ defmodule AlertsUIWeb.CreateAlertLive.AlertData do
           | :end_of_service
           | :until_further_notice
           | :when_work_order_is_closed
+          | :when_skate_detour_is_closed
           | :custom
 
   @notification_values [:same_as_effect_period, :now, :start_of_service, :custom]
@@ -112,7 +114,8 @@ defmodule AlertsUIWeb.CreateAlertLive.AlertData do
     # time range
     field :alert_timing, Ecto.Enum, values: @alert_timing_values, default: :"one-time"
     field :recurrence_days, {:array, Ecto.Enum}, values: @recurrence_days_values
-    field :can_close_automatically, :boolean, default: false
+    field :trapeze_autoclosable, :boolean, default: false
+    field :skate_autoclosable, :boolean, default: false
     field :active_period_end, :naive_datetime
     field :active_period_end_date, :date
     field :active_period_end_specifier, Ecto.Enum, values: @end_values

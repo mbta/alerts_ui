@@ -66,7 +66,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.DurationTextTest do
         form(%{
           "active_period_start" => ~N[2024-11-28 01:00:00],
           "active_period_end" => ~N[2024-11-28 03:00:00],
-          "active_period_end_specifier" => "end_of_service"
+          "active_period_end_specifier" => :end_of_service
         })
 
       assert DurationText.one_time_duration_text(f) ==
@@ -83,6 +83,30 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.DurationTextTest do
 
       assert DurationText.one_time_duration_text(f) ==
                "Wed Nov 27, 2024 @ 9:00 AM until alert is manually closed (indefinite)"
+    end
+
+    test "displays when_work_order_is_closed correctly" do
+      form =
+        form(%{
+          "active_period_start" => ~N[2024-11-27 09:00:00],
+          "active_period_end" => "",
+          "active_period_end_specifier" => "when_work_order_is_closed"
+        })
+
+      assert DurationText.one_time_duration_text(form) ==
+               "Wed Nov 27, 2024 @ 9:00 AM until a work order with this facility ID is closed "
+    end
+
+    test "displays when_skate_detour_is_closed correctly" do
+      form =
+        form(%{
+          "active_period_start" => ~N[2024-11-27 09:00:00],
+          "active_period_end" => "",
+          "active_period_end_specifier" => :when_skate_detour_is_closed
+        })
+
+      assert DurationText.one_time_duration_text(form) ==
+               "Wed Nov 27, 2024 @ 9:00 AM until the associated Skate detour is closed "
     end
 
     test "tolerates nil/empty start and end values" do
