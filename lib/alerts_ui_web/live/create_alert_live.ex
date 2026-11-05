@@ -1068,6 +1068,25 @@ defmodule AlertsUIWeb.CreateAlertLive do
 
   defp flash_text(_assigns_alert_id, alert_id, _form_type), do: "Alert ##{alert_id} updated"
 
+  # Debugging https://app.asana.com/1/15492006741476/project/1167196461144361/task/1219194607596850?focus=true
+  def maybe_log_empty_trip_info(
+        %{
+          trip_information_by_id: nil,
+          original_trip_selections: [_ | _] = trip_selections
+        },
+        socket
+      ) do
+    num_available_schedules = length(socket.assigns.selections.available_schedules)
+
+    Logger.warning(
+      "Received nil trip_information_by_id but had #{num_available_schedules} available schedules and trip selections #{Enum.join(trip_selections, ",")}"
+    )
+
+    :warning
+  end
+
+  def maybe_log_empty_trip_info(_, _), do: :ok
+
   defp persist_valid_alert(socket) do
     send(self(), {:persisting_start})
 
@@ -1082,6 +1101,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
     form_type = socket.assigns.form_type
 
     user = Users.create_or_update_user_from_session(socket.assigns.current_user)
+
+    maybe_log_empty_trip_info(alert_data, socket)
 
     alert_params =
       alert_data
