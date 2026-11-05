@@ -647,6 +647,31 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSliceTest do
     end
 
     @tag :logged_in_user
+    test "displays error if one-time start occurs during DST ambiguity", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_start" => "2026-11-01T01:41:00"
+        }
+      })
+
+      assert render(view) =~
+               ~s(Effect periods cannot start or end during a repeated daylight savings time hour)
+    end
+
+    @tag :logged_in_user
     test "displays error if one-time end occurs during DST gap", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page(conn, view, "Bus", "Delay")
@@ -669,6 +694,31 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSliceTest do
 
       assert render(view) =~
                ~s(Effect periods cannot start or end during a skipped daylight savings time hour)
+    end
+
+    @tag :logged_in_user
+    test "displays error if one-time end occurs during DST ambiguity", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end_specifier" => "custom"
+        }
+      })
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "active_period_end" => "2026-11-01T01:41:00"
+        }
+      })
+
+      assert render(view) =~
+               ~s(Effect periods cannot start or end during a repeated daylight savings time hour)
     end
 
     @tag :logged_in_user

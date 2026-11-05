@@ -255,10 +255,10 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeValidators do
   def validate_not_dst_gap(changeset) do
     changeset
     |> validate_change(:active_period_start, fn :active_period_start, active_period_start ->
-      validate_not_in_dst_gap(active_period_start, :active_period_start)
+      validate_not_during_dst_hour(active_period_start, :active_period_start)
     end)
     |> validate_change(:active_period_end, fn :active_period_end, active_period_end ->
-      validate_not_in_dst_gap(active_period_end, :active_period_end)
+      validate_not_during_dst_hour(active_period_end, :active_period_end)
     end)
   end
 
@@ -442,7 +442,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeValidators do
 
   defp validate_start_date_matches_weekday(_, _, _), do: []
 
-  defp validate_not_in_dst_gap(naive_datetime, field) do
+  defp validate_not_during_dst_hour(naive_datetime, field) do
     case DateTime.from_naive(naive_datetime, "America/New_York") do
       {:ok, _} ->
         []
@@ -451,6 +451,12 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.TimeRangeValidators do
         [
           {field,
            "Effect periods cannot start or end during a skipped daylight savings time hour"}
+        ]
+
+      {:ambiguous, _, _} ->
+        [
+          {field,
+           "Effect periods cannot start or end during a repeated daylight savings time hour"}
         ]
     end
   end
