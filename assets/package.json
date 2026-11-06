@@ -6,7 +6,7 @@
   "devDependencies": {
     "@playwright/test": "^1.62.0",
     "@types/node": "^26.1.2",
-    "daisyui": "^4.4.23"
+    "daisyui": "^5.7.50"
   },
   "scripts": {},
   "keywords": [],
