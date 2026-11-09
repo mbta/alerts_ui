@@ -94,13 +94,8 @@ module.exports = {
       "review-modal": "1fr 13.875rem",
     },
   },
-  daisyui: {
-    logs: false,
-    themes: ["winter"],
-  },
   plugins: [
     require("@tailwindcss/typography"),
-    require("daisyui"),
     // Allows prefixing tailwind classes with LiveView classes to add rules
     // only when LiveView classes are applied, for example:
     //
