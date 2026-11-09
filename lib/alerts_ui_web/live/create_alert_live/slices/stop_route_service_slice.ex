@@ -338,13 +338,13 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.StopRouteServiceSlice do
           options={@selections.modal_route_id_options}
           loading={@selections.loading}
           no_results={Enum.empty?(@selections.modal_route_id_options)}
-          class="h-[32rem]"
+          class="h-128"
           prompt="All routes"
           multiple={false}
         />
       </.modal>
 
-      <div class="md:flex md:flex-row gap-x-8 mb-4 h-[32rem]">
+      <div class="md:flex md:flex-row gap-x-8 mb-4 h-128">
         <.filtered_select
           class="md:w-[25%]"
           field={@form[:stop_names_and_ids]}

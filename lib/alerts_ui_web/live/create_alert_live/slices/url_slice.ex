@@ -239,7 +239,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.UrlSlice do
           >
             Effect
             <div id="effect_buttons">
-              <p class="text-text-secondary mb-[18rem]" hidden={!is_nil(@path_route_type)}>
+              <p class="text-text-secondary mb-72" hidden={!is_nil(@path_route_type)}>
                 Select a service type to see possible effects.
               </p>
               <div class="flex flex-wrap justify-center md:justify-normal gap-2">

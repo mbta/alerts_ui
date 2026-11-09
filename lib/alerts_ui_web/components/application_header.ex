@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.ApplicationHeader do
       <div class={"flex items-center justify-between py-4 text-sm before:absolute before:top-0 before:left-0 before:right-0 before:h-3 #{@header_variants[@environment]}"}>
         <div class="flex items-center gap-4 mx-4">
           <a href="/"><img class="h-12" src={"/images/logos/logo-#{@environment}.svg"} /></a>
-          <.h1 class="!mb-0">
+          <.h1 class="mb-0!">
             <a href="/">{"Alerts Manager " <> if @environment != "prod", do: "Test", else: ""}</a>
           </.h1>
           <div

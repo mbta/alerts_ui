@@ -506,9 +506,9 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
               id="header_input"
               class={
                 [
-                  "w-[100%] min-h-[10rem] z-20 mt-3",
+                  "w-full min-h-40 z-20 mt-3",
                   if(String.length(@form[:header_text].value || "") >= 255,
-                    do: "!border-error border-b-1",
+                    do: "!border-error border-b",
                     else: "border-b-0"
                   )
                 ]
@@ -540,9 +540,9 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
               id="description_input"
               class={
                 [
-                  "w-[100%] min-h-[10rem] z-20 mt-3",
+                  "w-full min-h-40 z-20 mt-3",
                   if(String.length(@form[:description_text].value || "") >= 3000,
-                    do: "!border-error border-b-1",
+                    do: "!border-error border-b",
                     else: "border-b-0"
                   )
                 ]
@@ -592,7 +592,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
           >
             <img
               src={@form[:image_url].value}
-              class={["md:max-h-[8rem] mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
+              class={["md:max-h-32 mt-4", if(@form[:image_url].value in ["", nil], do: "hidden")]}
             />
             <div class="flex flex-col justify-center mt-4 md:mt-0 md:ml-4">
               <p :if={@image_path} class="break-all">{@image_path}</p>

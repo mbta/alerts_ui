@@ -679,7 +679,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
               class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_time_specifier) in [:custom, "custom"], do: "", else: "hidden")}
               phx-debounce={120}
             />
-            <p class="md:pt-[2rem]">to</p>
+            <p class="md:pt-8">to</p>
           </div>
           <div class={responsive_class()}>
             <.select
@@ -718,7 +718,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
               class={"md:min-w-64 md:max-w-64 " <> (if fv(@form, :active_period_start_specifier) in [:custom, "custom"], do: "", else: "hidden")}
               phx-debounce={120}
             />
-            <p class="md:pt-[2rem]">to</p>
+            <p class="md:pt-8">to</p>
           </div>
           <div class={responsive_class()}>
             <.select

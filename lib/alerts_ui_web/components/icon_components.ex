@@ -287,7 +287,7 @@ defmodule AlertsUIWeb.IconComponents do
       """
     else
       ~H"""
-      <span class="align-middle bg-mbta-bus font-bold h-full py-1 px-2 rounded text-black text-sm uppercase">
+      <span class="align-middle bg-mbta-bus font-bold h-full py-1 px-2 rounded-sm text-black text-sm uppercase">
         {@type}
       </span>
       """
@@ -319,7 +319,7 @@ defmodule AlertsUIWeb.IconComponents do
 
   def mode_icon(%{type: "Systemwide"} = assigns) do
     ~H"""
-    <.base_pill text="Systemwide" class="!text-black bg-text-white" />
+    <.base_pill text="Systemwide" class="text-black! bg-text-white" />
     """
   end
 
@@ -379,7 +379,7 @@ defmodule AlertsUIWeb.IconComponents do
   # Bus Route Icon
   def mode_icon(assigns) do
     ~H"""
-    <.base_pill text={@name} class="!text-black bg-mbta-bus" />
+    <.base_pill text={@name} class="text-black! bg-mbta-bus" />
     """
   end
 

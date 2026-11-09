@@ -816,7 +816,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
         Affected service
       </.h5>
       <div class={[
-        "flex flex-row flex-wrap min-h-[38rem] md:min-h-[32rem] gap-y-4",
+        "flex flex-row flex-wrap min-h-152 md:min-h-128 gap-y-4",
         @route_field.errors != [] && "mb-9",
         @form[:stop_names_and_ids].errors != [] && "mb-14 md:mb-16",
         @route_field.errors === [] && @form[:stop_names_and_ids].errors === [] && "mb-4"
@@ -845,7 +845,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
           accept_event_name="accept_filter"
           accept_button_text="Apply"
           target_id="#alert_form"
-          container_class="md:!w-[25rem]"
+          container_class="md:w-100!"
         >
           <.filtered_select
             label="Upcoming dates"
@@ -859,7 +859,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
                 @form[:modal_date].value
               )
             }
-            class="h-[32rem]"
+            class="h-128"
             prompt="All future trips"
             multiple={false}
           />
@@ -980,7 +980,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
       </div>
       <div
         :if={@skate_id_selected?}
-        class="p-2 rounded-sm max-w-[48rem] text-bold"
+        class="p-2 rounded-xs max-w-3xl text-bold"
       >
         <p>
           <.icon name="hero-information-circle-solid" /> Selecting a detour from Skate will
