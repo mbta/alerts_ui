@@ -118,7 +118,7 @@ config :alerts_ui, Oban,
        # Read the Trapeze Elevator/Escalator feed, every minute
        {"*/1 * * * *", AlertsUI.Trapeze.Importer, max_attempts: 1},
        # Look for outdated skate alerts to close, every minute
-       {"*/1 * * * *", AlertsUI.Jobs.SkateDetourAutocloseWorker, max_attempts: 1},
+       {"*/1 * * * *", AlertsUI.Jobs.SkateDetourUpdateWorker, max_attempts: 1},
        # Check if we need to validate alerts against dev every minute
        {
          "*/1 * * * *",
