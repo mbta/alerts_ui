@@ -35,7 +35,7 @@ jobs:
   deploy:
     if: ${{ github.event.inputs.env || inputs.environment != 'production' }}
     name: "Deploy Alerts Manager dev"
-    uses: ./.github/workflows/deploy-base.yml
+    uses: $/.github/workflows/deploy-base.yml
     with:
       environment: ${{ github.event.inputs.env || inputs.environment }}
     permissions:

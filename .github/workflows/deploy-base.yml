@@ -29,19 +29,19 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: mbta/actions/build-push-ecr@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+      - uses: mbta/actions/build-push-ecr@788f8e264e9ebb1b76b927c89e6466d5a162be80 # v2.24
         id: build-push
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           docker-repo: ${{ secrets.DOCKER_REPO }}
           docker-additional-args: "--build-arg GIT_SHA=${{github.sha}}"
-      - uses: mbta/actions/deploy-ecs@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+      - uses: mbta/actions/deploy-ecs@788f8e264e9ebb1b76b927c89e6466d5a162be80 # v2.24
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           ecs-cluster: alerts-manager
           ecs-service: alerts-manager-${{ env.TARGET }}
           docker-tag: ${{ steps.build-push.outputs.docker-tag }}
-      - uses: mbta/actions/notify-slack-deploy@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+      - uses: mbta/actions/notify-slack-deploy@788f8e264e9ebb1b76b927c89e6466d5a162be80 # v2.24
         if: ${{ !cancelled() }}
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}

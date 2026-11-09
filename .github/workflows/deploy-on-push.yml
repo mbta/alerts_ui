@@ -8,7 +8,7 @@ on:
 
 jobs:
     call-deploy-dev-orange:
-        uses: ./.github/workflows/deploy-dev.yml
+        uses: $/.github/workflows/deploy-dev.yml
         with:
           environment: dev-orange
         permissions:
@@ -19,7 +19,7 @@ jobs:
           DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     call-deploy-staging:
-        uses: ./.github/workflows/deploy-dev.yml
+        uses: $/.github/workflows/deploy-dev.yml
         with:
           environment: staging
         permissions:
