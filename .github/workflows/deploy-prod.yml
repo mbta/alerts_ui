@@ -11,7 +11,7 @@ permissions: {}
 jobs:
   deploy:
     name: "Deploy Alerts Manager production"
-    uses: ./.github/workflows/deploy-base.yml
+    uses: $/.github/workflows/deploy-base.yml
     with:
       environment: prod
     permissions:
