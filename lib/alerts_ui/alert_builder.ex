@@ -5,6 +5,7 @@ defmodule AlertsUI.AlertBuilder do
     All incoming times are naive datetimes created in the eastern timezone
     and need to be converted to UTC datetimes
   """
+  require Logger
 
   alias AlertsUI.{ActivePeriodBuilder, Activities}
   alias AlertsUI.Helpers.Recurrence
@@ -1121,6 +1122,19 @@ defmodule AlertsUI.AlertBuilder do
       end)
 
     if Enum.empty?(filtered_stops) do
+      # below data just used for log
+      routes =
+        Enum.map(stops_with_context, fn {_, route_id, _, _} -> route_id end)
+        |> Enum.uniq()
+        |> Enum.join(", ")
+
+      stops = Enum.map_join(stops_with_context, ", ", fn {stop, _, _, _} -> stop.id end)
+
+      Logger.info(
+        "Empty stops fallback triggered with routes: #{routes}; stops: #{stops}; trip_directions: #{Enum.join(trip_directions, ", ")}"
+      )
+
+      # logging over
       stops_with_context
     else
       filtered_stops
