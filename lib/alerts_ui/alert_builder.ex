@@ -5,6 +5,7 @@ defmodule AlertsUI.AlertBuilder do
     All incoming times are naive datetimes created in the eastern timezone
     and need to be converted to UTC datetimes
   """
+  require Logger
 
   alias AlertsUI.{ActivePeriodBuilder, Activities}
   alias AlertsUI.Helpers.Recurrence
@@ -1016,9 +1017,7 @@ defmodule AlertsUI.AlertBuilder do
     trip_directions = trip_directions(trip_information_by_id)
 
     stops_with_context
-    |> Enum.filter(fn {_, _, stop_direction_id, _} ->
-      Enum.member?(trip_directions, stop_direction_id)
-    end)
+    |> filter_stops_by_trip_directions(trip_directions)
     |> Enum.flat_map(fn {%Stop{id: stop_id}, route_id, _direction_id, _stop_type} ->
       trip_information_by_id
       |> Enum.flat_map(fn {trip_id, info} ->
@@ -1099,11 +1098,7 @@ defmodule AlertsUI.AlertBuilder do
 
   def build_informed_entities(_mode, _data, _effect), do: []
 
-  @spec build_alternate_route_entities(
-          Trip.id_t(),
-          map(),
-          [Route.id_t()]
-        ) :: [map()]
+  @spec build_alternate_route_entities(Trip.id_t(), map(), [Route.id_t()]) :: [map()]
   defp build_alternate_route_entities(trip_id, entity, added_route_ids) do
     added_route_ids
     |> Enum.map(fn route_id ->
@@ -1113,6 +1108,37 @@ defmodule AlertsUI.AlertBuilder do
           trip: build_trip(trip_id, entity.trip.direction_id, route_id)
       }
     end)
+  end
+
+  @spec filter_stops_by_trip_directions([tuple()], [integer()]) :: [tuple()]
+  defp filter_stops_by_trip_directions(stops_with_context, trip_directions) do
+    # Reject stops that don't match the directions of the selected trips
+    # But if all stops are rejected (rare case), just keep the
+    # original list of stops
+    filtered_stops =
+      stops_with_context
+      |> Enum.filter(fn {_, _, stop_direction_id, _} ->
+        Enum.member?(trip_directions, stop_direction_id)
+      end)
+
+    if Enum.empty?(filtered_stops) do
+      # below data just used for log
+      routes =
+        Enum.map(stops_with_context, fn {_, route_id, _, _} -> route_id end)
+        |> Enum.uniq()
+        |> Enum.join(", ")
+
+      stops = Enum.map_join(stops_with_context, ", ", fn {stop, _, _, _} -> stop.id end)
+
+      Logger.info(
+        "Empty stops fallback triggered with routes: #{routes}; stops: #{stops}; trip_directions: #{Enum.join(trip_directions, ", ")}"
+      )
+
+      # logging over
+      stops_with_context
+    else
+      filtered_stops
+    end
   end
 
   @spec trip_directions(trip_information_by_id_t()) :: [Trip.direction_id_t()]

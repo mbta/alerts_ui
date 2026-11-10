@@ -3928,6 +3928,124 @@ defmodule AlertsUI.AlertBuilderTest do
       end
     end
 
+    test "RDTS CR delay does not filter out stops based on trip direction if all stops would have been filtered out" do
+      trip_id = "FBTieJobPhase17006patch-879458-6028"
+
+      alert_data = %{
+        route_type: 2,
+        effect_name: "Delay",
+        description_text: "CR delay",
+        header_text: "CR delay",
+        route_ids: ["CR-Providence"],
+        direction: "default",
+        trip_ids: ["default", trip_id],
+        trip_information_by_id: %{
+          trip_id => %{
+            direction_id: 1,
+            route_id: "CR-Providence",
+            added_route_ids: []
+          }
+        },
+        stop_ids: ["place-DB-0095", "place-forhl"]
+      }
+
+      parent_stops = [%Stop{id: "place-DB-0095"}, %Stop{id: "place-forhl"}]
+
+      child_stops = [
+        %Stop{id: "NEC-2237-03", parent_id: "place-forhl"},
+        %Stop{id: "NEC-2192-03", parent_id: "place-DB-0095"}
+      ]
+
+      with_mocks([
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn "CR-Providence", [include: "representative_trip.stops,route"] ->
+             [
+               %APIRoutePattern{
+                 direction_id: 0,
+                 stops: child_stops,
+                 route_id: "CR-Providence",
+                 listed_route: true,
+                 id: "CR-Providence-0"
+               },
+               %APIRoutePattern{
+                 direction_id: 1,
+                 # missing the forest hills stop
+                 stops: [%Stop{id: "NEC-2192-03", parent_id: "place-DB-0095"}],
+                 route_id: "CR-Providence",
+                 listed_route: true,
+                 id: "CR-Providence-1"
+               }
+             ]
+           end,
+           included_stops_by_route_id: fn _route_id, _direction ->
+             child_stops
+           end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _route_id, _direction ->
+             parent_stops ++ child_stops
+           end,
+           all: fn ["filter[id]": "place-DB-0095,place-forhl"], _opts -> parent_stops end
+         ]},
+        {RoutesRepo, [], [get: fn route_id, _opts -> %Route{id: route_id, type: 2} end]}
+      ]) do
+        result = AlertBuilder.build_alert(alert_data, :RDTS)
+
+        assert result.informed_entity == [
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   route_id: "CR-Providence",
+                   route_type: 2,
+                   stop_id: "NEC-2237-03",
+                   trip: %{
+                     direction_id: 1,
+                     route_id: "CR-Providence",
+                     trip_id: "FBTieJobPhase17006patch-879458-6028"
+                   }
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   route_id: "CR-Providence",
+                   route_type: 2,
+                   stop_id: "NEC-2192-03",
+                   trip: %{
+                     direction_id: 1,
+                     route_id: "CR-Providence",
+                     trip_id: "FBTieJobPhase17006patch-879458-6028"
+                   }
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   route_id: "CR-Providence",
+                   route_type: 2,
+                   stop_id: "place-forhl",
+                   trip: %{
+                     direction_id: 1,
+                     route_id: "CR-Providence",
+                     trip_id: "FBTieJobPhase17006patch-879458-6028"
+                   }
+                 },
+                 %{
+                   activities: [:BOARD, :EXIT, :RIDE],
+                   agency_id: "1",
+                   route_id: "CR-Providence",
+                   route_type: 2,
+                   stop_id: "place-DB-0095",
+                   trip: %{
+                     direction_id: 1,
+                     route_id: "CR-Providence",
+                     trip_id: "FBTieJobPhase17006patch-879458-6028"
+                   }
+                 }
+               ]
+      end
+    end
+
     test "SR informed entity routes and stops includes route type" do
       alert_data = %{
         route_type: 1,
