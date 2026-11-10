@@ -561,7 +561,7 @@ defmodule AlertsUI.AlertBuilder do
     informed_entities |> Enum.concat(added_f1_entities)
   end
 
-  @spec stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
+  @spec stops_with_context([Route.t()], String.t(), [Stop.id_t()]) ::
           [
             stop_with_context_t()
           ]

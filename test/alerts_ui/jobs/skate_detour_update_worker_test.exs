@@ -116,11 +116,11 @@ defmodule AlertsUI.Jobs.SkateUpdateWorkerTest do
           active_period_end: nil,
           cause: :ACCIDENT,
           cause_detail: "ACCIDENT",
-          original_route_selections: ["17|17"],
+          original_route_selections: ["1|1"],
           original_stop_selections: ["Massachusetts Ave opp Inman St|71"],
-          original_direction_selections: ["Outbound|0"],
+          original_direction_selections: ["Inbound|1"],
           informed_entity: [
-            build(:informed_entity, %{route_id: "17", route_type: 3, stop_id: "71"})
+            build(:informed_entity, %{route_id: "1", route_type: 3, stop_id: "71"})
           ],
           header_text: "original header text",
           description_text: "original description text",

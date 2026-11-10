@@ -12,7 +12,7 @@ defmodule AlertsUI.Jobs.SkateDetourUpdateWorker do
   alias AlertsUI.SkateDetours.GetDetours
   alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AlertDataToAutoText
   alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.Templates
-  alias MBTAV3API.Routes.Repo, as: RoutesRepo
+  alias MBTAV3API.Routes.Route
   alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   @impl Oban.Worker
@@ -71,10 +71,15 @@ defmodule AlertsUI.Jobs.SkateDetourUpdateWorker do
 
     new_cause = Cause.get_by_mode_and_detail(3, new_cause_detail)
 
-    new_direction_id = Map.get(detour, :direction_id)
-    new_direction_name = direction_to_direction_name(new_direction_id)
+    # the route and direction cannot change in a detour
+    # therefore we can get these from existing alert data.
+    [{direction_name, direction_id}] =
+      Alert.get_original_names_and_ids(existing_alert.original_direction_selections)
 
-    new_route = RoutesRepo.get(detour.route_id, []) || %{}
+    [{route_name, route_id}] =
+      Alert.get_original_names_and_ids(existing_alert.original_route_selections)
+
+    route = %Route{id: route_id, name: route_name, type: 3}
 
     new_stops = StopsRepo.all(["filter[id]": Enum.join(detour.missed_stops, ",")], [])
     new_connection_points = get_connection_points(detour)
@@ -82,18 +87,18 @@ defmodule AlertsUI.Jobs.SkateDetourUpdateWorker do
     autotext_data =
       AlertDataToAutoText.build_autotext_data(%{
         route_type: 3,
-        routes: [new_route],
+        routes: [route],
         effect_name: "Detour",
         cause_detail: new_cause_detail,
         connection_points: new_connection_points,
         stops:
           Enum.map(
             new_stops,
-            &Map.put(&1, :name, &1.name <> " (#{String.downcase(new_direction_name)})")
+            &Map.put(&1, :name, &1.name <> " (#{String.downcase(direction_name)})")
           ),
         service_types: [3],
         missed_stops: detour.missed_stops,
-        direction: [new_direction_id]
+        direction: [String.to_integer(direction_id)]
       })
 
     new_header_text = Templates.build_auto_text(autotext_data, :header_template)
@@ -102,8 +107,8 @@ defmodule AlertsUI.Jobs.SkateDetourUpdateWorker do
 
     stops_with_context =
       AlertBuilder.stops_with_context(
-        [new_route],
-        new_direction_id,
+        [route],
+        direction_id,
         detour.missed_stops
       )
 
@@ -112,7 +117,7 @@ defmodule AlertsUI.Jobs.SkateDetourUpdateWorker do
         :RDS,
         %{
           stops_with_context: stops_with_context,
-          route_types_by_id: %{new_route.id => 3},
+          route_types_by_id: %{route.id => 3},
           route_type: 3
         },
         "Detour"
@@ -121,8 +126,6 @@ defmodule AlertsUI.Jobs.SkateDetourUpdateWorker do
     new_alert_params = %{
       cause: new_cause,
       cause_detail: new_cause_detail,
-      original_direction_selections: ["#{new_direction_name}|#{new_direction_id}"],
-      original_route_selections: ["#{new_route.name}|#{new_route.id}"],
       original_stop_selections: Enum.map(new_stops, &"#{&1.name}|#{&1.id}"),
       informed_entity: informed_entities,
       header_text: new_header_text,
@@ -161,8 +164,4 @@ defmodule AlertsUI.Jobs.SkateDetourUpdateWorker do
   defp get_connection_points(%{connection_points: []}), do: []
 
   defp get_connection_points(_), do: nil
-
-  defp direction_to_direction_name(0), do: "Outbound"
-  defp direction_to_direction_name(1), do: "Inbound"
-  defp direction_to_direction_name(_), do: ""
 end
