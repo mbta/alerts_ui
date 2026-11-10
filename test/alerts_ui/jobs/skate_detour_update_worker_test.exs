@@ -58,8 +58,8 @@ defmodule AlertsUI.Jobs.SkateUpdateWorkerTest do
         reason: "Drawbridge being raised",
         nearest_intersection: "Massachusetts Avenue & Western Avenue",
         estimated_duration: "2026-04-14",
-        activated_at: ~U[2026-04-06 18:44:19Z],
-        updated_at: ~U[2026-04-09 13:37:59Z],
+        activated_at: ~U[2026-05-10 18:44:19Z],
+        updated_at: ~U[2026-05-11 13:37:59Z],
         autoclose_on: nil,
         direction_id: 1,
         missed_stops: ["72"],
@@ -136,8 +136,8 @@ defmodule AlertsUI.Jobs.SkateUpdateWorkerTest do
           active_period_end: nil,
           cause: :ACCIDENT,
           cause_detail: "ACCIDENT",
-          created_at: DateTime.add(original_created_at_timestamp, -60, :day),
-          last_modified_timestamp: DateTime.add(original_created_at_timestamp, -60, :day)
+          created_at: ~U[2026-05-12 13:37:59Z],
+          last_modified_timestamp: ~U[2026-05-12 13:37:59Z]
         })
 
         {result, log} = with_log(fn -> SkateDetourUpdateWorker.perform(%Job{args: %{}}) end)
@@ -146,8 +146,7 @@ defmodule AlertsUI.Jobs.SkateUpdateWorkerTest do
 
         non_updated_alert = Alerts.get_by_alert_id!("456")
 
-        assert non_updated_alert.last_modified_timestamp ==
-                 DateTime.add(original_created_at_timestamp, -60, :day)
+        assert non_updated_alert.last_modified_timestamp == ~U[2026-05-12 13:37:59Z]
 
         updated_alert = Alerts.get_by_alert_id!("123")
 

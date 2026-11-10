@@ -38,7 +38,7 @@ defmodule AlertsUI.Jobs.SkateDetourUpdateWorker do
         {alert, Enum.find(skate_detours, &(&1.id == alert.skate_detour_id))}
       end)
       |> Enum.filter(fn {existing_alert, detour} ->
-        DateTime.compare(detour.updated_at, existing_alert.last_modified_timestamp) == :lt
+        DateTime.compare(detour.updated_at, existing_alert.last_modified_timestamp) == :gt
       end)
       |> Enum.map(&modify_alert/1)
       |> Enum.split_with(fn {result, _alert} -> result == :ok end)
