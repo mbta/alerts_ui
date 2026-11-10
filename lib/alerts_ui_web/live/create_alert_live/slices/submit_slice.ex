@@ -61,10 +61,18 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.SubmitSlice do
 
     loading = Map.get(assigns.selections, :loading, false) or assigns.persisting_alert
 
+    url = assigns.current_url |> URI.parse()
+    url_for_link_copy = "#{url.scheme}://#{url.authority}/alerts"
+
     assigns =
       assign(
         assigns,
-        %{alert_data: alert_data, selected_routes: selected_routes, loading: loading}
+        %{
+          alert_data: alert_data,
+          selected_routes: selected_routes,
+          loading: loading,
+          url_for_link_copy: url_for_link_copy
+        }
       )
 
     ~H"""
@@ -106,6 +114,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.SubmitSlice do
         target_id="#submit_view"
         alert_id={@alert_data.alert_id}
         current_user={@current_user}
+        current_url={@url_for_link_copy}
       />
       <.button_secondary
         class="mt-8 self-center border-none py-2 px-3"

@@ -131,7 +131,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         gtfs_modal_id: @gtfs_modal_id,
         change_mode_effect_modal_id: @change_mode_effect_modal_id,
         # Used for keeping track of original state of an alert when changing its mode/effect type
-        original_alert_form: nil
+        original_alert_form: nil,
+        current_url: ""
       })
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
@@ -165,8 +166,9 @@ defmodule AlertsUIWeb.CreateAlertLive do
   end
 
   @impl true
-  def handle_params(params, _url, socket) do
-    {:noreply, sync_socket(socket, params)}
+  def handle_params(params, url, socket) do
+    socket = socket |> assign(:current_url, url) |> sync_socket(params)
+    {:noreply, socket}
   end
 
   @impl true
