@@ -150,7 +150,7 @@
 
   <.h2>Form Fields</.h2>
 
-  <.form for={@form} class="form-control gap-4" phx-change="rerender">
+  <.form for={@form} class="form-control flex flex-col gap-4" phx-change="rerender">
     <.select
       label="Select"
       field={@form[:single_select]}
@@ -309,7 +309,7 @@
       label="Different checkbox"
       field={@form[:checkbox_icon]}
       class="h-5 w-5"
-      check_class="w-full h-full checked:before:hero-truck leading-normal checked:before:mb-8"
+      check_class="w-full h-full checked:before:hero-truck-mini leading-normal checked:before:mb-8"
     />
   </.form>
 

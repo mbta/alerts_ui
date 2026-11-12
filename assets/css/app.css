@@ -3,8 +3,6 @@
 @source "../js";
 @source "../../lib/alerts_ui_web";
 
-@plugin "@tailwindcss/forms";
-
 /* A Tailwind plugin that makes "hero-#{ICON}" classes available. */
 @plugin "../vendor/heroicons";
 

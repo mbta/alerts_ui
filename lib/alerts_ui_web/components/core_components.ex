@@ -374,7 +374,7 @@ defmodule AlertsUIWeb.CoreComponents do
   def radio_switch(assigns) do
     ~H"""
     <fieldset class={["mx-12", @class]}>
-      <div class="join w-full">
+      <div class="join w-full [&>:first-child]:rounded-s-sm [&>:last-child]:rounded-e-sm">
         <.radio_switch_input
           :for={value <- @values}
           name={@name}
@@ -404,7 +404,7 @@ defmodule AlertsUIWeb.CoreComponents do
   def radio_switch_input(assigns) do
     base_classes = "
       join-item
-      rounded btn
+      btn
       h-[38px]!
       min-h-0!
       grow

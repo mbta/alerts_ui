@@ -178,10 +178,10 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   def base_button_classes, do: "
-  btn
-  font-normal
-  text-base
-  gap-0
+    btn
+    font-normal
+    text-base
+    gap-0
     btn-lg
     px-3
     py-1.5
@@ -1232,7 +1232,7 @@ defmodule AlertsUIWeb.SharedComponents do
           target_id={@target_id}
           {@rest}
         />
-        <hr class="w-5/6 self-center border-y border-bg-elevation-6 min-h-4" />
+        <hr class="w-5/6 self-center border-t border-bg-elevation-6 min-h-4" />
         <.select
           multiple={@multiple}
           size="2"
@@ -1671,7 +1671,7 @@ defmodule AlertsUIWeb.SharedComponents do
       </:previous>
       <:ellipsis>
         <span
-          class="ellipsis pointer-events-none text-primary-disabled border-primary-disabled bg-transparent rounded-none btn h-auto min-h-fit py-1! px-2! leading-normal font-normal"
+          class="ellipsis pointer-events-none text-primary-disabled border-primary-disabled bg-transparent rounded-none btn h-auto min-h-full py-1! px-2! leading-normal font-normal border-1"
           aria-hidden="true"
         >
           &hellip;
