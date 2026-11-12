@@ -2,7 +2,6 @@
   "name": "assets",
   "version": "1.0.0",
   "description": "",
-  "main": "tailwind.config.js",
   "devDependencies": {
     "@playwright/test": "^1.62.0",
     "@types/node": "^26.1.2",
