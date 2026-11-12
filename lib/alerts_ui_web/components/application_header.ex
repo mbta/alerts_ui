@@ -79,7 +79,7 @@ defmodule AlertsUIWeb.ApplicationHeader do
             href={~p"/help"}
             class="text-sm leading-6 text-primary hover:underline hover:text-primary-hover whitespace-nowrap"
           >
-            <.icon name="hero-question-mark-circle" class="mx-1" />Help
+            <.icon name="hero-question-mark-circle-mini" class="mx-1" />Help
           </.link>
           <.link
             :if={@current_user}
@@ -87,7 +87,7 @@ defmodule AlertsUIWeb.ApplicationHeader do
             method="delete"
             class="text-sm leading-6 text-primary hover:underline hover:text-primary-hover whitespace-nowrap"
           >
-            <.icon name="hero-arrow-right-on-rectangle" class="mx-1" />Logout
+            <.icon name="hero-arrow-right-on-rectangle-mini" class="mx-1" />Logout
           </.link>
           <.link
             :if={!@current_user}
