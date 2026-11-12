@@ -409,9 +409,10 @@ defmodule AlertsUIWeb.ReviewModal do
             </p>
           <% end %>
           <div>
-            <div
+            <button
               :if={@alert_id}
-              class="text-primary hover:text-primary-hover hover:underline cursor-pointer"
+              type="button"
+              class="text-primary hover:text-primary-hover hover:underline"
               phx-click={
                 JS.dispatch("phx:copy", detail: %{text: @current_url <> "?alert_id=#{@alert_id}"})
               }
@@ -423,7 +424,7 @@ defmodule AlertsUIWeb.ReviewModal do
               <span class="state-copied hidden" aria-hidden="true">
                 <.icon name="hero-check-solid" class="w-4 h-4" /> Copied
               </span>
-            </div>
+            </button>
           </div>
           <.link
             :if={@alert_id}
