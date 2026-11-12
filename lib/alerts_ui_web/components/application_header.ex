@@ -72,7 +72,7 @@ defmodule AlertsUIWeb.ApplicationHeader do
             Download CR Alerts
           </a>
           <div :if={@current_user} class="whitespace-nowrap hidden lg:block fs-mask">
-            <.icon name="hero-user-solid" />
+            <.icon name="hero-user-mini" />
             {@current_user.email}
           </div>
           <.link
