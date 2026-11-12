@@ -1,9 +1,118 @@
-@import 'tailwindcss';
+@import "tailwindcss" source(none);
+@source "../css";
+@source "../js";
+@source "../../lib/alerts_ui_web";
+
+@plugin "@tailwindcss/forms";
+
+/* A Tailwind plugin that makes "hero-#{ICON}" classes available. */
+@plugin "../vendor/heroicons";
+
+@plugin "daisyui" {
+  themes: winter;
+}
 
 @import './inter_ui.css' layer(utilities);
 @import './flop_table.css' layer(utilities);
 
-@config '../tailwind.config.js';
+
+@theme {
+  /* --- Colors --- */
+  --color-primary: #8ecdff;
+  --color-secondary: #171f26;
+  --color-success: #a7ffeb;
+  --color-warning: #ffc107;
+  --color-danger: #dc3545;
+  --color-primary-hover: #C1E4FF;
+  --color-primary-border-hover: #C1E4FF;
+  --color-primary-active: #74a5cc;
+  --color-primary-disabled: #628cae;
+  --color-secondary-border: #495057;
+  --color-secondary-hover: #0b2f4c;
+  --color-secondary-hover-border: #8AC6F6;
+  --color-secondary-active: #9FC0DB;
+  --color-secondary-focus-border: #8ECDFF;
+  --color-secondary-focus-shadow: #4F718B;
+  --color-secondary-disabled: #628CAE;
+  --color-danger-active: #fb5262;
+  --color-danger-hover: #f77380;
+  --color-danger-disabled: #a64f57;
+  --color-toggle-active: #485E70;
+  --color-bg-primary: #0f1417;
+  --color-bg-secondary: #171f26;
+  --color-bg-elevation-3: #1e2933;
+  --color-bg-elevation-4: #2b3741;
+  --color-bg-elevation-5: #2e3f4d;
+  --color-bg-elevation-6: #384e5c;
+  --color-bg-input-default: #2e3f4d;
+  --color-menu-active: #c1e4ff;
+  --color-border-primary: #384E5C;
+  --color-border-focus: #8ecdff;
+  --color-border-disabled: #c6c6c9;
+  --color-text-primary: #f8f9fa;
+  --color-text-primary-disabled: #1B1F23;
+  --color-text-danger: #F3A8A9;
+  --color-text-danger-disabled: #C1C1C1;
+  --color-text-toggle-disabled: #8B8B8B;
+  --color-text-secondary: #B1BCCE;
+  --color-text-disabled: #c6c6c9;
+  --color-text-select-disabled: #7f7f7f;
+  --color-text-link-outline: #8ecdff;
+  --color-text-error: #F3A8A9;
+  --color-text-invert: #212529;
+  --color-text-white: #ffffff;
+  --color-text-dark: #212529;
+  --color-mbta-commuter-rail: #80276c;
+  --color-mbta-subway: #494f5b;
+  --color-mbta-bus: #ffc72c;
+  --color-mbta-ferry: #008eaa;
+  --color-mbta-the-ride: #52bbc5;
+  --color-mbta-red: #da291c;
+  --color-mbta-orange: #ed8b00;
+  --color-mbta-green: #00843d;
+  --color-mbta-blue: #003da5;
+  --color-mbta-silver: #6c777e;
+  --color-mbta-access: #165C96;
+
+  /* --- Fonts --- */
+  --font-body: "Inter UI", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+
+  /* --- Font Sizes & Line Heights --- */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 2.1rem;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 2.4rem;
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 3rem;
+
+  /* --- Grid Template Columns --- */
+  --grid-template-columns-1: 1fr;
+  --grid-template-columns-3: repeat(3, 1fr);
+  --grid-template-columns-4: repeat(4, 1fr);
+  --grid-template-columns-6: repeat(6, 1fr);
+  --grid-template-columns-review-modal: 1fr 13.875rem;
+}
+
+/* Add variants based on LiveView classes */
+@custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
+@custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
+@custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
+
+/* Use the data attribute for dark mode  */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* Make LiveView wrapper divs transparent for layout */
+[data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
