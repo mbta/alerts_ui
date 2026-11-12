@@ -176,7 +176,7 @@ defmodule AlertsUIWeb.ReviewModal do
           </p>
         </div>
       </:header>
-      <div class="grid-cols-review-modal md:grid text-sm/2">
+      <div class="grid-cols-review-modal md:grid">
         <%!-- Main lefthand content --%>
         <div class="p-4 md:grow">
           <%!-- Top section --%>
