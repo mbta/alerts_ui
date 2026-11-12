@@ -178,6 +178,7 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   def base_button_classes, do: "
+    btn-lg
     px-3
     py-1.5
     border
@@ -702,7 +703,7 @@ defmodule AlertsUIWeb.SharedComponents do
                     |> JS.exec("data-cancel", to: "##{@id}")
                   }
                   type="button"
-                  class="opacity-20 hover:opacity-40"
+                  class="btn border-none p-0 opacity-20 hover:opacity-40"
                   aria-label={gettext("close")}
                 >
                   <AlertsUIWeb.CoreComponents.icon name="hero-x-mark-solid" class="h-8 w-8" />
@@ -1339,8 +1340,8 @@ defmodule AlertsUIWeb.SharedComponents do
               rounded text-text-primary disabled:text-text-secondary
               disabled:bg-bg-elevation-3 ring-0 min-w-full focus:ring-0 ring-border-focus
               focus:border-border-focus",
-            @icon && "ps-10",
-            @action_icon && @action_event && "pe-12 w-full",
+            @icon && "pl-10",
+            @action_icon && @action_event && "pr-12 w-full",
             @class,
             @errors != [] && "border-danger focus:border-danger"
           ]}
