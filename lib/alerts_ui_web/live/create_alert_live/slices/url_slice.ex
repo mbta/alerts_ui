@@ -218,7 +218,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.UrlSlice do
         <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
           Alert type
         </.h5>
-        <div class="form-control gap-4 min-w-full">
+        <div class="form-control flex flex-col gap-4 min-w-full">
           <div class="w-4 mr-4 w-full text-center md:text-left">
             Service Type
           </div>

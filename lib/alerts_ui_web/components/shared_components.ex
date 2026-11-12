@@ -178,6 +178,10 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   def base_button_classes, do: "
+  btn
+  font-normal
+  text-base
+  gap-0
     btn-lg
     px-3
     py-1.5
@@ -377,6 +381,10 @@ defmodule AlertsUIWeb.SharedComponents do
   def toggle_button_classes do
     [
       base_toggle_classes: "
+      btn
+      btn-lg
+      text-base
+      font-normal
         disabled:text-secondary-disabled
         disabled:border-secondary-disabled
         cursor-pointer" <> shared_base_toggle_classes(),
