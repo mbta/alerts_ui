@@ -411,6 +411,7 @@ defmodule AlertsUIWeb.ReviewModal do
           <div>
             <button
               :if={@alert_id}
+              type="button"
               class="text-primary hover:text-primary-hover hover:underline"
               phx-click={
                 JS.dispatch("phx:copy", detail: %{text: @current_url <> "?alert_id=#{@alert_id}"})
