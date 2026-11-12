@@ -476,7 +476,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def copy_button(assigns) do
     ~H"""
     <button
-      class="px-2 py-1 border border-border-primary bg-bg-input-default active:bg-secondary-active rounded-sm hover:bg-secondary-hover"
+      class="btn btn-sm text-sm font-normal px-2 py-1 border border-border-primary bg-bg-input-default active:bg-secondary-active rounded-sm hover:bg-secondary-hover"
       phx-click={JS.dispatch("phx:copy_input", to: @copy_id)}
       title={@title}
       type="button"
