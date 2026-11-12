@@ -262,6 +262,15 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
     %{stops: available_stops, facilities: available_facilities}
   end
 
+  def get_missed_child_stops(original_missed_stops, stops_we_already_have, direction_id) do
+    # get missed stops from bus detours that are child stops
+    # and thus weren't in the list of available stops
+    original_missed_stops
+    |> Enum.reject(fn stop_id -> stop_id in Enum.map(stops_we_already_have, & &1.id) end)
+    |> Enum.map(&StopsRepo.get_parent/1)
+    |> map_direction_names_to_stops(direction_id)
+  end
+
   def handle_info({:selected_routes, selected_routes}, socket) do
     {:noreply, assign(socket, selected_routes: selected_routes)}
   end

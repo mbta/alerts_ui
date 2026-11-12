@@ -147,9 +147,23 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
     skate_detour_id = Changeset.get_field(changeset, :skate_detour_id)
     skate_detour = Enum.find(detours, &(&1.id == skate_detour_id))
 
+    missed_stops =
+      Enum.filter(
+        socket.assigns.selections.available_stops,
+        &(&1.id in skate_detour.missed_stops)
+      )
+
+    # if skate gives us child stops we can't grab them from the available stops list
+    # so we need to get their parents from the api
+    missed_stops_from_children =
+      CreateAlertHelpers.get_missed_child_stops(
+        skate_detour.missed_stops,
+        missed_stops,
+        skate_detour.direction_id
+      )
+
     stops =
-      socket.assigns.selections.available_stops
-      |> Enum.filter(&(&1.id in skate_detour.missed_stops))
+      (missed_stops ++ missed_stops_from_children)
       |> Enum.map(&SelectFormatter.id_for_option(&1, true))
 
     changeset

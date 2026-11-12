@@ -8,6 +8,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
   import Ecto.Changeset
 
   alias AlertsUI.Models.{Alert, Cause, SeverityLevel}
+  alias AlertsUIWeb.CreateAlertHelpers
   alias AlertsUIWeb.CreateAlertLive.Helpers.AutoText.{AlertDataToAutoText, Templates}
   alias AlertsUIWeb.CreateAlertLive.Helpers.GetKeyForModeEffect
   alias AlertsUIWeb.CreateAlertLive.Helpers.Path, as: EffectHelper
@@ -396,9 +397,20 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
     end
   end
 
-  defp get_connection_points(%{connection_points: [_ | _] = connection_points}, [_ | _] = stops) do
-    stops
-    |> Enum.filter(fn stop -> stop.id in connection_points end)
+  defp get_connection_points(
+         %{connection_points: [_ | _] = detour_connection_points},
+         [_ | _] = stops
+       ) do
+    connection_points =
+      stops
+      |> Enum.filter(fn stop -> stop.id in detour_connection_points end)
+
+    # use API call to get data for child connection stops that aren't in
+    # the available stops list
+    child_connection_points =
+      CreateAlertHelpers.get_missed_child_stops(detour_connection_points, connection_points, nil)
+
+    (connection_points ++ child_connection_points)
     |> Enum.uniq_by(& &1.id)
     |> Enum.map(
       &(&1.name
