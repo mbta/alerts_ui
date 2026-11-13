@@ -1004,7 +1004,7 @@ defmodule AlertsUIWeb.SharedComponents do
           :if={@modal_filter_id}
           phx-click={show_modal(@modal_filter_id)}
           class={[
-            "leading-tight mb-2 min-h-[1.3rem] text-right",
+            "cursor-pointer leading-tight mb-2 min-h-[1.3rem] text-right",
             if(@modal_filter_disabled, do: "text-text-disabled", else: "text-primary")
           ]}
           type="button"
@@ -1034,7 +1034,8 @@ defmodule AlertsUIWeb.SharedComponents do
           "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 scheme-light
             rounded text-text-primary disabled:text-text-select-disabled scrollbar-thin overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 **:pb-[.40rem] **:whitespace-pre-wrap **:truncate block",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 **:pb-[.40rem] **:whitespace-pre-wrap **:truncate block
+            [&>option]:px-0.5",
           @select_class,
           @errors != [] && "border-danger focus:border-danger",
           @warning && "border-warning focus:border-warning",
