@@ -28,6 +28,19 @@ defmodule AlertsUI.Models.CustomFilters do
     effects_filter(query, %{filter | value: [value]}, opts)
   end
 
+  def causes_filter(query, %Filter{value: value}, _opts) when is_list(value) do
+    # find alerts with no cause detail if value is empty
+    if Enum.empty?(value) do
+      query |> where([a], is_nil(a.cause_detail))
+    else
+      query |> where([a], a.cause_detail in ^value)
+    end
+  end
+
+  def causes_filter(query, %Filter{value: value} = filter, opts) do
+    causes_filter(query, %{filter | value: [value]}, opts)
+  end
+
   def routes_filter(query, %Filter{value: value}, _opts) when is_list(value) do
     value =
       if "Green" in value do
