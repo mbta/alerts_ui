@@ -453,7 +453,12 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSliceTest do
            by_type: fn _ -> [@detour_bus_route] end,
            get: fn _, _ -> @detour_bus_route end
          ]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [] end]}
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ ->
+             [%Stop{id: "62", name: "stop 62"}, %Stop{id: "63", name: "stop 63"}]
+           end
+         ]}
       ]) do
         conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -480,6 +485,8 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSliceTest do
           "_target" => ["alert_data", "skate_detour_id"],
           "alert_data" => %{"skate_detour_id" => 9}
         })
+
+        render_async(view)
 
         assert selected_start_specifier(view) == "now"
         assert selected_end_specifier(view) == "when_skate_detour_is_closed"

@@ -152,7 +152,16 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSliceTest do
            by_type: fn _ -> [@detour_bus_route] end,
            get: fn _, _ -> @detour_bus_route end
          ]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [] end]}
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ ->
+             [
+               %Stop{id: "71", name: "Massachusetts Ave opp Inman St"},
+               %Stop{id: "72", name: "Massachusetts Ave @ Pearl St"},
+               %Stop{id: "73", name: "Massachusetts Ave @ Sidney St"}
+             ]
+           end
+         ]}
       ]) do
         conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -198,6 +207,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSliceTest do
            by_route: fn _, _, _ ->
              [
                %Stop{id: "71", name: "Massachusetts Ave opp Inman St"},
+               %Stop{id: "72", name: "Massachusetts Ave @ Pearl St"},
                %Stop{id: "73", name: "Massachusetts Ave @ Sidney St"}
              ]
            end
@@ -235,12 +245,12 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSliceTest do
         })
 
         assert view |> element("#alert_data_header_text") |> render_async =~
-                 ~s("Route 1 inbound is detoured due to a drawbridge being raised. The closest stops with service are Massachusetts Ave opp Inman St and Massachusetts Ave @ Sidney St.")
+                 ~s("Route 1 inbound is detoured, skipping Massachusetts Ave @ Pearl St due to a drawbridge being raised. The closest stops with service are Massachusetts Ave opp Inman St and Massachusetts Ave @ Sidney St.")
 
         assert view |> element("#alert_data_header_text") |> render_async =~ ~s(disabled="")
 
         assert view |> element("#alert_data_description_text") |> render_async =~
-                 ~s("Affected direction: inbound")
+                 ~s("Skipped inbound stops:\nMassachusetts Ave @ Pearl St")
 
         assert view |> element("#alert_data_description_text") |> render_async =~ ~s(disabled="")
 

@@ -3191,7 +3191,16 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
            by_type: fn _ -> [@detour_bus_route] end,
            get: fn _, _ -> @detour_bus_route end
          ]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [@detour_stop, @connection_stop] end]}
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ ->
+             [
+               @connection_stop,
+               @detour_stop,
+               %Stop{id: "73", name: "Massachusetts Ave @ Sidney St"}
+             ]
+           end
+         ]}
       ]) do
         conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -3229,7 +3238,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
                  ~s(title="Stop ID 72" selected="" value="Mass Ave at Pearl St \(inbound\)|72">Mass Ave at Pearl St \(inbound\))
 
         assert view |> element("#alert_data_header_text") |> render_async =~
-                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St due to a drawbridge being raised. The closest stop with service is Mass Ave opp Inman St."
+                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St due to a drawbridge being raised. The closest stops with service are Mass Ave opp Inman St and Massachusetts Ave @ Sidney St."
       end
     end
 
@@ -3331,7 +3340,16 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
            get: fn _, _ -> @detour_bus_route end
          ]},
         {StopsRepo, [],
-         [by_route: fn _, _, _ -> [@detour_stop] end, all: fn _, _ -> [@detour_stop] end]},
+         [
+           by_route: fn _, _, _ ->
+             [
+               @connection_stop,
+               @detour_stop,
+               %Stop{id: "73", name: "Massachusetts Ave @ Sidney St"}
+             ]
+           end,
+           all: fn _, _ -> [] end
+         ]},
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _, _ -> [] end
