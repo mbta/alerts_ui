@@ -14,7 +14,7 @@ ADD . .
 RUN mix deps.get --only prod
 
 # --- Build NPM assets ---
-FROM node:20.10.0-alpine3.19 AS assets-builder
+FROM node:26.13.0-alpine3.24 AS assets-builder
 
 WORKDIR /root
 ADD . .
