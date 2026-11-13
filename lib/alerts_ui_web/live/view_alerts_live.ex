@@ -28,11 +28,13 @@ defmodule AlertsUIWeb.ViewAlertsLive do
     field :routes_search_term, :string
     field :effects, {:array, :string}
     field :effects_search_term, :string
+    field :causes, {:array, :string}
+    field :cause_search_term, :string
   end
 
-  @fields ~w[timeline multi_column_search service_type service_type_search_term routes routes_search_term effects effects_search_term]a
+  @fields ~w[timeline multi_column_search service_type service_type_search_term routes routes_search_term effects effects_search_term causes cause_search_term]a
 
-  @modal_filter_fields ["service_type", "routes", "effects"]
+  @modal_filter_fields ["service_type", "routes", "effects", "causes"]
   @other_filter_fields ["multi_column_search", "timeline"]
   @filter_fields @modal_filter_fields ++ @other_filter_fields
 

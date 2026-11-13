@@ -12,7 +12,7 @@ defmodule AlertsUIWeb.FilterForm do
   import AlertsUIWeb.SharedComponents
 
   alias AlertsUI.Alerts
-  alias AlertsUI.Models.Effect
+  alias AlertsUI.Models.{Cause, Effect}
   alias AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
@@ -194,6 +194,20 @@ defmodule AlertsUIWeb.FilterForm do
             })
           }
         />
+        <.filter_modal_group
+          field={@form[:causes]}
+          filter_field={@form[:cause_search_term]}
+          label="Causes"
+          options={
+            SelectFormatter.formatted_select_options(%SelectFormatter{
+              options: format_cause_options(),
+              search_term: assigns.form[:cause_search_term].value,
+              values_to_keep: List.wrap(assigns.form[:causes].value),
+              option_prefix: "causes-filter"
+            })
+          }
+        />
+
         <:footer>
           <div class="flex flex-row justify-end px-4 py-4 gap-2">
             <.button_primary
@@ -331,6 +345,26 @@ defmodule AlertsUIWeb.FilterForm do
   def format_effect_options do
     Effect.effects_tuples()
     |> Enum.map(fn {name, _, _} -> {name, name} end)
+  end
+
+  def format_cause_options do
+    cause_option_list =
+      Cause.all_causes()
+      |> Enum.map(&Map.keys/1)
+      |> List.flatten()
+      |> Enum.sort()
+      |> Enum.map(fn cause_detail ->
+        display_name =
+          cause_detail
+          |> String.replace("_", " ")
+          |> String.downcase()
+          |> String.replace("amtrak", "Amtrak")
+          |> String.replace("coast guard", "Coast Guard")
+
+        {display_name, cause_detail}
+      end)
+
+    [{"<none>", nil} | cause_option_list]
   end
 
   def format_routes_options do

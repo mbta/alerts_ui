@@ -78,112 +78,147 @@ defmodule AlertsUI.Models.Cause do
   def cause_map_by_mode(mode) do
     case mode do
       nil ->
-        # systemwide
-        %{
-          "HOLIDAY" => :HOLIDAY,
-          "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
-          "SNOW" => :WEATHER,
-          "SPECIAL_EVENT" => :OTHER_CAUSE,
-          "WEATHER" => :WEATHER
-        }
+        systemwide_causes()
 
       m when m in [0, 1] ->
-        %{
-          "ACCIDENT" => :ACCIDENT,
-          "CONSTRUCTION" => :CONSTRUCTION,
-          "DISABLED_TRAIN" => :TECHNICAL_PROBLEM,
-          "FIRE" => :TECHNICAL_PROBLEM,
-          "FIRE_DEPARTMENT_ACTIVITY" => :OTHER_CAUSE,
-          "FLOODING" => :WEATHER,
-          "MAINTENANCE" => :MAINTENANCE,
-          "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
-          "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
-          "POWER_PROBLEM" => :TECHNICAL_PROBLEM,
-          "SIGNAL_PROBLEM" => :TECHNICAL_PROBLEM,
-          "SINGLE_TRACKING" => :MAINTENANCE,
-          "SNOW" => :WEATHER,
-          "SPECIAL_EVENT" => :OTHER_CAUSE,
-          "SWITCH_PROBLEM" => :TECHNICAL_PROBLEM,
-          "TRACK_PROBLEM" => :TECHNICAL_PROBLEM,
-          "TRACK_WORK" => :MAINTENANCE,
-          "TRAFFIC" => :OTHER_CAUSE,
-          "WEATHER" => :WEATHER
-        }
+        subway_causes()
 
       2 ->
-        %{
-          "AMTRAK_TRAIN_TRAFFIC" => :OTHER_CAUSE,
-          "CROSSING_ISSUE" => :TECHNICAL_PROBLEM,
-          "DRAWBRIDGE_ISSUE" => :OTHER_CAUSE,
-          "FIRE_DEPARTMENT_ACTIVITY" => :TECHNICAL_PROBLEM,
-          "FREIGHT_TRAIN_INTERFERENCE" => :OTHER_CAUSE,
-          "HEAVY_RIDERSHIP" => :OTHER_CAUSE,
-          "HOLIDAY" => :HOLIDAY,
-          "MAINTENANCE" => :MAINTENANCE,
-          "MECHANICAL_ISSUE" => :TECHNICAL_PROBLEM,
-          "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
-          "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
-          "RAIL_DEFECT" => :TECHNICAL_PROBLEM,
-          "SIGNAL_ISSUE" => :TECHNICAL_PROBLEM,
-          "SLIPPERY_RAIL" => :WEATHER,
-          "SNOW" => :WEATHER,
-          "SPEED_RESTRICTION" => :OTHER_CAUSE,
-          "SWITCH_ISSUE" => :TECHNICAL_PROBLEM,
-          "TIE_REPLACEMENT" => :MAINTENANCE,
-          "TRACK_WORK" => :CONSTRUCTION,
-          "TRAIN_TRAFFIC" => :OTHER_CAUSE,
-          "UNRULY_PASSENGER" => :POLICE_ACTIVITY,
-          "WEATHER" => :WEATHER
-        }
+        commuter_rail_causes()
 
       3 ->
-        %{
-          "ACCIDENT" => :ACCIDENT,
-          "CONSTRUCTION" => :CONSTRUCTION,
-          "DEMONSTRATION" => :DEMONSTRATION,
-          "DISABLED_BUS" => :TECHNICAL_PROBLEM,
-          "DRAWBRIDGE_BEING_RAISED" => :OTHER_CAUSE,
-          "FIRE" => :TECHNICAL_PROBLEM,
-          "HAZMAT_CONDITION" => :OTHER_CAUSE,
-          "HOLIDAY" => :HOLIDAY,
-          "MAINTENANCE" => :MAINTENANCE,
-          "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
-          "PARADE" => :OTHER_CAUSE,
-          "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
-          "SNOW" => :WEATHER,
-          "SPECIAL_EVENT" => :OTHER_CAUSE,
-          "TRAFFIC" => :OTHER_CAUSE,
-          "UTILITY_WORK" => :CONSTRUCTION,
-          "WEATHER" => :WEATHER
-        }
+        bus_causes()
 
       4 ->
-        %{
-          "ACCIDENT" => :ACCIDENT,
-          "COAST_GUARD_RESTRICTION" => :OTHER_CAUSE,
-          "FOG" => :WEATHER,
-          "HIGH_RIDERSHIP" => :OTHER_CAUSE,
-          "HIGH_WINDS" => :WEATHER,
-          "HOLIDAY" => :HOLIDAY,
-          "ICE_IN_HARBOR" => :WEATHER,
-          "MAINTENANCE" => :MAINTENANCE,
-          "MECHANICAL_PROBLEM" => :TECHNICAL_PROBLEM,
-          "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
-          "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
-          "PRESENCE_OF_WHALES" => :OTHER_CAUSE,
-          "ROUGH_SEAS" => :OTHER_CAUSE,
-          "SEVERE_WEATHER" => :WEATHER,
-          "VESSEL_SUBSTITUTION" => :OTHER_CAUSE,
-          "VESSEL_TRAFFIC" => :OTHER_CAUSE
-        }
+        ferry_causes()
 
       :ACCESS ->
-        %{
-          "CONSTRUCTION" => :CONSTRUCTION,
-          "ELECTRICAL_WORK" => :MAINTENANCE,
-          "FIRE" => :TECHNICAL_PROBLEM,
-          "MAINTENANCE" => :MAINTENANCE
-        }
+        facility_causes()
     end
+  end
+
+  def all_causes do
+    [
+      systemwide_causes(),
+      subway_causes(),
+      commuter_rail_causes(),
+      bus_causes(),
+      ferry_causes(),
+      facility_causes()
+    ]
+    |> List.flatten()
+  end
+
+  def systemwide_causes do
+    %{
+      "HOLIDAY" => :HOLIDAY,
+      "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
+      "SNOW" => :WEATHER,
+      "SPECIAL_EVENT" => :OTHER_CAUSE,
+      "WEATHER" => :WEATHER
+    }
+  end
+
+  def subway_causes do
+    %{
+      "ACCIDENT" => :ACCIDENT,
+      "CONSTRUCTION" => :CONSTRUCTION,
+      "DISABLED_TRAIN" => :TECHNICAL_PROBLEM,
+      "FIRE" => :TECHNICAL_PROBLEM,
+      "FIRE_DEPARTMENT_ACTIVITY" => :OTHER_CAUSE,
+      "FLOODING" => :WEATHER,
+      "MAINTENANCE" => :MAINTENANCE,
+      "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
+      "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
+      "POWER_PROBLEM" => :TECHNICAL_PROBLEM,
+      "SIGNAL_PROBLEM" => :TECHNICAL_PROBLEM,
+      "SINGLE_TRACKING" => :MAINTENANCE,
+      "SNOW" => :WEATHER,
+      "SPECIAL_EVENT" => :OTHER_CAUSE,
+      "SWITCH_PROBLEM" => :TECHNICAL_PROBLEM,
+      "TRACK_PROBLEM" => :TECHNICAL_PROBLEM,
+      "TRACK_WORK" => :MAINTENANCE,
+      "TRAFFIC" => :OTHER_CAUSE,
+      "WEATHER" => :WEATHER
+    }
+  end
+
+  def commuter_rail_causes do
+    %{
+      "AMTRAK_TRAIN_TRAFFIC" => :OTHER_CAUSE,
+      "CROSSING_ISSUE" => :TECHNICAL_PROBLEM,
+      "DRAWBRIDGE_ISSUE" => :OTHER_CAUSE,
+      "FIRE_DEPARTMENT_ACTIVITY" => :TECHNICAL_PROBLEM,
+      "FREIGHT_TRAIN_INTERFERENCE" => :OTHER_CAUSE,
+      "HEAVY_RIDERSHIP" => :OTHER_CAUSE,
+      "HOLIDAY" => :HOLIDAY,
+      "MAINTENANCE" => :MAINTENANCE,
+      "MECHANICAL_ISSUE" => :TECHNICAL_PROBLEM,
+      "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
+      "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
+      "RAIL_DEFECT" => :TECHNICAL_PROBLEM,
+      "SIGNAL_ISSUE" => :TECHNICAL_PROBLEM,
+      "SLIPPERY_RAIL" => :WEATHER,
+      "SNOW" => :WEATHER,
+      "SPEED_RESTRICTION" => :OTHER_CAUSE,
+      "SWITCH_ISSUE" => :TECHNICAL_PROBLEM,
+      "TIE_REPLACEMENT" => :MAINTENANCE,
+      "TRACK_WORK" => :CONSTRUCTION,
+      "TRAIN_TRAFFIC" => :OTHER_CAUSE,
+      "UNRULY_PASSENGER" => :POLICE_ACTIVITY,
+      "WEATHER" => :WEATHER
+    }
+  end
+
+  def bus_causes do
+    %{
+      "ACCIDENT" => :ACCIDENT,
+      "CONSTRUCTION" => :CONSTRUCTION,
+      "DEMONSTRATION" => :DEMONSTRATION,
+      "DISABLED_BUS" => :TECHNICAL_PROBLEM,
+      "DRAWBRIDGE_BEING_RAISED" => :OTHER_CAUSE,
+      "FIRE" => :TECHNICAL_PROBLEM,
+      "HAZMAT_CONDITION" => :OTHER_CAUSE,
+      "HOLIDAY" => :HOLIDAY,
+      "MAINTENANCE" => :MAINTENANCE,
+      "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
+      "PARADE" => :OTHER_CAUSE,
+      "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
+      "SNOW" => :WEATHER,
+      "SPECIAL_EVENT" => :OTHER_CAUSE,
+      "TRAFFIC" => :OTHER_CAUSE,
+      "UTILITY_WORK" => :CONSTRUCTION,
+      "WEATHER" => :WEATHER
+    }
+  end
+
+  def ferry_causes do
+    %{
+      "ACCIDENT" => :ACCIDENT,
+      "COAST_GUARD_RESTRICTION" => :OTHER_CAUSE,
+      "FOG" => :WEATHER,
+      "HIGH_RIDERSHIP" => :OTHER_CAUSE,
+      "HIGH_WINDS" => :WEATHER,
+      "HOLIDAY" => :HOLIDAY,
+      "ICE_IN_HARBOR" => :WEATHER,
+      "MAINTENANCE" => :MAINTENANCE,
+      "MECHANICAL_PROBLEM" => :TECHNICAL_PROBLEM,
+      "MEDICAL_EMERGENCY" => :MEDICAL_EMERGENCY,
+      "POLICE_ACTIVITY" => :POLICE_ACTIVITY,
+      "PRESENCE_OF_WHALES" => :OTHER_CAUSE,
+      "ROUGH_SEAS" => :OTHER_CAUSE,
+      "SEVERE_WEATHER" => :WEATHER,
+      "VESSEL_SUBSTITUTION" => :OTHER_CAUSE,
+      "VESSEL_TRAFFIC" => :OTHER_CAUSE
+    }
+  end
+
+  def facility_causes do
+    %{
+      "CONSTRUCTION" => :CONSTRUCTION,
+      "ELECTRICAL_WORK" => :MAINTENANCE,
+      "FIRE" => :TECHNICAL_PROBLEM,
+      "MAINTENANCE" => :MAINTENANCE
+    }
   end
 end

@@ -470,6 +470,29 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
     end
 
     @tag :logged_in_user
+    test "filter by cause works", %{conn: conn} do
+      insert(:alert, %{
+        alert_id: "1000",
+        cause_detail: "DEMONSTRATION",
+        cause: :DEMONSTRATION
+      })
+
+      insert(:alert, %{
+        alert_id: "2000",
+        cause_detail: nil,
+        cause: nil
+      })
+
+      {:ok, _view, html} = live(conn, "/alerts?filter[causes][]=DEMONSTRATION")
+      refute html =~ "2000"
+      assert html =~ "1000"
+
+      {:ok, _view, html} = live(conn, "/alerts?filter[causes][]=")
+      refute html =~ "1000"
+      assert html =~ "2000"
+    end
+
+    @tag :logged_in_user
     test "text search and the modal filters have oneoff resets", %{conn: conn} do
       insert(:alert, %{
         alert_id: "899",

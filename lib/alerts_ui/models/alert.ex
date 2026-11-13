@@ -159,6 +159,7 @@ defmodule AlertsUI.Models.Alert do
   @flop_options [
     filterable: [
       :alert_id,
+      :causes,
       :effect_detail,
       :text_content,
       :effects,
@@ -181,6 +182,11 @@ defmodule AlertsUI.Models.Alert do
       alias_fields: [:integer_alert_id, :service_pill_sort_key],
       compound_fields: [text_content: [:header_text, :description_text]],
       custom_fields: [
+        causes: [
+          filter: {CustomFilters, :causes_filter, []},
+          ecto_type: {:array, :string},
+          operators: [:==]
+        ],
         effects: [
           filter: {CustomFilters, :effects_filter, []},
           ecto_type: {:array, :string},
