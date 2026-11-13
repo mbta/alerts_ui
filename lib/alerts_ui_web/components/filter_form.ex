@@ -42,7 +42,7 @@ defmodule AlertsUIWeb.FilterForm do
         <.filter_modal form={@form} filter_count={@filter_count} />
         <.radio_switch
           name="timeline"
-          class="!mx-0"
+          class="mx-0!"
           selected={@form[:timeline].value}
           default="current"
           values={timeline_options()}
@@ -53,7 +53,7 @@ defmodule AlertsUIWeb.FilterForm do
           phx-debounce={750}
           placeholder="Search alerts"
           icon="hero-magnifying-glass-mini"
-          class="h-[2.375rem] w-full"
+          class="h-9.5 w-full"
           phx-change={JS.push("paginate_start") |> JS.push("apply_filter")}
           action_icon="hero-x-circle-solid"
           action_event={JS.push("paginate_start") |> JS.push("reset_text_filter")}
@@ -91,8 +91,8 @@ defmodule AlertsUIWeb.FilterForm do
 
   def filter_modal(assigns) do
     button_classes = "
-      !h-[38px]
-      !min-h-0
+      h-[38px]!
+      min-h-0!
       active:bg-secondary-active
       align-center
       bg-bg-elevation-3
@@ -121,10 +121,10 @@ defmodule AlertsUIWeb.FilterForm do
 
     active_button_classes =
       if assigns.filter_count > 0 do
-        "!bg-secondary-active
+        "bg-secondary-active!
         border-0
-        hover:!bg-primary-hover
-        !text-text-invert"
+        hover:bg-primary-hover!
+        text-text-invert!"
       else
         ""
       end
@@ -153,7 +153,7 @@ defmodule AlertsUIWeb.FilterForm do
         header_text={@header_text}
         cancel_event_name="cancel_filter_modal"
         button_type="submit"
-        container_class="!w-[25rem]"
+        container_class="w-100!"
       >
         <.filter_modal_group
           field={@form[:service_type]}
@@ -291,7 +291,7 @@ defmodule AlertsUIWeb.FilterForm do
     assigns = assign(assigns, field_string: assigns.field.field |> to_string())
 
     ~H"""
-    <div class="group collapse rounded-none border-bg-elevation-6 border-b-[1px] first:border-t-0 last:border-b-0 has-[.trigger:checked]:border-b-0">
+    <div class="group collapse rounded-none border-bg-elevation-6 border-b first:border-t-0 last:border-b-0 has-[.trigger:checked]:border-b-0">
       <input
         id={@field_string <> "_filter"}
         type="radio"
@@ -321,8 +321,8 @@ defmodule AlertsUIWeb.FilterForm do
         phx-value-filter-id={@field_string}
         class="hero-x-circle-mini w-4 h-4 bg-primary cursor-pointer absolute right-8 top-2.5"
       />
-      <div class="collapse-content text-base !p-0">
-        <.filtered_select class="h-[20rem]" field={@field} prompt="All" {@rest} />
+      <div class="collapse-content text-base p-0!">
+        <.filtered_select class="h-80" field={@field} prompt="All" {@rest} />
       </div>
     </div>
     """

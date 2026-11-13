@@ -16,7 +16,7 @@
     <.filter_form form={@form} filter_count={@filter_count} />
   </div>
 
-  <div class="sticky top-0 z-20 flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between min-h-[2.5rem]">
+  <div class="sticky top-0 z-20 flex items-center bg-bg-secondary p-2 text-sm border-t border-border-primary justify-between min-h-10">
     <span class="w-24">
       <.loading loading={@loading}></.loading>
       <span :if={!@loading}>
@@ -44,12 +44,12 @@
         symbol_asc: sort_icon(:asc),
         symbol_desc: sort_icon(:desc),
         symbol_unsorted: sort_icon(nil),
-        table_attrs: [class: "table table-fixed min-w-[54rem]"],
-        tbody_td_attrs: [class: "px-2 py-1 leading-[1.5] break-words"],
+        table_attrs: [class: "table table-fixed min-w-216"],
+        tbody_td_attrs: [class: "px-2 py-1 leading-normal wrap-break-word"],
         tbody_tr_attrs: [
           class: "hover:bg-bg-elevation-3 cursor-pointer odd:bg-bg-secondary border-none"
         ],
-        thead_th_attrs: [class: "bg-bg-primary px-2 leading-[1.5]"],
+        thead_th_attrs: [class: "bg-bg-primary px-2 leading-normal"],
         thead_tr_attrs: [
           class: "md:sticky md:top-0 z-10 text-base text-text-primary border-none"
         ]
@@ -137,7 +137,7 @@
             }
             id={"edit-button-#{alert.alert_id}"}
             href={form_path_edit(alert.alert_id)}
-            class="inline-flex rounded !px-2 !py-[3px]"
+            class="inline-flex rounded-sm px-2! py-[3px]!"
             title="Edit alert"
           >
             <.icon name="hero-pencil-solid" class="w-4 h-4" />
@@ -148,7 +148,7 @@
                 UserHelpers.author?(@current_user)
             }
             id={"close-button-#{alert.alert_id}"}
-            class="inline-flex rounded !px-2 !py-[3px]"
+            class="inline-flex rounded-sm px-2! py-[3px]!"
             title="Close alert"
             phx-click={
               JS.push("opening_close_modal",
@@ -165,7 +165,7 @@
           <.button_menu id={"button-menu-#{alert.alert_id}"} container_id="view_alerts_live_view">
             <:toggle>
               <.button_secondary
-                class="inline-flex rounded !px-2 !py-[3px]"
+                class="inline-flex rounded-sm px-2! py-[3px]!"
                 title="Show more actions"
               >
                 <.icon name="hero-ellipsis-vertical" class="w-4 h-4" />

@@ -207,7 +207,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.ReminderTimesSlice do
       <.input type="hidden" name="alert_data[reminder_drop][]" value="" />
       <button
         :if={@editable}
-        class="flex max-h-[3.2rem] items-center"
+        class="btn border-none p-2 flex max-h-[3.2rem] items-center"
         type="button"
         name="alert_data[reminder_drop][]"
         value={@index}

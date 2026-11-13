@@ -135,19 +135,19 @@ defmodule AlertsUIWeb.Tickets.SearchBarPersistsOnSelectionTest do
         render_async(view)
 
         # The modal panel carries a fixed width class regardless of result count.
-        # (Driven from the slice's `container_class="md:!w-[25rem]"`.)
+        # (Driven from the slice's `container_class="md:w-100!"`.)
         {:ok, doc_all} = view |> render() |> Floki.parse_document()
-        assert modal_container_class(doc_all) =~ "w-[25rem]"
+        assert modal_container_class(doc_all) =~ "w-100"
 
         # Narrow results to one match.
         type_in_filter(view, "stop_search_term", "Wellesley")
         {:ok, doc_one} = view |> render() |> Floki.parse_document()
-        assert modal_container_class(doc_one) =~ "w-[25rem]"
+        assert modal_container_class(doc_one) =~ "w-100"
 
         # Narrow to zero matches.
         type_in_filter(view, "stop_search_term", "zzzzzznomatch")
         {:ok, doc_none} = view |> render() |> Floki.parse_document()
-        assert modal_container_class(doc_none) =~ "w-[25rem]"
+        assert modal_container_class(doc_none) =~ "w-100"
 
         # The width-bearing class is identical across all three states.
         assert modal_container_class(doc_all) == modal_container_class(doc_one)

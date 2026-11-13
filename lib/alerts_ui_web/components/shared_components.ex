@@ -178,6 +178,11 @@ defmodule AlertsUIWeb.SharedComponents do
   end
 
   def base_button_classes, do: "
+    btn
+    font-normal
+    text-base
+    gap-0
+    btn-lg
     px-3
     py-1.5
     border
@@ -376,6 +381,10 @@ defmodule AlertsUIWeb.SharedComponents do
   def toggle_button_classes do
     [
       base_toggle_classes: "
+      btn
+      btn-lg
+      text-base
+      font-normal
         disabled:text-secondary-disabled
         disabled:border-secondary-disabled
         cursor-pointer" <> shared_base_toggle_classes(),
@@ -396,7 +405,7 @@ defmodule AlertsUIWeb.SharedComponents do
 
   defp shared_base_toggle_classes do
     "font-medium
-        border-[1px]
+        border
         mb-1
         text-base
         px-4
@@ -420,7 +429,11 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :icon, :string, default: nil, doc: "optional name of icon"
   attr :hidden, :boolean, default: false, doc: "hides component if true"
   attr :active, :boolean, default: true, doc: "switches to active colors if true"
-  attr :use_outline_buttons, :boolean, default: false, doc: "whether to use outline button type"
+
+  attr :use_outline_buttons, :boolean,
+    default: false,
+    doc: "whether to use outline-solid button type"
+
   slot :inner_block, required: true
 
   def button_toggle(assigns) do
@@ -463,7 +476,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def copy_button(assigns) do
     ~H"""
     <button
-      class="px-2 py-1 border border-border-primary bg-bg-input-default active:bg-secondary-active rounded hover:bg-secondary-hover"
+      class="btn btn-sm text-sm font-normal px-2 py-1 border border-border-primary bg-bg-input-default active:bg-secondary-active rounded-sm hover:bg-secondary-hover"
       phx-click={JS.dispatch("phx:copy_input", to: @copy_id)}
       title={@title}
       type="button"
@@ -507,7 +520,9 @@ defmodule AlertsUIWeb.SharedComponents do
     default: false,
     doc: "whether to show icons. Icon will display option name unless icon_type is set."
 
-  attr :use_outline_buttons, :boolean, default: false, doc: "whether to use outline button type"
+  attr :use_outline_buttons, :boolean,
+    default: false,
+    doc: "whether to use outline-solid button type"
 
   attr :label, :string, default: nil
   attr :class, :string, default: "", doc: "additional classes to add"
@@ -541,7 +556,7 @@ defmodule AlertsUIWeb.SharedComponents do
           class={[
             "flex-1",
             @button_class,
-            "!m-0 !p-0",
+            "m-0! p-0!",
             @base_toggle_classes,
             if(@field_value && id in @field_value, do: @toggled_on, else: @toggled_off)
           ]}
@@ -696,7 +711,7 @@ defmodule AlertsUIWeb.SharedComponents do
                     |> JS.exec("data-cancel", to: "##{@id}")
                   }
                   type="button"
-                  class="opacity-20 hover:opacity-40"
+                  class="btn border-none p-0 opacity-20 hover:opacity-40"
                   aria-label={gettext("close")}
                 >
                   <AlertsUIWeb.CoreComponents.icon name="hero-x-mark-solid" class="h-8 w-8" />
@@ -797,7 +812,7 @@ defmodule AlertsUIWeb.SharedComponents do
   def demote_modal(js \\ %JS{}, id) do
     js
     |> JS.remove_class("z-50", to: "##{id}")
-    |> JS.add_class("z-[49]", to: "##{id}")
+    |> JS.add_class("z-49", to: "##{id}")
   end
 
   @doc """
@@ -847,7 +862,7 @@ defmodule AlertsUIWeb.SharedComponents do
           absolute
           top-[34px]
           right-0
-          z-[100]
+          z-100
           bg-bg-input-default
           rounded
           text-white
@@ -989,7 +1004,7 @@ defmodule AlertsUIWeb.SharedComponents do
           :if={@modal_filter_id}
           phx-click={show_modal(@modal_filter_id)}
           class={[
-            "leading-tight mb-2 min-h-[1.3rem] text-right",
+            "cursor-pointer leading-tight mb-2 min-h-[1.3rem] text-right",
             if(@modal_filter_disabled, do: "text-text-disabled", else: "text-primary")
           ]}
           type="button"
@@ -1016,10 +1031,11 @@ defmodule AlertsUIWeb.SharedComponents do
         id={@id}
         disabled={@disabled}
         class={[
-          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
-            rounded text-text-primary disabled:text-text-select-disabled [scrollbar-width:thin] overflow-auto
+          "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 scheme-light
+            rounded text-text-primary disabled:text-text-select-disabled scrollbar-thin overflow-auto
             disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate block",
+            focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 **:pb-[.40rem] **:whitespace-pre-wrap **:truncate block
+            [&>option]:px-0.5",
           @select_class,
           @errors != [] && "border-danger focus:border-danger",
           @warning && "border-warning focus:border-warning",
@@ -1195,7 +1211,7 @@ defmodule AlertsUIWeb.SharedComponents do
       </div>
       <div
         class={[
-          "flex flex-col rounded border grow w-[100%]
+          "flex flex-col rounded border grow w-full
           border-bg-elevation-6 ring-0 ring-border-focus
           focus:ring-1 focus:border-border-focus
           focus-within:ring-1 focus-within:border-border-focus",
@@ -1217,7 +1233,7 @@ defmodule AlertsUIWeb.SharedComponents do
           target_id={@target_id}
           {@rest}
         />
-        <hr class="w-5/6 self-center border-y-1 border-bg-elevation-6 min-h-[1rem]" />
+        <hr class="w-5/6 self-center border-t border-bg-elevation-6 min-h-4" />
         <.select
           multiple={@multiple}
           size="2"
@@ -1236,8 +1252,8 @@ defmodule AlertsUIWeb.SharedComponents do
           loading={@loading}
           loads_based_on={@loads_based_on}
           class="m-0 h-full"
-          select_class="min-w-full pt-0 mt-0 [scrollbar-width:thin] overflow-auto
-            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none [appearance:none] max-w-[100%] h-full"
+          select_class="min-w-full pt-0 mt-0 scrollbar-thin overflow-auto
+            border-0 focus:ring-0 focus:border-0 focus:outline-0 rounded-t-none appearance-none max-w-full h-full"
           selected={@selected}
           {@rest}
         />
@@ -1333,8 +1349,8 @@ defmodule AlertsUIWeb.SharedComponents do
               rounded text-text-primary disabled:text-text-secondary
               disabled:bg-bg-elevation-3 ring-0 min-w-full focus:ring-0 ring-border-focus
               focus:border-border-focus",
-            @icon && "ps-10",
-            @action_icon && @action_event && "pe-[3rem] w-full",
+            @icon && "pl-10",
+            @action_icon && @action_event && "pr-12 w-full",
             @class,
             @errors != [] && "border-danger focus:border-danger"
           ]}
@@ -1343,13 +1359,13 @@ defmodule AlertsUIWeb.SharedComponents do
         />
         <button
           :if={@action_event != nil && @action_icon != nil}
-          class={"h-[38px] relative right-[3rem] flex flex-row items-center justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer z-1 #{if @value in ["", nil], do: "invisible"}"}
+          class={"h-[38px] relative right-12 flex flex-row items-center justify-center align-center rounded-xl text-primary hover:text-primary-hover active:text-primary-active cursor-pointer z-1 #{if @value in ["", nil], do: "invisible"}"}
           phx-click={@action_event}
           phx-value-name={@name}
           phx-target={@target_id}
           type="button"
         >
-          <AlertsUIWeb.CoreComponents.icon name={@action_icon} class="p-2 z-1 w-[3rem]" />
+          <AlertsUIWeb.CoreComponents.icon name={@action_icon} class="p-2 z-1 w-12" />
           <span class="sr-only">{@action_name}</span>
         </button>
       </div>
@@ -1520,16 +1536,15 @@ defmodule AlertsUIWeb.SharedComponents do
       value={@value}
       checked={@checked}
       class={[
-        "[appearance:none] bg-bg-input-default checked:bg-primary hover:bg-bg-elevation-6 hover:checked:bg-primary-hover
+        "appearance-none bg-bg-input-default checked:bg-primary hover:bg-bg-elevation-6 hover:checked:bg-primary-hover
             rounded font-bold leading-none text-text-dark  w-4 h-4 before:content-['✓']
             border border-primary border-rounded hover:checked:border-primary-hover
-            outline-text-primary outline-offset-2 focus:outline focus:outline-1
-            [&:not(:checked)]:text-transparent
+            outline-text-primary outline-offset-2 focus:outline-solid focus:outline-1
+            not-checked:text-transparent
             disabled:bg-text-disabled disabled:hover:checked:bg-text-disabled
-            disabled:border-text-disabled disabled:hover:checked:border-text-disabled
-            ",
+            disabled:border-text-disabled disabled:hover:checked:border-text-disabled",
         @class,
-        if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")
+        if(length(@errors) > 0, do: "border border border-danger focus:border-danger")
       ]}
       {@rest}
     />
@@ -1599,9 +1614,9 @@ defmodule AlertsUIWeb.SharedComponents do
           value={Form.normalize_value("datetime-local", @value)}
           class={[
             "bg-bg-elevation-5 border border-border-primary px-3 py-1.5 p-0 w-64
-              rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
+              rounded text-text-primary disabled:text-text-secondary scrollbar-thin overflow-auto
               disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-              focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) appearance-auto dark:text-white dark:[color-scheme:dark]",
+              focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25)",
             @errors != [] && "border-danger focus:border-danger",
             @warning && "border-warning focus:border-warning"
           ]}
@@ -1637,11 +1652,11 @@ defmodule AlertsUIWeb.SharedComponents do
       class="flex flex-row justify-center has-[.ellipsis]:w-[370px]"
       page_link_attrs={[
         class:
-          "rounded-none h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal"
+          "rounded-none h-auto min-h-fit #{secondary_button_classes()} py-1! px-2! leading-normal font-normal"
       ]}
       current_page_link_attrs={[
         class:
-          "rounded-none h-auto min-h-fit #{secondary_button_classes()} !py-1 !px-2 leading-[1.5] font-normal !bg-primary hover:!bg-primary-hover text-text-invert"
+          "rounded-none h-auto min-h-fit #{secondary_button_classes()} py-1! px-2! leading-normal font-normal bg-primary! hover:bg-primary-hover! text-text-invert"
       ]}
       page_list_attrs={[
         class: "join mx-3 [&>:first-child>button]:rounded-s-sm [&>:last-child>button]:rounded-e-sm"
@@ -1649,7 +1664,7 @@ defmodule AlertsUIWeb.SharedComponents do
       {@rest}
     >
       <:previous attrs={[
-        class: "text-primary flex items-center mr-auto !py-1 !px-[6px] leading-[1.5]",
+        class: "text-primary flex items-center mr-auto py-1! px-[6px]! leading-normal",
         "aria-labelledby": "paginate-previous"
       ]}>
         <.caret_icon direction={:left} />
@@ -1657,14 +1672,14 @@ defmodule AlertsUIWeb.SharedComponents do
       </:previous>
       <:ellipsis>
         <span
-          class="ellipsis pointer-events-none text-primary-disabled border-primary-disabled bg-transparent rounded-none btn h-auto min-h-fit !py-1 !px-2 leading-[1.5] font-normal"
+          class="ellipsis pointer-events-none text-primary-disabled border-primary-disabled bg-transparent rounded-none btn h-auto min-h-full py-1! px-2! leading-normal font-normal border-1"
           aria-hidden="true"
         >
           &hellip;
         </span>
       </:ellipsis>
       <:next attrs={[
-        class: "text-primary flex items-center ml-auto !py-1 !px-[6px] leading-[1.5] order-last",
+        class: "text-primary flex items-center ml-auto py-1! px-[6px]! leading-normal order-last",
         "aria-labelledby": "paginate-next"
       ]}>
         <span id="paginate-next" class="text-xs hidden lg:flex-inline font-normal">Next</span>

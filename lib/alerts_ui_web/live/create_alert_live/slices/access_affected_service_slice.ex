@@ -269,7 +269,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice do
           accept_event_name="accept_filter"
           accept_button_text="Apply"
           target_id="#alert_form"
-          container_class="md:!w-[25rem]"
+          container_class="md:w-100!"
         >
           <.filtered_select
             label="Stops"
@@ -280,11 +280,11 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AccessAffectedServiceSlice do
             no_results={Enum.empty?(@selections.modal_stop_id_options)}
             prompt="All Stops"
             multiple={false}
-            class="h-[32rem]"
+            class="h-128"
           />
         </.modal>
         <.filtered_select
-          class="md:w-[25%] h-[32rem]"
+          class="md:w-[25%] h-128"
           field={
             if humanize_effect_name(@form) in get_single_facility_effect_names(),
               do: @form[:single_facility_id],

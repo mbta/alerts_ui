@@ -147,7 +147,7 @@ defmodule AlertsUIWeb.ReviewModal do
       accept_button_text={if @send_notifications, do: submit_with_notifications(), else: "Submit"}
       accept_button_classes="whitespace-nowrap"
       cancel_button_classes="whitespace-nowrap"
-      inner_class="!p-0"
+      inner_class="p-0!"
       target_id={@target_id}
       footer_warning_text={
         if @send_notifications,
@@ -176,13 +176,13 @@ defmodule AlertsUIWeb.ReviewModal do
           </p>
         </div>
       </:header>
-      <div class="grid-cols-review-modal md:grid text-sm/2">
+      <div class="grid-cols-review-modal md:grid">
         <%!-- Main lefthand content --%>
         <div class="p-4 md:grow">
           <%!-- Top section --%>
           <p class="font-bold">Main message</p>
           {text_to_html(@alert_data.header_text,
-            attributes: [class: "pb-4 max-w-[28rem] break-words"]
+            attributes: [class: "pb-4 max-w-md wrap-break-word"]
           )}
           <div>
             <span class="block pb-4">
@@ -412,7 +412,7 @@ defmodule AlertsUIWeb.ReviewModal do
             <button
               :if={@alert_id}
               type="button"
-              class="text-primary hover:text-primary-hover hover:underline"
+              class="btn border-none p-0 font-normal text-base text-primary hover:text-primary-hover hover:underline"
               phx-click={
                 JS.dispatch("phx:copy", detail: %{text: @current_url <> "?alert_id=#{@alert_id}"})
               }
@@ -661,14 +661,14 @@ defmodule AlertsUIWeb.ReviewModal do
       inner_class="text-base font-light"
       cancel_button_classes="border-0 text-base"
       accept_button_classes="
-              !text-white
-              !bg-danger
-              !border-danger
-              hover:!bg-danger-hover
-              hover:!border-danger-hover
-              active:!bg-primary-active
-              active:!border-primary-active
-              focus:!border-primary-active
+              text-white!
+              bg-danger!
+              border-danger!
+              hover:bg-danger-hover!
+              hover:border-danger-hover!
+              active:bg-primary-active!
+              active:border-primary-active!
+              focus:border-primary-active!
               text-base
               "
       value={@alert_id}

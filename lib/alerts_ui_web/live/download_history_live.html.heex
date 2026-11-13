@@ -4,14 +4,14 @@
   <.form
     :let={f}
     for={%{}}
-    class="w-[20%]"
+    class="w-[20%] flex flex-col gap-4"
   >
     <.input
       class={[
-        "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
-        rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
+        "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 scheme-light
+        rounded text-text-primary disabled:text-text-secondary scrollbar-thin overflow-auto
         disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-        focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate"
+        focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 **:pb-[.40rem] **:whitespace-pre-wrap **:truncate"
       ]}
       id="month"
       name="month"
@@ -25,10 +25,10 @@
 
     <.input
       class={[
-        "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 [color-scheme:light]
-        rounded text-text-primary disabled:text-text-secondary [scrollbar-width:thin] overflow-auto
+        "bg-bg-elevation-5 border border-bg-elevation-6 px-3 mb-2 max-w-full min-w-full p-0 scheme-light
+        rounded text-text-primary disabled:text-text-secondary scrollbar-thin overflow-auto
         disabled:bg-bg-elevation-3 ring-0 ring-border-focus focus:ring-0 focus:border-border-focus
-        focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 [&_*]:pb-[.40rem] [&_*]:whitespace-pre-wrap [&_*]:truncate"
+        focus:drop-shadow-[0 .25rem .25rem rgba(13,110,253,0.25) h-10 **:pb-[.40rem] **:whitespace-pre-wrap **:truncate"
       ]}
       id="year"
       name="year"
@@ -42,7 +42,7 @@
 
     <.button_primary_link
       id="download-history-button"
-      class={"mt-6 justify-center min-w-[11rem]" <> if @loading, do: "pointer-events-none bg-primary-disabled", else: ""}
+      class={"mt-6 justify-center min-w-44" <> if @loading, do: "pointer-events-none bg-primary-disabled", else: ""}
       href={~p"/download_history/download_bulk?month=#{@selected_month}&year=#{@selected_year}"}
       target="_blank"
       disabled={@loading}
