@@ -483,6 +483,13 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSliceTest do
 
         assert selected_start_specifier(view) == "now"
         assert selected_end_specifier(view) == "when_skate_detour_is_closed"
+        assert view |> element("#alert_data_alert_timing") |> render_async =~ ~s(disabled="")
+
+        assert view |> element("#alert_data_active_period_start_specifier") |> render_async =~
+                 ~s(disabled="")
+
+        assert view |> element("#alert_data_active_period_end_specifier") |> render_async =~
+                 ~s(disabled="")
       end
     end
 

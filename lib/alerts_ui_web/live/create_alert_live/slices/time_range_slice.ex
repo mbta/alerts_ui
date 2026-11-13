@@ -528,6 +528,8 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
   attr :skate_detours, :map
 
   def render(assigns) do
+    assigns = assign(assigns, detour_selected?: !is_nil(assigns.form.data.skate_detour_id))
+
     ~H"""
     <div class="min-w-full flex flex-col mt-4" id="time_range_view">
       <.h5 class="text-text-secondary mb-8 w-full text-center md:text-left">
@@ -536,12 +538,14 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
       <.select
         label="Alert timing"
         field={@form[:alert_timing]}
+        disabled={@detour_selected?}
         options={values_to_options(alert_timing_values())}
         class="md:min-w-64 md:max-w-64"
         phx-debounce={120}
       />
       <.one_time_alert
         :if={@form[:alert_timing].value in [:"one-time", "one-time"]}
+        detour_selected?={@detour_selected?}
         class="flex-wrap md:mt-4"
         trip_arrival_time={@trip_arrival_time}
         current_time={@current_time}
@@ -566,6 +570,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
   attr :start_values, :list, default: []
   attr :end_values, :list, default: []
   attr :trip_arrival_time, NaiveDateTime
+  attr :detour_selected?, :boolean, default: false
 
   defp one_time_alert(assigns) do
     show_trip_end_warning? =
@@ -583,6 +588,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
         <div class={responsive_class()}>
           <.select
             label="Effect period"
+            disabled={@detour_selected?}
             warning={
               @show_trip_end_warning && @form.data.active_period_start_specifier in [:now, "now"]
             }
@@ -615,6 +621,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimeRangeSlice do
       <div class={responsive_class()}>
         <.select
           field={@form[:active_period_end_specifier]}
+          disabled={@detour_selected?}
           options={values_to_options(@end_values)}
           class="md:min-w-64 md:max-w-64"
           select_class="mt-[28.8px]"

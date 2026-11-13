@@ -1394,8 +1394,8 @@ defmodule AlertsUI.AlertsTest do
     end
   end
 
-  describe "get_nonmatching_skate_alerts/1" do
-    test "given list of skate ids, returns open alerts with skate ids that are not nil but not in the given list" do
+  describe "get_all_skate_alerts/1" do
+    test "returns open alerts with skate ids that are not nil" do
       insert(:alert, %{alert_id: "55", skate_detour_id: 1})
       insert(:alert, %{alert_id: "56", skate_detour_id: nil})
 
@@ -1407,9 +1407,10 @@ defmodule AlertsUI.AlertsTest do
 
       insert(:alert, %{alert_id: "58", skate_detour_id: 5})
 
-      result = Alerts.get_nonmatching_skate_alerts([1, 2, 3])
+      result = Alerts.get_open_skate_alerts()
 
       assert result |> Enum.map(&Map.take(&1, [:alert_id, :skate_detour_id])) == [
+               %{alert_id: "55", skate_detour_id: 1},
                %{alert_id: "58", skate_detour_id: 5}
              ]
     end

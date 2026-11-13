@@ -328,15 +328,15 @@ defmodule AlertsUI.Alerts do
     |> Repo.all()
   end
 
-  @spec get_nonmatching_skate_alerts([integer()]) :: [Alert.t()]
-  def get_nonmatching_skate_alerts(skate_ids) do
+  @spec get_open_skate_alerts() :: [Alert.t()]
+  def get_open_skate_alerts do
     # get open alerts with a non-nil skate id
     # that no longer appear in list of skate detours from skate
     from(
       a in Alert,
       where: not is_nil(a.skate_detour_id),
-      where: a.skate_detour_id not in ^skate_ids,
-      where: is_nil(a.closed_timestamp)
+      where: is_nil(a.closed_timestamp),
+      preload: [:informed_entity]
     )
     |> Repo.all()
   end

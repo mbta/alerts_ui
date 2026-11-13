@@ -130,14 +130,17 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
       detour = Enum.find(skate_detours, &(&1.id == detour_id)) || %{}
       new_cause = (Map.get(detour, :reason) || "") |> String.upcase() |> String.replace(" ", "_")
 
-      force_change(changeset, :cause_detail, new_cause)
+      changeset
+      |> force_change(:cause_detail, new_cause)
     end
 
     defp update_cause_from_detour(changeset, _target, _), do: changeset
 
+    defp header_sync_toggle("skate_detour_id", _), do: true
     defp header_sync_toggle("header_text", true), do: false
     defp header_sync_toggle(_, current_toggle), do: current_toggle
 
+    defp description_sync_toggle("skate_detour_id", _), do: true
     defp description_sync_toggle("description_text", true), do: false
     defp description_sync_toggle(_, current_toggle), do: current_toggle
 
@@ -464,7 +467,10 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
   def render(assigns) do
     alert_data = Map.merge(assigns.form.source.data, assigns.form.source.changes)
 
-    assigns = assign(assigns, autotext_map(alert_data, assigns))
+    assigns =
+      assigns
+      |> assign(autotext_map(alert_data, assigns))
+      |> assign(detour_selected?: !is_nil(alert_data.skate_detour_id))
 
     ~H"""
     <div class="min-w-full flex flex-col mt-4" id="details_view">
@@ -474,6 +480,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
       <div class="flex flex-col gap-4">
         <div class="flex flex-col md:flex-row md:w-[50%]">
           <.select
+            disabled={@detour_selected?}
             label="Cause"
             field={@form[:cause_detail]}
             options={@cause_options}
@@ -491,6 +498,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
         <div class="flex flex-col md:flex-row">
           <div class="flex flex-col md:w-[50%]">
             <.textarea
+              disabled={@detour_selected?}
               field={@form[:header_text]}
               label="Main message"
               phx-debounce={120}
@@ -516,6 +524,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
             />
           </div>
           <.form_checkbox
+            disabled={@detour_selected?}
             class="mt-2 md:ml-4 md:mt-8"
             field={@form[:header_sync_toggle]}
             label="Auto refresh"
@@ -524,6 +533,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
         <div class="flex flex-col md:flex-row">
           <div class="flex flex-col md:w-[50%]">
             <.textarea
+              disabled={@detour_selected?}
               field={@form[:description_text]}
               label="Supporting information"
               phx-debounce={120}
@@ -549,6 +559,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
             />
           </div>
           <.form_checkbox
+            disabled={@detour_selected?}
             class="mt-2 md:ml-4 md:mt-8"
             field={@form[:description_sync_toggle]}
             label="Auto refresh"

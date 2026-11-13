@@ -1525,6 +1525,8 @@ defmodule AlertsUIWeb.SharedComponents do
             border border-primary border-rounded hover:checked:border-primary-hover
             outline-text-primary outline-offset-2 focus:outline focus:outline-1
             [&:not(:checked)]:text-transparent
+            disabled:bg-text-disabled disabled:hover:checked:bg-text-disabled
+            disabled:border-text-disabled disabled:hover:checked:border-text-disabled
             ",
         @class,
         if(length(@errors) > 0, do: "border border-1 border-danger focus:border-danger")

@@ -987,11 +987,12 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
           automatically:
         </p>
         <ul class="list-disc ml-8">
-          <li>Select a direction</li>
-          <li>Select missed stops</li>
+          <li>Set direction</li>
           <li>
-            Set this alert to close when the detour is
-            closed in Skate
+            Update this alert when the detour is edited in Skate
+          </li>
+          <li>
+            Close this alert when the detour is closed in Skate
           </li>
         </ul>
       </div>

@@ -562,12 +562,12 @@ defmodule AlertsUI.AlertBuilder do
     informed_entities |> Enum.concat(added_f1_entities)
   end
 
-  @spec stops_with_context([Route.id_t()], String.t(), [Stop.id_t()]) ::
+  @spec stops_with_context([Route.t()], String.t(), [Stop.id_t()]) ::
           [
             stop_with_context_t()
           ]
 
-  defp stops_with_context(routes, direction, parent_stop_ids) do
+  def stops_with_context(routes, direction, parent_stop_ids) do
     parent_stops =
       StopsRepo.all(["filter[id]": Enum.join(parent_stop_ids, ",")], [])
       |> Enum.into(%{}, fn stop -> {stop.id, stop} end)
@@ -798,7 +798,7 @@ defmodule AlertsUI.AlertBuilder do
 
   @spec build_informed_entities(
           ServiceEffectCombinations.service_effect_combination() | nil,
-          alert_data_t(),
+          map(),
           Effect.effect_name()
         ) ::
           [map()]

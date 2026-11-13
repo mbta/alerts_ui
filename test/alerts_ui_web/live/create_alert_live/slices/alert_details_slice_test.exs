@@ -178,6 +178,82 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSliceTest do
 
         assert view |> element("#alert_data_cause_detail") |> render_async =~
                  ~s(<option selected="" value="DRAWBRIDGE_BEING_RAISED">drawbridge being raised</option>)
+
+        assert view |> element("#alert_data_cause_detail") |> render_async =~ ~s(disabled="")
+      end
+    end
+
+    @tag :logged_in_user
+    test "header and description text selected & disabled upon skate detour selection", %{
+      conn: conn
+    } do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@detour_bus_route] end,
+           get: fn _, _ -> @detour_bus_route end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ ->
+             [
+               %Stop{id: "71", name: "Massachusetts Ave opp Inman St"},
+               %Stop{id: "73", name: "Massachusetts Ave @ Sidney St"}
+             ]
+           end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page(conn, view, "Bus", "Detour")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"route_ids" => ["1"], "single_route_id" => "1"}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "alert_data" => %{
+            "header_text" => "abcd",
+            "description_text" => "edfg",
+            "header_sync_toggle" => false,
+            "description_sync_toggle" => false
+          }
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "skate_detour_id"],
+          "alert_data" => %{"skate_detour_id" => 7}
+        })
+
+        assert view |> element("#alert_data_header_text") |> render_async =~
+                 ~s("Route 1 inbound is detoured due to a drawbridge being raised. The closest stops with service are Massachusetts Ave opp Inman St and Massachusetts Ave @ Sidney St.")
+
+        assert view |> element("#alert_data_header_text") |> render_async =~ ~s(disabled="")
+
+        assert view |> element("#alert_data_description_text") |> render_async =~
+                 ~s("Affected direction: inbound")
+
+        assert view |> element("#alert_data_description_text") |> render_async =~ ~s(disabled="")
+
+        assert view |> element("#alert_data_header_sync_toggle") |> render_async =~ ~s(checked="")
+
+        assert view |> element("#alert_data_header_sync_toggle") |> render_async =~
+                 ~s(disabled="")
+
+        assert view |> element("#alert_data_description_sync_toggle") |> render_async =~
+                 ~s(checked="")
+
+        assert view |> element("#alert_data_description_sync_toggle") |> render_async =~
+                 ~s(disabled="")
       end
     end
   end
