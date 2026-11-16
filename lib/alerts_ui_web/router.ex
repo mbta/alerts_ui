@@ -139,6 +139,7 @@ defmodule AlertsUIWeb.Router do
     oban_dashboard("/oban")
     get("/_version", VersionController, :index)
     get("/detours_viewer", DetoursViewerController, :index)
+    get("/detours_viewer_json", DetoursViewerController, :get_json)
 
     live_session :require_developer,
       on_mount: [
