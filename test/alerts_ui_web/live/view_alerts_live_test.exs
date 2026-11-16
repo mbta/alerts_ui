@@ -530,7 +530,7 @@ defmodule AlertsUIWeb.ViewAlertsLiveTest do
         )
 
       reset_modal_filters =
-        element(view, "#filter-modal-Filters span:has(span.hero-x-circle-solid)")
+        element(view, "#filter-modal-Filters button:has(span.hero-x-circle-mini)")
 
       assert reset_modal_filters
 
