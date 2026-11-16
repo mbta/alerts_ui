@@ -112,7 +112,6 @@ defmodule AlertsUIWeb.FilterForm do
       leading-tight
       min-h-[1.3rem]
       px-3
-      rounded
       text-primary
       text-right
       transition-none
@@ -210,10 +209,10 @@ defmodule AlertsUIWeb.FilterForm do
           </div>
         </:footer>
       </.modal>
-      <div class="flex flex-row items-center join ">
+      <div class="flex flex-row items-center join [&>:first-child]:rounded-s-sm [&>:last-child]:rounded-e-sm">
         <button
           phx-click={show_modal("alerts-filter-modal")}
-          class={[@button_classes, @active_button_classes]}
+          class={[@button_classes, @active_button_classes, "mr-[2px]"]}
           type="button"
         >
           <span class={[
