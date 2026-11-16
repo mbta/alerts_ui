@@ -34,7 +34,7 @@ defmodule AlertsUIWeb.ApplicationHeader do
       <div class={"flex items-center justify-between py-4 text-sm before:absolute before:top-0 before:left-0 before:right-0 before:h-3 #{@header_variants[@environment]}"}>
         <div class="flex items-center gap-4 mx-4">
           <a href="/"><img class="h-12" src={"/images/logos/logo-#{@environment}.svg"} /></a>
-          <.h1 class="!mb-0">
+          <.h1 class="mb-0!">
             <a href="/">{"Alerts Manager " <> if @environment != "prod", do: "Test", else: ""}</a>
           </.h1>
           <div
@@ -72,14 +72,14 @@ defmodule AlertsUIWeb.ApplicationHeader do
             Download CR Alerts
           </a>
           <div :if={@current_user} class="whitespace-nowrap hidden lg:block fs-mask">
-            <.icon name="hero-user-solid" />
+            <.icon name="hero-user-mini" />
             {@current_user.email}
           </div>
           <.link
             href={~p"/help"}
             class="text-sm leading-6 text-primary hover:underline hover:text-primary-hover whitespace-nowrap"
           >
-            <.icon name="hero-question-mark-circle" class="mx-1" />Help
+            <.icon name="hero-question-mark-circle-mini" class="mx-1" />Help
           </.link>
           <.link
             :if={@current_user}
@@ -87,7 +87,7 @@ defmodule AlertsUIWeb.ApplicationHeader do
             method="delete"
             class="text-sm leading-6 text-primary hover:underline hover:text-primary-hover whitespace-nowrap"
           >
-            <.icon name="hero-arrow-right-on-rectangle" class="mx-1" />Logout
+            <.icon name="hero-arrow-right-on-rectangle-mini" class="mx-1" />Logout
           </.link>
           <.link
             :if={!@current_user}

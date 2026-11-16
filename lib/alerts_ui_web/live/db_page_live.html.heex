@@ -60,7 +60,7 @@
           <td class="border p-3">{if draft, do: draft, else: ""}</td>
           <td :if={UserHelpers.author?(@current_user)} class="border p-3">
             <.button_danger
-              class="btn !min-h-[24px] h-auto font-normal"
+              class="btn min-h-[24px]! h-auto font-normal"
               phx-click={show_modal("delete-alert-modal-#{alert_id}")}
             >
               Delete
@@ -73,18 +73,18 @@
               cancel_button_text="Nevermind"
               accept_button_text="Delete"
               target_id="#db_page_live_view"
-              class="text-text-primary min-w-[26rem]"
+              class="text-text-primary min-w-104"
               inner_class="text-base font-light min-h-[72px]"
               cancel_button_classes="border-0 text-base"
               accept_button_classes="
-                    !text-white
-                    !bg-danger
-                    !border-danger
-                    hover:!bg-primary-hover
-                    hover:!border-primary-border-hover
-                    active:!bg-primary-active
-                    active:!border-primary-active
-                    focus:!border-primary-active
+                    text-white!
+                    bg-danger!
+                    border-danger!
+                    hover:bg-primary-hover!
+                    hover:border-primary-border-hover!
+                    active:bg-primary-active!
+                    active:border-primary-active!
+                    focus:border-primary-active!
                     text-base
                     "
               value={alert_id}

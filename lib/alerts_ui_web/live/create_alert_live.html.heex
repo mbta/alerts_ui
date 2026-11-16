@@ -9,7 +9,7 @@
     change_type={@change_type}
   />
   <div class="flex flex-col items-center justify-center w-[90%]" id="article-view">
-    <article class="flex flex-col items-center justify-center w-[100%]">
+    <article class="flex flex-col items-center justify-center w-full">
       <div class="w-full">
         <UrlSlice.render
           :if={!AlertDataHelpers.show_details?(@form, @change_type)}
@@ -22,7 +22,7 @@
           :if={AlertDataHelpers.show_details?(@form, @change_type)}
           for={@form}
           id="alert_form"
-          class="form-control flex flex-row flex-wrap mb-4 min-h-[38rem] md:min-h-[32rem] group"
+          class="form-control flex flex-row flex-wrap mb-4 min-h-152 md:min-h-128 group"
           phx-no-unused-field
           phx-change="validate"
           phx-auto-recover="recover_form"

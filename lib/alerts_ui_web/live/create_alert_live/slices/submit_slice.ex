@@ -139,7 +139,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.SubmitSlice do
       </.button_secondary>
       <.button_primary
         :if={@progress.name == "details"}
-        class="mt-8 ml-2 self-center min-w-[10.5rem] justify-center"
+        class="mt-8 ml-2 self-center min-w-42 justify-center"
         name="review"
         phx-click="review"
         type="button"

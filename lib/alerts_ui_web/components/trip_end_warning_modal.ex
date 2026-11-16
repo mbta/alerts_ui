@@ -33,7 +33,7 @@ defmodule AlertsUIWeb.TripEndWarningModal do
       cancel_button_text="No, keep editing"
       accept_button_text="Yes, continue"
       class="flex flex-col h-full justify-center w-[600px]"
-      outer_class="!h-full"
+      outer_class="h-full!"
       inner_class="shrink grow overflow-auto"
       {@rest}
     >

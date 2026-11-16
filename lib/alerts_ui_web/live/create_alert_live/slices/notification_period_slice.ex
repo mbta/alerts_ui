@@ -271,7 +271,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.NotificationPeriodSlice do
           }
           class="flex flex-col md:flex-row"
         >
-          <p class="pt-[2rem] mr-[2rem]">
+          <p class="pt-8 mr-8">
             to
           </p>
           <input
@@ -283,7 +283,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.NotificationPeriodSlice do
             class="border border-bg-elevation-6 pl-2
                   rounded text-text-secondary
                   bg-bg-elevation-3 ring-0  ring-border-focus
-                  mt-[1.75rem] h-10 min-w-[16rem]"
+                  mt-7 h-10 min-w-[16rem]"
           />
         </div>
       </div>

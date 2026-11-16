@@ -101,7 +101,7 @@
   </.p>
 
   <.h2>Modal</.h2>
-  <.button_primary phx-click={show_modal("example-modal")} class="mb-8 w-[8rem]">
+  <.button_primary phx-click={show_modal("example-modal")} class="mb-8 w-32">
     Show Modal
   </.button_primary>
   <.modal
@@ -150,7 +150,7 @@
 
   <.h2>Form Fields</.h2>
 
-  <.form for={@form} class="form-control gap-4" phx-change="rerender">
+  <.form for={@form} class="form-control flex flex-col gap-4" phx-change="rerender">
     <.select
       label="Select"
       field={@form[:single_select]}
@@ -198,7 +198,7 @@
           filtered_select_options(@form[:modal_filter_filter].value, single_select_options())
         }
         prompt="All"
-        class="h-[35rem]"
+        class="h-140"
       />
     </.modal>
 
@@ -218,7 +218,7 @@
           end
         end)
       }
-      class="max-w-[16rem] mb-[4rem] min-h-[12rem]"
+      class="max-w-[16rem] mb-16 min-h-48"
     />
     <.filtered_select
       label="Disabled filtered_select"
@@ -226,7 +226,7 @@
       filter_field={@form[:filtered_select_filter_disabled]}
       options={filtered_select_options(@form[:filtered_select_filter].value, select_options())}
       disabled={true}
-      class="max-w-[16rem] mb-8 mb-[4rem] min-h-[12rem]"
+      class="max-w-[16rem] mb-8 mb-16 min-h-48"
     />
     <.filtered_select
       label="Errored filtered_select"
@@ -235,7 +235,7 @@
       options={filtered_select_options(@form[:filtered_select_filter].value, select_options())}
       prompt="All"
       disabled={true}
-      class="max-w-[16rem] mb-8 mb-[4rem] min-h-[12rem]"
+      class="max-w-[16rem] mb-8 mb-16 min-h-48"
     />
     <.text_input
       label="Text Input"
@@ -309,7 +309,7 @@
       label="Different checkbox"
       field={@form[:checkbox_icon]}
       class="h-5 w-5"
-      check_class="w-[100%] h-[100%] checked:before:hero-truck leading-normal checked:before:mb-8"
+      check_class="w-full h-full checked:before:hero-truck-mini leading-normal checked:before:mb-8"
     />
   </.form>
 

@@ -146,7 +146,7 @@ defmodule AlertsUIWeb.Tickets.ButtonsGoDarkOnHoverTest do
         """
         |> rendered_to_string()
 
-      assert html =~ "hover:!#{@timeline_selected_hover_bg}",
+      assert html =~ "hover:#{@timeline_selected_hover_bg}!",
              "Selected timeline btn should hover to #{@timeline_selected_hover_bg} (light blue)"
 
       refute html =~ "hover:#{@dark_hover_bg}",

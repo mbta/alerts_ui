@@ -158,9 +158,9 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.DeliverySlice do
                     id="banner_input"
                     class={
                       [
-                        "w-[100%] min-h-[10rem] z-20 mt-3",
+                        "w-full min-h-40 z-20 mt-3",
                         if(String.length(@form[:header_text].value || "") >= 4000,
-                          do: "!border-error border-b-1",
+                          do: "!border-error border-b",
                           else: "border-b-0"
                         )
                       ]
