@@ -1477,24 +1477,28 @@ defmodule AlertsUIWeb.SharedComponents do
   attr :class, :string, default: "", doc: "additional classes to add to container div"
   attr :check_class, :string, default: "", doc: "additional classes to add directly to input"
   attr :label, :string, default: nil
+  attr :foo, :boolean, default: false
 
   attr :field, FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
-  attr :rest, :global, include: ~w(phx-debounce disabled)
+  attr :rest, :global, include: ~w(disabled phx-debounce)
 
   def form_checkbox(%{field: %FormField{} = field} = assigns) do
+    # only uses "hidden" input if we're not disabled
+    # intented to keep checkbox from flipping to false if disabled
     assigns =
       assigns
       |> assign(id: assigns.id || field.id)
       |> assign(:errors, Enum.map(field.errors, &CoreComponents.translate_error(&1)))
       |> assign(:name, field.name)
       |> assign_new(:checked, fn -> Form.normalize_value("checkbox", field.value) end)
+      |> assign(:use_hidden_input?, !Map.get(assigns.rest, :disabled, false))
 
     ~H"""
     <div>
       <div phx-feedback-for={@name} class={@class}>
-        <input type="hidden" name={@name} value="false" />
+        <input :if={@use_hidden_input?} type="hidden" name={@name} value="false" />
         <.checkbox
           id={@id}
           name={@name}
