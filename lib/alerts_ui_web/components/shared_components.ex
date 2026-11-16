@@ -1664,7 +1664,8 @@ defmodule AlertsUIWeb.SharedComponents do
       {@rest}
     >
       <:previous attrs={[
-        class: "text-primary flex items-center mr-auto py-1! px-[6px]! leading-normal",
+        class:
+          "cursor-pointer disabled:cursor-not-allowed text-primary flex items-center mr-auto py-1! px-[6px]! leading-normal",
         "aria-labelledby": "paginate-previous"
       ]}>
         <.caret_icon direction={:left} />
@@ -1679,7 +1680,8 @@ defmodule AlertsUIWeb.SharedComponents do
         </span>
       </:ellipsis>
       <:next attrs={[
-        class: "text-primary flex items-center ml-auto py-1! px-[6px]! leading-normal order-last",
+        class:
+          "cursor-pointer disabled:cursor-not-allowed text-primary flex items-center ml-auto py-1! px-[6px]! leading-normal order-last",
         "aria-labelledby": "paginate-next"
       ]}>
         <span id="paginate-next" class="text-xs hidden lg:flex-inline font-normal">Next</span>
