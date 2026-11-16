@@ -483,6 +483,15 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatterTest do
                [{"Westbound", "0"}, {"Eastbound", "1"}]
     end
 
+    test "filters out directions whose name is 'nil' (eg winter Ferry)" do
+      direction_map = %{
+        "1" => %{0 => nil, 1 => "Loop"}
+      }
+
+      assert SelectFormatter.formatted_direction_options(["1"], direction_map) ==
+               [{"Loop", "1"}]
+    end
+
     test "falls back to Outbound/Inbound when single route has no direction names" do
       assert SelectFormatter.formatted_direction_options(["unknown"], %{}) ==
                [Outbound: "0", Inbound: "1"]

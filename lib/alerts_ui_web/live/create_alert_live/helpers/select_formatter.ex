@@ -236,6 +236,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.SelectFormatter do
         Inbound: "1"
       ]
     end
+    |> Enum.reject(fn {name, _id} -> is_nil(name) end)
   end
 
   def formatted_direction_options([_ | _], _) do
