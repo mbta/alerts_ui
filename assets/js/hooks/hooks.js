@@ -214,7 +214,9 @@ Hooks.Selector = {
       // save the current scroll top so we can return after rerender
       this.savedScrollTop = this.el.scrollTop;
       // prevents scroll on select
-      this.el.focus({ preventScroll: true });
+      requestAnimationFrame(() => {
+        this.el.focus({ preventScroll: true });
+      })
     });
   },
 
