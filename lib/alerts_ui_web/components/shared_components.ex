@@ -1188,7 +1188,7 @@ defmodule AlertsUIWeb.SharedComponents do
           :if={@modal_filter_id}
           phx-click={show_modal(@modal_filter_id)}
           class={[
-            "flex shrink min-w-0 items-center leading-tight ml-2 mb-2 min-h-[1.3rem] text-right",
+            "cursor-pointer flex shrink min-w-0 items-center leading-tight ml-2 mb-2 min-h-[1.3rem] text-right",
             if(@disabled || @first_async_load, do: "text-text-disabled", else: "text-primary")
           ]}
           type="button"
@@ -1649,17 +1649,17 @@ defmodule AlertsUIWeb.SharedComponents do
           active:bg-transparent active:text-secondary-disabled active:border-secondary-disabled"
       ]}
       page_links={3}
-      class="flex flex-row justify-center has-[.ellipsis]:w-[370px]"
+      class="flex flex-row justify-center has-[.ellipsis]:w-[370px] text-sm"
       page_link_attrs={[
         class:
-          "rounded-none h-auto min-h-fit #{secondary_button_classes()} py-1! px-2! leading-normal font-normal"
+          "rounded-none h-auto min-h-fit #{secondary_button_classes()} py-1! px-2! leading-normal font-normal text-sm"
       ]}
       current_page_link_attrs={[
         class:
-          "rounded-none h-auto min-h-fit #{secondary_button_classes()} py-1! px-2! leading-normal font-normal bg-primary! hover:bg-primary-hover! text-text-invert"
+          "rounded-none h-auto min-h-fit #{secondary_button_classes()} py-1! px-2! leading-normal font-normal bg-primary! hover:bg-primary-hover! text-text-invert text-sm"
       ]}
       page_list_attrs={[
-        class: "join mx-3 [&>:first-child>button]:rounded-s-sm [&>:last-child>button]:rounded-e-sm"
+        class: "join mx-3 [&>:first-child>button]:rounded-s-xs [&>:last-child>button]:rounded-e-xs"
       ]}
       {@rest}
     >
