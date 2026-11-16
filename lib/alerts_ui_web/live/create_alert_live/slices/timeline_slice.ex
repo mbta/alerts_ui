@@ -125,7 +125,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.TimelineSlice do
         assigns,
         %{
           step: step,
-          class: "#{clickable_class} #{selected_class}",
+          class: "cursor-pointer disabled:cursor-auto #{clickable_class} #{selected_class}",
           disabled: disabled
         }
       )
