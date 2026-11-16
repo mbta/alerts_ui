@@ -1188,7 +1188,7 @@ defmodule AlertsUIWeb.SharedComponents do
           :if={@modal_filter_id}
           phx-click={show_modal(@modal_filter_id)}
           class={[
-            "flex shrink min-w-0 items-center leading-tight ml-2 mb-2 min-h-[1.3rem] text-right",
+            "cursor-pointer flex shrink min-w-0 items-center leading-tight ml-2 mb-2 min-h-[1.3rem] text-right",
             if(@disabled || @first_async_load, do: "text-text-disabled", else: "text-primary")
           ]}
           type="button"
