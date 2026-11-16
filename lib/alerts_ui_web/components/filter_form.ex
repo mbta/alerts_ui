@@ -108,7 +108,6 @@ defmodule AlertsUIWeb.FilterForm do
       hover:border-secondary-hover-border
       active:text-text-invert
       items-center
-      join-item
       leading-tight
       min-h-[1.3rem]
       px-3
@@ -209,10 +208,10 @@ defmodule AlertsUIWeb.FilterForm do
           </div>
         </:footer>
       </.modal>
-      <div class="flex flex-row items-center join [&>:first-child]:rounded-s-sm [&>:last-child]:rounded-e-sm">
+      <div class="flex flex-row gap-px items-center [&>:first-child]:rounded-s-sm [&>:last-child]:rounded-e-sm">
         <button
           phx-click={show_modal("alerts-filter-modal")}
-          class={[@button_classes, @active_button_classes, "mr-[2px]"]}
+          class={[@button_classes, @active_button_classes]}
           type="button"
         >
           <span class={[
@@ -220,14 +219,15 @@ defmodule AlertsUIWeb.FilterForm do
           ]} />
           {@button_label}
         </button>
-        <span
+        <button
           :if={@filter_count > 0}
-          class={[@button_classes, @active_button_classes, "ms-px"]}
+          class={[@button_classes, @active_button_classes]}
           phx-click={JS.push("paginate_start") |> JS.push("reset_modal_filters")}
           title="Clear filters"
+          type="button"
         >
-          <AlertsUIWeb.CoreComponents.icon name="hero-x-circle-solid" />
-        </span>
+          <AlertsUIWeb.CoreComponents.icon name="hero-x-circle-mini" />
+        </button>
       </div>
     </fieldset>
     """
