@@ -262,7 +262,7 @@ defmodule AlertsUIWeb.CreateAlertHelpers do
     %{stops: available_stops, facilities: available_facilities}
   end
 
-  def get_missed_child_stops(original_missed_stops, stops_we_already_have, direction_id) do
+  def get_parents_of_missed_stops(original_missed_stops, stops_we_already_have, direction_id) do
     # get missed stops from bus detours that are child stops
     # and thus weren't in the list of available stops
 

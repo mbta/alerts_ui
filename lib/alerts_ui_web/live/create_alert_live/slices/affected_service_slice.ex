@@ -156,7 +156,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
     # if skate gives us child stops we can't grab them from the available stops list
     # so we need to get their parents from the api
     missed_stops_from_children =
-      CreateAlertHelpers.get_missed_child_stops(
+      CreateAlertHelpers.get_parents_of_missed_stops(
         skate_detour.missed_stops,
         missed_stops,
         skate_detour.direction_id

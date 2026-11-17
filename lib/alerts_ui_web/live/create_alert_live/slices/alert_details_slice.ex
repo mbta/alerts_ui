@@ -411,7 +411,11 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSlice do
     # use API call to get data for child connection stops that aren't in
     # the available stops list
     child_connection_points =
-      CreateAlertHelpers.get_missed_child_stops(detour_connection_points, connection_points, nil)
+      CreateAlertHelpers.get_parents_of_missed_stops(
+        detour_connection_points,
+        connection_points,
+        nil
+      )
 
     (connection_points ++ child_connection_points)
     |> Enum.uniq_by(& &1.id)
