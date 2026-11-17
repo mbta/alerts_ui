@@ -3094,7 +3094,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@detour_stop] end]}
       ]) do
-        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page(conn, view, "Bus", "Detour")
 
@@ -3134,7 +3133,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
            end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page(conn, view, "Bus", "Detour")
 
@@ -3160,7 +3158,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
          ]},
         {StopsRepo, [], [by_route: fn _, _, _ -> [@detour_stop] end]}
       ]) do
-        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page(conn, view, "Bus", "Detour")
 
@@ -3202,7 +3199,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
            end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page(conn, view, "Bus", "Detour")
 
@@ -3293,7 +3289,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
            end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page(conn, view, "Bus", "Detour")
 
@@ -3355,7 +3350,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
            by_route_id: fn _, _ -> [] end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page(conn, view, "Bus", "Detour")
 

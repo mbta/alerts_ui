@@ -163,7 +163,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSliceTest do
            end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page(conn, view, "Bus", "Detour")
 
@@ -213,7 +212,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AlertDetailsSliceTest do
            end
          ]}
       ]) do
-        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
         view = get_to_submission_page(conn, view, "Bus", "Detour")
 

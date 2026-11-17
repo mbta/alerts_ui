@@ -45,8 +45,7 @@ config :laboratory,
      "Shows the menu link to a page showing a guide to our components"},
     {:show_stop_ids, "Show stop ids", "Show a list of selected stop ids in the form."},
     {:show_bulk_download_page, "Show Commuter Rail download page", "Shows a page where you
-    can download bulk Commuter Rail alerts."},
-    {:show_new_bus_detours, "Show New Bus Detours", "Makes bus detours w skate available"}
+    can download bulk Commuter Rail alerts."}
   ],
   cookie: [
     # one month,
