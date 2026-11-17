@@ -189,7 +189,7 @@ defmodule AlertsUI.ActivePeriodBuilder do
   end
 
   defp build_one_time_active_period_start(naive_start, _specifier, _time) do
-    naive_start |> naive_eastern_datetime_to_utc
+    naive_start |> ensure_utc_datetime
   end
 
   defp build_one_time_active_period_end(nil, _, _, _), do: nil
@@ -204,7 +204,7 @@ defmodule AlertsUI.ActivePeriodBuilder do
     # if start time is BEFORE current time, use current time + 2 hours
     # else if start time is AFTER current time, use start time + 2 hours
     # this ensures "later today" is always in the future.
-    utc_start = naive_eastern_datetime_to_utc(naive_start)
+    utc_start = ensure_utc_datetime(naive_start)
 
     if DateTime.compare(utc_start, current_time) == :lt do
       DateTime.add(current_time, 2, :hour)
@@ -214,12 +214,17 @@ defmodule AlertsUI.ActivePeriodBuilder do
   end
 
   defp build_one_time_active_period_end(naive_end, _, _, _) do
-    naive_eastern_datetime_to_utc(naive_end)
+    ensure_utc_datetime(naive_end)
   end
 
-  @spec naive_eastern_datetime_to_utc(NaiveDateTime.t() | nil) :: DateTime.t() | nil
-  def naive_eastern_datetime_to_utc(nil), do: nil
+  @spec ensure_utc_datetime(NaiveDateTime.t() | DateTime.t() | nil) :: DateTime.t() | nil
+  def ensure_utc_datetime(nil), do: nil
 
-  def naive_eastern_datetime_to_utc(naive),
-    do: naive |> DateTime.from_naive!("America/New_York") |> Timex.Timezone.convert("Etc/UTC")
+  def ensure_utc_datetime(%NaiveDateTime{} = naive) do
+    naive |> DateTime.from_naive!("America/New_York") |> DateTime.shift_zone!("Etc/UTC")
+  end
+
+  def ensure_utc_datetime(%DateTime{} = datetime) do
+    DateTime.shift_zone!(datetime, "Etc/UTC")
+  end
 end

@@ -328,7 +328,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           facility_ids: ["123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~N[2026-02-19 03:01:00],
+          closed_timestamp: ~U[2026-02-19 08:01:00Z],
           status: :closed
         })
 
@@ -356,7 +356,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           facility_ids: ["123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~N[2026-02-19 03:01:00],
+          closed_timestamp: ~U[2026-02-19 08:01:00Z],
           status: :closed
         })
 
@@ -387,7 +387,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           facility_ids: ["123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~N[2026-02-19 03:01:00],
+          closed_timestamp: ~U[2026-02-19 08:01:00Z],
           status: :closed
         })
 
@@ -413,7 +413,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           facility_ids: ["123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~N[2026-02-19 03:01:00],
+          closed_timestamp: ~U[2026-02-19 08:01:00Z],
           status: :closed
         })
 
@@ -437,7 +437,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           original_facility_selections: ["stop|123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~N[2026-02-19 03:01:00],
+          closed_timestamp: ~U[2026-02-19 08:01:00Z],
           status: :closed
         })
 
@@ -469,8 +469,8 @@ defmodule AlertsUI.Trapeze.ImporterTest do
             description_text: "ok",
             header_text: "hello",
             effect_name: "Escalator Closure",
-            active_period_start: ~N[2024-04-30 11:54:00],
-            notification_period_start: ~N[2024-04-30 11:54:00],
+            active_period_start: ~U[2024-04-30 16:54:00Z],
+            notification_period_start: ~U[2024-04-30 16:54:00Z],
             active_period_end_specifier: :until_further_notice,
             active_period_start_specifier: :custom,
             cause_detail: "ESCALATOR_CLOSURE",
@@ -491,7 +491,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           original_facility_selections: ["stop|123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~N[2026-02-19 03:01:00Z],
+          closed_timestamp: ~U[2026-02-19 08:01:00Z],
           status: :closed
         })
 
@@ -535,7 +535,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           effect_name: "Elevator Closure",
           original_facility_selections: ["stop|123"],
           work_order_id: "TESTORDER1",
-          closed_timestamp: ~N[2026-02-14T07:00:00],
+          closed_timestamp: ~U[2026-02-14T12:00:00Z],
           status: :closed
         })
 
@@ -559,7 +559,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
          [get: fn _ -> @stop end, get!: fn _ -> @stop end, all: fn _, _ -> [@stop] end]},
         {RoutesRepo, [], [by_stop: fn _ -> [@route] end]}
       ]) do
-        start_datetime = ~N[2024-04-30 11:54:00]
+        start_datetime = ~U[2024-04-30 16:54:00Z]
 
         Importer.persist(%{
           work_order_id: "TESTORDER1",
@@ -569,7 +569,7 @@ defmodule AlertsUI.Trapeze.ImporterTest do
           header_text: "hello",
           effect_name: "Escalator Closure",
           active_period_start: start_datetime,
-          notification_period_start: ~N[2024-04-30 11:54:00],
+          notification_period_start: ~U[2024-04-30 16:54:00Z],
           active_period_end_specifier: :until_further_notice,
           active_period_start_specifier: :custom,
           cause_detail: "ESCALATOR_CLOSURE",

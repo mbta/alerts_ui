@@ -89,7 +89,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
        active_period_end_specifier: end_datetime_specifier(work_order),
        active_period_end: end_datetime(work_order),
        active_period_start_specifier: :custom,
-       active_period_start: DateTime.utc_now() |> to_naive_eastern(),
+       active_period_start: DateTime.utc_now(),
        alert_timing: :one_time,
        cause_detail: "MAINTENANCE",
        cause: :MAINTENANCE,
@@ -104,7 +104,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
        facility_ids: [work_order.facility_id],
        header_text: autotext(work_order) |> header_for(),
        notification_period_end: end_datetime(work_order),
-       notification_period_start: work_order.start_datetime |> to_naive_eastern(),
+       notification_period_start: work_order.start_datetime,
        notification_specifier: :now,
        reminder_times: [],
        route_ids: [],
@@ -131,7 +131,7 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       route_type: nil,
       effect_name: effect_name(work_order.effect),
       cause_detail: "maintenance",
-      start_datetime: work_order.start_datetime |> to_naive_eastern(),
+      start_datetime: work_order.start_datetime,
       end_specifier: :until_further_notice,
       facilities: [facility],
       stops: stops |> Enum.map(fn stop -> StopsRepo.get(stop.id) end)
@@ -148,11 +148,13 @@ defmodule AlertsUI.Trapeze.WorkOrder do
     end
   end
 
+  @spec service_effect_text_for(AlertsUIWeb.CreateAlertLive.Helpers.AutoText.BuildAutoText.t()) ::
+          binary()
   def service_effect_text_for(autotext),
     do: Templates.build_auto_text(autotext, :service_effect_template)
 
   defp end_datetime(%{end_datetime: datetime, status: :closed}),
-    do: datetime |> to_naive_eastern()
+    do: datetime
 
   defp end_datetime(_), do: nil
 
@@ -183,10 +185,4 @@ defmodule AlertsUI.Trapeze.WorkOrder do
       "WORK FINISHED" -> :work_finished
     end
   end
-
-  defp to_naive_eastern(%DateTime{} = datetime),
-    do:
-      datetime
-      |> DateTime.shift_zone!("America/New_York")
-      |> DateTime.to_naive()
 end

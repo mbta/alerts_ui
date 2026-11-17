@@ -42,8 +42,8 @@ defmodule AlertsUI.AlertBuilder do
           alert_timing: atom(),
           active_period_end_specifier: atom() | nil,
           active_period_start_specifier: atom() | nil,
-          active_period_start: NaiveDateTime.t() | nil,
-          active_period_end: NaiveDateTime.t() | nil,
+          active_period_start: NaiveDateTime.t() | DateTime.t() | nil,
+          active_period_end: NaiveDateTime.t() | DateTime.t() | nil,
           active_period_start_date: Date.t() | nil,
           active_period_end_date: Date.t() | nil,
           active_period_start_time: Time.t() | nil,
@@ -59,9 +59,9 @@ defmodule AlertsUI.AlertBuilder do
           header_text: String.t(),
           description_text: String.t() | nil,
           banner_text: String.t() | nil,
-          last_push_notification_timestamp: NaiveDateTime.t() | nil,
-          notification_period_start: NaiveDateTime.t() | nil,
-          notification_period_end: NaiveDateTime.t() | nil,
+          last_push_notification_timestamp: NaiveDateTime.t() | DateTime.t() | nil,
+          notification_period_start: NaiveDateTime.t() | DateTime.t() | nil,
+          notification_period_end: NaiveDateTime.t() | DateTime.t() | nil,
           notification_specifier: atom() | nil,
           severity: integer(),
           reminder_times: [NaiveDateTime.t()] | nil,
@@ -186,8 +186,7 @@ defmodule AlertsUI.AlertBuilder do
         |> Enum.map(
           &%{
             id: &1.id,
-            reminder_time:
-              ActivePeriodBuilder.naive_eastern_datetime_to_utc(reminder_time_value(&1))
+            reminder_time: ActivePeriodBuilder.ensure_utc_datetime(reminder_time_value(&1))
           }
         )
 
@@ -1331,7 +1330,7 @@ defmodule AlertsUI.AlertBuilder do
   end
 
   defp ensure_utc_or_nil(%NaiveDateTime{} = timestamp) do
-    ActivePeriodBuilder.naive_eastern_datetime_to_utc(timestamp)
+    ActivePeriodBuilder.ensure_utc_datetime(timestamp)
   end
 
   defp ensure_utc_or_nil(%DateTime{} = timestamp) do
