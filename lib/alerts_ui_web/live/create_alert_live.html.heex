@@ -66,7 +66,10 @@
             skate_detours={@skate_detours}
           />
           <DeliverySlice.render form={@form} />
-          <ReminderTimesSlice.render form={@form} />
+          <ReminderTimesSlice.render
+            form={@form}
+            current_time={@current_time}
+          />
           <SubmitSlice.render
             form={@form}
             progress={@progress}
