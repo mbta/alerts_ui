@@ -43,7 +43,9 @@ defmodule AlertsUI.Jobs.SkateUpdateWorkerTest do
       {result, log} = with_log(fn -> SkateDetourUpdateWorker.perform(%Job{args: %{}}) end)
 
       assert result == :ok
-      assert log =~ "[info] Automatically closed the following Skate alerts: 123, 789"
+      assert log =~ "[info] Automatically closed the following Skate alerts:"
+      assert log =~ "123"
+      assert log =~ "789"
       assert !is_nil(Alerts.get_by_alert_id!("123").closed_timestamp)
       assert !is_nil(Alerts.get_by_alert_id!("789").closed_timestamp)
     end
@@ -158,7 +160,7 @@ defmodule AlertsUI.Jobs.SkateUpdateWorkerTest do
                  cause: :OTHER_CAUSE,
                  cause_detail: "DRAWBRIDGE_BEING_RAISED",
                  original_route_selections: ["1|1"],
-                 original_stop_selections: ["Massachusetts Ave @ Pearl St|72"],
+                 original_stop_selections: ["Massachusetts Ave @ Pearl St (inbound)|72"],
                  original_direction_selections: ["Inbound|1"],
                  header_text:
                    "Route 1 inbound is detoured, skipping Massachusetts Ave @ Pearl St due to a drawbridge being raised. The closest stops with service are Massachusetts Ave opp Inman St and Massachusetts Ave @ Sidney St.",
@@ -305,8 +307,8 @@ defmodule AlertsUI.Jobs.SkateUpdateWorkerTest do
 
         assert %{
                  original_stop_selections: [
-                   "Silver Line Way|place-conrd",
-                   "World Trade Center|place-wtcst"
+                   "Silver Line Way (outbound)|place-conrd",
+                   "World Trade Center (outbound)|place-wtcst"
                  ],
                  header_text:
                    "SL1 outbound is detoured, skipping Silver Line Way and World Trade Center due to a parade. The closest stops with service are Courthouse and Terminal A.",

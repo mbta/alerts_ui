@@ -139,7 +139,8 @@ defmodule AlertsUI.Jobs.SkateDetourUpdateWorker do
     new_alert_params = %{
       cause: new_cause,
       cause_detail: new_cause_detail,
-      original_stop_selections: Enum.map(new_stops, &"#{&1.name}|#{&1.id}"),
+      original_stop_selections:
+        Enum.map(new_stops, &"#{&1.name} (#{String.downcase(direction_name)})|#{&1.id}"),
       informed_entity: informed_entities,
       header_text: new_header_text,
       description_text: new_description_text,
