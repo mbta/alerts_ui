@@ -288,7 +288,6 @@ defmodule AlertsUIWeb.CreateAlertLive.SubmitSliceTest do
                  last_modified_timestamp: _,
                  last_push_notification_timestamp: _,
                  closed_timestamp: nil,
-                 timeframe_text: nil,
                  recurrence_text: nil,
                  alert_lifecycle: nil,
                  duration_certainty: :KNOWN,
