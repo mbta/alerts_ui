@@ -32,14 +32,9 @@ defmodule AlertsUIWeb.DetoursViewerController do
   end
 
   def get_json(conn, _params) do
-
-    {:ok, detours} =
-      GetDetours.read_data()
-
-    detours
-    |> String.trim()
-    |> String.split("\n")
-    |> Enum.map(&Jason.decode!/1)
+    detours =
+      GetDetours.get_detours(true)
+      |> Enum.map(&Map.from_struct(&1))
 
     json(conn, detours)
   end
