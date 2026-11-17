@@ -22,7 +22,7 @@ defmodule AlertsUI.SkateDetours.GetDetoursTest do
 
     test "parses detours from file" do
       data = GetDetours.get_detours()
-      assert length(data) == 8
+      assert length(data) == 9
 
       assert %AlertsUI.Models.SkateDetour{
                id: 7,

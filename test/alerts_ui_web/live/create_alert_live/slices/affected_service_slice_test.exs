@@ -3191,7 +3191,16 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
            by_type: fn _ -> [@detour_bus_route] end,
            get: fn _, _ -> @detour_bus_route end
          ]},
-        {StopsRepo, [], [by_route: fn _, _, _ -> [@detour_stop, @connection_stop] end]}
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ ->
+             [
+               @connection_stop,
+               @detour_stop,
+               %Stop{id: "73", name: "Massachusetts Ave @ Sidney St"}
+             ]
+           end
+         ]}
       ]) do
         conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
         {:ok, view, _html} = live(conn, "/alerts/new")
@@ -3229,7 +3238,96 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
                  ~s(title="Stop ID 72" selected="" value="Mass Ave at Pearl St \(inbound\)|72">Mass Ave at Pearl St \(inbound\))
 
         assert view |> element("#alert_data_header_text") |> render_async =~
-                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St due to a drawbridge being raised. The closest stop with service is Mass Ave opp Inman St."
+                 "Route 1 inbound is detoured, skipping Mass Ave at Pearl St due to a drawbridge being raised. The closest stops with service are Mass Ave opp Inman St and Massachusetts Ave @ Sidney St."
+      end
+    end
+
+    @tag :logged_in_user
+    test "selecting a detour that includes child stops populates correctly", %{
+      conn: conn
+    } do
+      bus_route = %Route{
+        direction_names: %{0 => "Outbound", 1 => "Inbound"},
+        sort_order: 1,
+        id: "741",
+        type: 3,
+        name: "SL1"
+      }
+
+      stop_zero = %Stop{
+        id: "place-crtst",
+        type: 3,
+        name: "Courthouse"
+      }
+
+      stop_one = %Stop{
+        id: "place-wtcst",
+        type: 3,
+        name: "World Trade Center"
+      }
+
+      stop_two = %Stop{
+        id: "place-conrd",
+        type: 3,
+        name: "Silver Line Way"
+      }
+
+      stop_three = %Stop{
+        id: "17091",
+        type: 3,
+        name: "Terminal A"
+      }
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [bus_route] end,
+           get: fn _, _ -> bus_route end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [stop_zero, stop_one, stop_two, stop_three] end,
+           get_parent: fn
+             "74612" -> stop_zero
+             "74613" -> stop_one
+           end
+         ]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_new_bus_detours", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page(conn, view, "Bus", "Detour")
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "single_route_id"],
+          "alert_data" => %{"route_ids" => ["741"], "single_route_id" => "741"}
+        })
+
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "skate_detour_id"],
+          "alert_data" => %{"skate_detour_id" => 11}
+        })
+
+        render_async(view)
+
+        assert view |> element("#alert_data_direction") |> render_async =~
+                 ~s(<option selected="" value="0">Outbound</option>)
+
+        assert view |> element("#alert_data_stop_names_and_ids_selector") |> render_async =~
+                 ~s(title="Stop ID place-wtcst" selected="" value="World Trade Center \(outbound\)|place-wtcst">World Trade Center \(outbound\))
+
+        assert view |> element("#alert_data_stop_names_and_ids_selector") |> render_async =~
+                 ~s(title="Stop ID place-conrd" selected="" value="Silver Line Way \(outbound\)|place-conrd">Silver Line Way \(outbound\))
+
+        assert view |> element("#alert_data_header_text") |> render_async =~
+                 "SL1 outbound is detoured, skipping Silver Line Way and World Trade Center due to a parade. The closest stops with service are Terminal A and Courthouse."
       end
     end
 
@@ -3242,7 +3340,16 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
            get: fn _, _ -> @detour_bus_route end
          ]},
         {StopsRepo, [],
-         [by_route: fn _, _, _ -> [@detour_stop] end, all: fn _, _ -> [@detour_stop] end]},
+         [
+           by_route: fn _, _, _ ->
+             [
+               @connection_stop,
+               @detour_stop,
+               %Stop{id: "73", name: "Massachusetts Ave @ Sidney St"}
+             ]
+           end,
+           all: fn _, _ -> [] end
+         ]},
         {RoutePatternsRepo, [],
          [
            by_route_id: fn _, _ -> [] end

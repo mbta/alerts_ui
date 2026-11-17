@@ -81,7 +81,20 @@ defmodule AlertsUI.Jobs.SkateDetourUpdateWorker do
 
     route = %Route{id: route_id, name: route_name, type: 3}
 
-    new_stops = StopsRepo.all(["filter[id]": Enum.join(detour.missed_stops, ",")], [])
+    # we want to deal with parent stops only
+    {new_stops, child_stops} =
+      StopsRepo.all(["filter[id]": Enum.join(detour.missed_stops, ",")], [])
+      |> Enum.split_with(fn stop -> is_nil(stop.parent_id) end)
+
+    parent_stops =
+      if Enum.empty?(child_stops) do
+        []
+      else
+        parent_ids_of_children = Enum.map_join(child_stops, ",", & &1.parent_id)
+        StopsRepo.all(["filter[id]": parent_ids_of_children], [])
+      end
+
+    new_stops = new_stops ++ parent_stops
     new_connection_points = get_connection_points(detour)
 
     autotext_data =

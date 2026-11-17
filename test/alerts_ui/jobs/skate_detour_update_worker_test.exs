@@ -183,5 +183,137 @@ defmodule AlertsUI.Jobs.SkateUpdateWorkerTest do
                } = hd(updated_alert.informed_entity)
       end
     end
+
+    test "correctly modifies alerts open skate alerts whose missed stops are child stops" do
+      bus_route = %Route{
+        direction_names: %{0 => "Outbound", 1 => "Inbound"},
+        sort_order: 1,
+        id: "741",
+        type: 3,
+        name: "SL1"
+      }
+
+      stop_zero = %Stop{
+        id: "place-crtst",
+        type: 3,
+        name: "Courthouse"
+      }
+
+      stop_one = %Stop{
+        id: "place-wtcst",
+        type: 3,
+        name: "World Trade Center"
+      }
+
+      stop_two = %Stop{
+        id: "place-conrd",
+        type: 3,
+        name: "Silver Line Way"
+      }
+
+      stop_three = %Stop{
+        id: "17091",
+        type: 3,
+        name: "Terminal A"
+      }
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [bus_route] end,
+           get: fn _, _ -> bus_route end
+         ]},
+        {RoutePatternsRepo, [],
+         [
+           by_route_id: fn _, _opts ->
+             [
+               %RoutePattern{
+                 direction_id: 0,
+                 stops: [stop_one, stop_two],
+                 route_id: bus_route.id,
+                 listed_route: true,
+                 id: "rp_1"
+               }
+             ]
+           end,
+           included_stops_by_route_id: fn _route_id, _direction -> [stop_one, stop_two] end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [stop_zero, stop_one, stop_two, stop_three] end,
+           get_parent: fn
+             "74612" -> stop_zero
+             "74613" -> stop_one
+           end,
+           all: fn
+             ["filter[id]": "74613,place-conrd"], _opts ->
+               [
+                 %Stop{
+                   id: "74613",
+                   type: 3,
+                   name: "World Trade Center",
+                   parent_id: stop_one.id
+                 },
+                 stop_two
+               ]
+
+             ["filter[id]": "74612,17091"], _opts ->
+               [
+                 %Stop{
+                   id: "74612",
+                   type: 3,
+                   name: "Courthouse",
+                   parent_id: stop_zero.id
+                 },
+                 stop_three
+               ]
+
+             ["filter[id]": "place-wtcst"], _opts ->
+               [stop_one]
+           end
+         ]}
+      ]) do
+        set_log_level(:info)
+
+        original_created_at_timestamp = ~U[2026-03-10 14:30:54Z]
+
+        insert(:alert, %{
+          alert_id: "123",
+          skate_detour_id: 11,
+          active_period_end: nil,
+          original_route_selections: ["SL1|#{bus_route.id}"],
+          original_stop_selections: ["World Trade Center|place-wtcst"],
+          original_direction_selections: ["Outbound|0"],
+          informed_entity: [
+            build(:informed_entity, %{route_id: "741", route_type: 3, stop_id: "place-wtcst"})
+          ],
+          header_text: "original header text",
+          description_text: "original description text",
+          service_effect_text: "original service effect text",
+          severity: 7,
+          created_at: original_created_at_timestamp,
+          last_modified_timestamp: original_created_at_timestamp
+        })
+
+        {result, log} = with_log(fn -> SkateDetourUpdateWorker.perform(%Job{args: %{}}) end)
+        assert log =~ "Automatically updated the following Skate alerts: 123"
+        assert result == :ok
+
+        updated_alert = Alerts.get_by_alert_id!("123")
+
+        assert true
+
+        assert %{
+                 original_stop_selections: [
+                   "Silver Line Way|place-conrd",
+                   "World Trade Center|place-wtcst"
+                 ],
+                 header_text:
+                   "SL1 outbound is detoured, skipping Silver Line Way and World Trade Center due to a parade. The closest stops with service are Courthouse and Terminal A.",
+                 description_text: "Skipped outbound stops:\nSilver Line Way\nWorld Trade Center",
+                 service_effect_text: "SL1 detour"
+               } = updated_alert
+      end
+    end
   end
 end
