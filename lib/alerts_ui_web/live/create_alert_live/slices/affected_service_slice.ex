@@ -5,6 +5,9 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
   loads schedules and renders the route/stop/trip picker for the details step.
   """
 
+  alias AlertsUI.Models.EnhancedSchedule
+  alias MBTAV3API.Schedules.Trip
+  alias MBTAV3API.Stops.Stop
   alias AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice
   use AlertsUIWeb, :html
   alias AlertsUI.Alerts
@@ -504,7 +507,9 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
 
   defp available_schedules(route_ids, direction, modal_date) do
     date = get_schedule_date(modal_date)
+
     CreateAlertHelpers.get_schedules_by_date(route_ids, direction, date)
+    |> maybe_add_fake_trips()
   end
 
   defp get_schedule_date("default") do
@@ -512,6 +517,37 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
   end
 
   defp get_schedule_date(modal_date), do: modal_date
+
+  defp maybe_add_fake_trips(schedules) do
+    # Enum.map(schedules, fn s -> s.stop end) |> IO.inspect()
+    path = "./test/support/fixtures/extra_trips.json"
+    {:ok, data} = File.read(path)
+    data = data |> Jason.decode!()
+
+    added_schedules =
+      Enum.map(data, fn d ->
+        {:ok, departure_datetime, _} = DateTime.from_iso8601(d["departure_time"])
+
+        {:ok, time_of_last_trip_arrival, _} =
+          DateTime.from_iso8601(d["time_of_last_trip_arrival"])
+
+        %EnhancedSchedule{
+          route_id: d["route_id"],
+          departure_time: departure_datetime,
+          time_of_last_trip_arrival: time_of_last_trip_arrival,
+          trip: %Trip{
+            id: d["trip"]["id"],
+            name: "FAKE #{d["trip"]["name"]}",
+            direction_id: d["trip"]["direction_id"]
+          },
+          stop: %Stop{name: d["stop"]["name"]},
+          last_stop_name: d["stop"]["last_stop_name"],
+          added_route_ids: d["added_route_ids"] || []
+        }
+      end)
+
+    added_schedules ++ schedules
+  end
 
   @update_selection_targets [
     "direction",
