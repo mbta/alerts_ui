@@ -10,8 +10,8 @@
             "name": "stop_name"
         },
         "last_stop_name": "last_stop_name",
-        "departure_time": "2026-11-17T20:00:00Z",
-        "time_of_last_trip_arrival": "2026-11-17T21:00:00Z",
+        "departure_time": "2026-11-18T20:00:00Z",
+        "time_of_last_trip_arrival": "2026-11-18T21:00:00Z",
         "added_route_ids": []
     }
 ]
