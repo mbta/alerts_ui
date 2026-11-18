@@ -40,7 +40,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
             direction_id: d["trip"]["direction_id"]
           },
           stop: %Stop{name: d["stop"]["name"]},
-          last_stop_name: d["stop"]["last_stop_name"],
+          last_stop_name: d["last_stop_name"],
           added_route_ids: d["added_route_ids"] || []
         }
       end)
