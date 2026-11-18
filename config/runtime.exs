@@ -39,6 +39,14 @@ get_translated_cause_effect_detail = fn ->
   end
 end
 
+get_bus_detours = fn ->
+  if System.get_env("SENTRY_ENV", "") == "prod" do
+    false
+  else
+    true
+  end
+end
+
 cond do
   config_env() == :test ->
     config :alerts_ui, AlertsUI.Repo, url: System.fetch_env!("DATABASE_URL_TEST")
@@ -49,7 +57,8 @@ cond do
       api_key: "",
       dev_api_url: "https://api-dev.mbtace.com",
       dev_api_key: "",
-      translated_cause_effect_detail?: true
+      translated_cause_effect_detail?: true,
+      show_new_bus_detours: true
 
     config :mbta_v3_api,
       base_url: "https://api-dev.mbtace.com/",
@@ -138,7 +147,8 @@ cond do
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
       dev_api_key: System.fetch_env!("DEV_API_KEY"),
-      translated_cause_effect_detail?: get_translated_cause_effect_detail.()
+      translated_cause_effect_detail?: get_translated_cause_effect_detail.(),
+      show_new_bus_detours: get_bus_detours.()
 
     config :mbta_v3_api,
       base_url: String.replace_trailing(System.fetch_env!("API_URL"), "/", ""),
@@ -176,7 +186,8 @@ cond do
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
       dev_api_key: System.fetch_env!("DEV_API_KEY"),
       translated_cause_effect_detail?: true,
-      trapeze_import?: false
+      trapeze_import?: false,
+      show_new_bus_detours: true
 
     config :sentry,
       # Prevents sentry reporting in local environments
