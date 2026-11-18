@@ -2,6 +2,8 @@ alias AlertsUI.Models.EnhancedSchedule
 alias MBTAV3API.Schedules.Trip
 alias MBTAV3API.Stops.Stop
 
+require Logger
+
 defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
   @moduledoc """
   Functions for handling staged fake trips
@@ -16,7 +18,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
   def maybe_add_fake_trips(schedules, show_fake_trips)
 
   def maybe_add_fake_trips(schedules, true) do
-    {:ok, data} = File.read(@fake_trip_file_path)
+    data = File.read!(@fake_trip_file_path)
     data = data |> Jason.decode!()
 
     now = DateTime.now!("America/New_York")
@@ -46,6 +48,13 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
       end)
 
     added_schedules ++ schedules
+  rescue
+    exception ->
+      Logger.error(
+        "Error reading fake trips, returning original trips: #{Exception.message(exception)}"
+      )
+
+      schedules
   end
 
   def maybe_add_fake_trips(schedules, false) do
