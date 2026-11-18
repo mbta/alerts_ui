@@ -189,8 +189,7 @@ config :laboratory,
        "When enabled, turns OFF Fullstory, our session tracker"},
       {:show_bulk_download_page, "Show Commuter Rail download page", "Shows a page where you
     can download bulk Commuter Rail alerts."}
-    ] ++
-      extra_features,
+    ] ++ extra_features,
   cookie: [
     # one month,
     max_age: 3600 * 24 * 30,

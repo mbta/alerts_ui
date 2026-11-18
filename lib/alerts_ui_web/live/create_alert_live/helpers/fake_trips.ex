@@ -19,12 +19,16 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
     {:ok, data} = File.read(@fake_trip_file_path)
     data = data |> Jason.decode!()
 
-    added_schedules =
-      Enum.map(data, fn d ->
-        {:ok, departure_datetime, _} = DateTime.from_iso8601(d["departure_time"])
+    now = DateTime.now!("America/New_York")
 
-        {:ok, time_of_last_trip_arrival, _} =
-          DateTime.from_iso8601(d["time_of_last_trip_arrival"])
+    added_schedules =
+      data
+      |> Enum.with_index()
+      |> Enum.map(fn {d, idx} ->
+        # Hard code the times to always be a little after 'now' so that they reliably show
+        # up in the form
+        departure_datetime = now |> DateTime.add(1, :hour) |> DateTime.add(5 * idx, :minute)
+        time_of_last_trip_arrival = departure_datetime |> DateTime.add(1, :hour)
 
         %EnhancedSchedule{
           route_id: d["route_id"],

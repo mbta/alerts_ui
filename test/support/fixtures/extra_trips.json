@@ -2,16 +2,40 @@
     {
         "route_id": "CR-Worcester",
         "trip": {
-            "name": "trip_name",
-            "id": "trip_id",
+            "name": "Adventure",
+            "id": "fake_000",
             "direction_id": 0
         },
         "stop": {
-            "name": "stop_name"
+            "name": "Hobbit Hole"
         },
-        "last_stop_name": "last_stop_name",
-        "departure_time": "2026-11-18T20:00:00Z",
-        "time_of_last_trip_arrival": "2026-11-18T21:00:00Z",
+        "last_stop_name": "Mt Doom",
+        "added_route_ids": []
+    },
+    {
+        "route_id": "CR-Worcester",
+        "trip": {
+            "name": "Adventure",
+            "id": "fake_001",
+            "direction_id": 0
+        },
+        "stop": {
+            "name": "The Shire"
+        },
+        "last_stop_name": "Mt Doom",
+        "added_route_ids": []
+    },
+    {
+        "route_id": "CR-Fairmount",
+        "trip": {
+            "name": "Adventure",
+            "id": "fake_002",
+            "direction_id": 0
+        },
+        "stop": {
+            "name": "Rivendell"
+        },
+        "last_stop_name": "Lothlorien",
         "added_route_ids": []
     }
 ]
