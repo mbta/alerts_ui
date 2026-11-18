@@ -1445,7 +1445,7 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
       severity: 4,
       reminder_times: [],
       recurrence_days: [],
-      created_timestamp: ActivePeriodBuilder.naive_eastern_datetime_to_utc(@yesterday),
+      created_timestamp: DateTime.add(DateTime.utc_now(), -1, :day),
       created_by: "First Last"
     }
 

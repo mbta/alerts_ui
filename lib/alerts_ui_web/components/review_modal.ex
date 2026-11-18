@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.ReviewModal do
     TimeRangeDurationText
   }
 
-  alias AlertsUIWeb.Helpers.ContentFormatter
+  alias AlertsUIWeb.Helpers.{ContentFormatter, DateTimeHelpers}
 
   alias AlertsUIWeb.UserHelpers
 
@@ -135,7 +135,8 @@ defmodule AlertsUIWeb.ReviewModal do
         last_edited_at: Map.get(assigns.alert_data, :last_edited_at),
         last_edited_by: Map.get(assigns.alert_data, :last_edited_by),
         reminder_times: reminder_times,
-        send_notifications: assigns.alert_data.notification_toggle
+        send_notifications: assigns.alert_data.notification_toggle,
+        current_time: DateTimeHelpers.current_time()
       )
 
     ~H"""
@@ -335,14 +336,14 @@ defmodule AlertsUIWeb.ReviewModal do
                   <p>
                     {Calendar.strftime(reminder_time(reminder), "%a %m/%d/%Y %-I:%M %p")}
                     <span
-                      :if={ReminderTimes.sent?(reminder_time(reminder))}
+                      :if={ReminderTimes.sent?(reminder_time(reminder), @current_time)}
                       class="text-text-secondary"
                     >
                       <.icon name="hero-check-circle-solid text-mbta-green" class="h-4 w-4" /> Sent
                     </span>
 
                     <span
-                      :if={!ReminderTimes.sent?(reminder_time(reminder))}
+                      :if={!ReminderTimes.sent?(reminder_time(reminder), @current_time)}
                       class="text-text-secondary"
                     >
                       <.icon name="hero-clock" class="h-4 w-4" /> Scheduled

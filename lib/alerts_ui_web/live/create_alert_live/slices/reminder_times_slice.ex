@@ -8,6 +8,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.ReminderTimesSlice do
   alias AlertsUI.Helpers.ReminderTimes
   alias AlertsUIWeb.CreateAlertLive.AlertData
   alias AlertsUIWeb.CreateAlertLive.Slice
+  alias AlertsUIWeb.Helpers.DateTimeHelpers
   alias Phoenix.HTML.FormField
 
   import Ecto.Changeset
@@ -19,9 +20,13 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.ReminderTimesSlice do
   defimpl Slice, for: __MODULE__ do
     alias AlertsUIWeb.CreateAlertLive.Slices.ReminderTimesSlice
 
-    def mount(_slice, socket, _base_params), do: socket
+    def mount(_slice, socket, _base_params) do
+      assign(socket, :current_time, DateTimeHelpers.current_time())
+    end
 
     def extract(slice, %AlertData{reminder_times: reminder_times} = _alert_data, _params) do
+      current_time = DateTimeHelpers.current_time()
+
       converted =
         Enum.map(reminder_times || [], fn
           %{id: id, time: time} -> %AlertData.ReminderTime{id: id, reminder_time: time}
@@ -33,7 +38,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.ReminderTimesSlice do
           # Filter to only future reminders when duplicating
           converted
           |> Enum.filter(fn %AlertData.ReminderTime{id: id, reminder_time: time} ->
-            ReminderTimes.editable?(id, time)
+            ReminderTimes.editable?(id, time, current_time)
           end)
         else
           converted
@@ -140,7 +145,9 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.ReminderTimesSlice do
         <.inputs_for :let={rt} field={@form[:reminder_times]}>
           <div class="flex flex-row mb-4" id={"reminder-time-component-#{rt.index}"}>
             <.reminder_input
-              editable={ReminderTimes.editable?(rt[:id].value, rt[:reminder_time].value)}
+              editable={
+                ReminderTimes.editable?(rt[:id].value, rt[:reminder_time].value, @current_time)
+              }
               field={rt[:reminder_time]}
               id={rt[:id].value}
               index={rt.index}
