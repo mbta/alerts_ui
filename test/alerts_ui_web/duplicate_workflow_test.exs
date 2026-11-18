@@ -276,7 +276,6 @@ defmodule AlertsUIWeb.DuplicateWorkflowTest do
                severity: 3,
                severity_level: :WARNING,
                short_header_text: nil,
-               timeframe_text: nil,
                tts_description_text: nil,
                tts_header_text: nil,
                url: nil,

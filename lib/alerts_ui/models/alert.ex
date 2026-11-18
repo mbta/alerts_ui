@@ -59,7 +59,6 @@ defmodule AlertsUI.Models.Alert do
   last_modified_timestamp
   last_push_notification_timestamp
   closed_timestamp
-  timeframe_text
   recurrence_text
   alert_lifecycle
   duration_certainty
@@ -145,7 +144,6 @@ defmodule AlertsUI.Models.Alert do
           severity_level: atom() | nil,
           short_header_text: String.t() | nil,
           source: atom() | nil,
-          timeframe_text: String.t() | nil,
           tts_header_text: String.t() | nil,
           tts_description_text: String.t() | nil,
           updated_at: DateTime.t(),
@@ -237,7 +235,6 @@ defmodule AlertsUI.Models.Alert do
     field :last_modified_timestamp, :utc_datetime
     field :last_push_notification_timestamp, :utc_datetime
     field :closed_timestamp, :utc_datetime
-    field :timeframe_text, :string
     field :recurrence_text, :string
     field :alert_lifecycle, Ecto.Enum, values: @alert_lifecycle
     field :duration_certainty, Ecto.Enum, values: @duration_certainty
