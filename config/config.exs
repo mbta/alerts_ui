@@ -173,7 +173,7 @@ extra_features =
   if System.get_env("SENTRY_ENV", "") === "prod",
     do: [],
     else: [
-      {:allow_fake_trips, "Include faked trips",
+      {:show_fake_trips, "Show faked trips",
        "Allows selecting hard-coded fake trips from extra_trips.json"}
     ]
 

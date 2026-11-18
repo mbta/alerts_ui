@@ -12,8 +12,10 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
 
   @fake_trip_file_path "./test/support/fixtures/extra_trips.json"
 
-  @spec maybe_add_fake_trips([EnhancedSchedule.t()]) :: [EnhancedSchedule.t()]
-  def maybe_add_fake_trips(schedules) do
+  @spec maybe_add_fake_trips([EnhancedSchedule.t()], boolean()) :: [EnhancedSchedule.t()]
+  def maybe_add_fake_trips(schedules, show_fake_trips)
+
+  def maybe_add_fake_trips(schedules, true) do
     {:ok, data} = File.read(@fake_trip_file_path)
     data = data |> Jason.decode!()
 
@@ -40,5 +42,9 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
       end)
 
     added_schedules ++ schedules
+  end
+
+  def maybe_add_fake_trips(schedules, false) do
+    schedules
   end
 end

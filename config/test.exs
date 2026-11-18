@@ -45,7 +45,9 @@ config :laboratory,
      "Shows the menu link to a page showing a guide to our components"},
     {:show_stop_ids, "Show stop ids", "Show a list of selected stop ids in the form."},
     {:show_bulk_download_page, "Show Commuter Rail download page", "Shows a page where you
-    can download bulk Commuter Rail alerts."}
+    can download bulk Commuter Rail alerts."},
+    {:show_fake_trips, "Show faked trips",
+     "Allows selecting hard-coded fake trips from extra_trips.json"}
   ],
   cookie: [
     # one month,
