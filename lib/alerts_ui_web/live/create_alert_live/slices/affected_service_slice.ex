@@ -26,7 +26,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
   import AlertsUIWeb.CreateAlertLive.Helpers.Validation,
     only: [always_validate_required: 3]
 
-  import AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips, only: [maybe_add_fake_trips: 2]
+  import AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips, only: [maybe_add_fake_trips: 3]
 
   @min_stops_message "Select 2 or more stops between which service is not running"
 
@@ -424,7 +424,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
 
       available_schedules =
         if show_trips_input?(combination),
-          do: available_schedules(route_ids, direction, modal_date, show_fake_trips?),
+          do: available_schedules(route_ids, direction, modal_date, route_type, show_fake_trips?),
           else: []
 
       direction_options =
@@ -500,16 +500,16 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
   defp prev(%Selections{} = selections), do: selections
   defp prev(_), do: %Selections{}
 
-  defp available_schedules(route_ids, direction, _modal_date, _show_fake_trips)
+  defp available_schedules(route_ids, direction, _modal_date, _route_type, _show_fake_trips)
        when nil in [route_ids, direction] or route_ids == [] do
     []
   end
 
-  defp available_schedules(route_ids, direction, modal_date, show_fake_trips) do
+  defp available_schedules(route_ids, direction, modal_date, route_type, show_fake_trips) do
     date = get_schedule_date(modal_date)
 
     CreateAlertHelpers.get_schedules_by_date(route_ids, direction, date)
-    |> maybe_add_fake_trips(show_fake_trips)
+    |> maybe_add_fake_trips(show_fake_trips, route_type)
   end
 
   defp get_schedule_date("default") do
