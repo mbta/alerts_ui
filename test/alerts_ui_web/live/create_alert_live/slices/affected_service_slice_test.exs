@@ -3382,4 +3382,53 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
       end
     end
   end
+
+  describe "faked trips" do
+    @tag :logged_in_user
+    test "can save an alert with a faked trip", %{conn: conn} do
+      faked_trip_id = "fake_002"
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route_2] end,
+           get: fn _, _ -> @route_2 end
+         ]},
+        {SchedulesRepo, [], [by_route_ids: fn _, _ -> [] end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end, all: fn _, _ -> [@stop] end]},
+        {RoutePatternsRepo, [], [by_route_id: fn _, _ -> [] end]}
+      ]) do
+        conn = put_resp_cookie(conn, "show_fake_trips", "true")
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page(conn, view, "Commuter Rail", "Delay")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => ["CR-Fairmount"]}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "trip_ids"],
+          "alert_data" => %{"trip_ids" => [faked_trip_id]}
+        })
+
+        render_async(view)
+
+        assert view |> element("#trip-selector-#{faked_trip_id}[selected]")
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        new_alert = parse_alert_created_output(view)
+        informed_entities = new_alert.informed_entity
+        assert length(informed_entities) === 1
+        informed_entity = hd(new_alert.informed_entity)
+        assert informed_entity.trip.trip_id === faked_trip_id
+      end
+    end
+  end
 end
