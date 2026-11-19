@@ -169,27 +169,20 @@ config :ueberauth, Ueberauth,
     }
   ]
 
-extra_features =
-  if System.get_env("SENTRY_ENV", "") === "staging",
-    do: [],
-    else: [
-      {:show_fake_trips, "Show faked trips",
-       "Allows selecting hard-coded fake trips from extra_trips.json"}
-    ]
-
 config :laboratory,
-  features:
-    [
-      {:show_alerts_table, "Show Alerts Table",
-       "Shows menu link to a page with the alerts DB table"},
-      {:show_components_page, "Show Components Style Guide page",
-       "Shows the menu link to a page showing a guide to our components"},
-      {:show_stop_ids, "Show stop ids", "Show a list of selected stop ids in the form."},
-      {:fullstory_disabled, "Stop Fullstory",
-       "When enabled, turns OFF Fullstory, our session tracker"},
-      {:show_bulk_download_page, "Show Commuter Rail download page", "Shows a page where you
-    can download bulk Commuter Rail alerts."}
-    ] ++ extra_features,
+  features: [
+    {:show_alerts_table, "Show Alerts Table",
+     "Shows menu link to a page with the alerts DB table"},
+    {:show_components_page, "Show Components Style Guide page",
+     "Shows the menu link to a page showing a guide to our components"},
+    {:show_stop_ids, "Show stop ids", "Show a list of selected stop ids in the form."},
+    {:fullstory_disabled, "Stop Fullstory",
+     "When enabled, turns OFF Fullstory, our session tracker"},
+    {:show_bulk_download_page, "Show Commuter Rail download page", "Shows a page where you
+    can download bulk Commuter Rail alerts."},
+    {:show_fake_trips, "Show faked trips (dev/staging only)",
+     "Allows selecting hard-coded fake trips from extra_trips.json. This flag is ignored in production."}
+  ],
   cookie: [
     # one month,
     max_age: 3600 * 24 * 30,
