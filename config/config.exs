@@ -170,7 +170,7 @@ config :ueberauth, Ueberauth,
   ]
 
 extra_features =
-  if System.get_env("SENTRY_ENV", "") === "prod",
+  if System.get_env("SENTRY_ENV", "") === "staging",
     do: [],
     else: [
       {:show_fake_trips, "Show faked trips",
