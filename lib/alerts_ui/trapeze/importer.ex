@@ -266,12 +266,7 @@ defmodule AlertsUI.Trapeze.Importer do
 
   defp enabled?, do: Application.get_env(:alerts_ui, :trapeze_import?) == true
 
-  defp compare_timestamps(%DateTime{} = created_at, %NaiveDateTime{} = closed_timestamp) do
-    closed_timestamp =
-      closed_timestamp
-      |> DateTime.from_naive!("America/New_York")
-      |> DateTime.shift_zone!("Etc/UTC")
-
+  defp compare_timestamps(%DateTime{} = created_at, %DateTime{} = closed_timestamp) do
     DateTime.compare(created_at, closed_timestamp)
   end
 

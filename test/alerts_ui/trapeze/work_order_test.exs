@@ -97,11 +97,11 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
         {:ok, wo} = WorkOrder.from_trapeze_line(input)
         {:ok, output} = WorkOrder.to_params(wo)
 
-        assert output == %{
-                 active_period_start: ~N[2026-03-01 07:34:56],
+        assert %{
+                 active_period_start: ~U[2026-03-01 12:34:56Z],
                  active_period_end: nil,
                  closed_timestamp: nil,
-                 notification_period_start: ~N[2026-01-12 10:50:03],
+                 notification_period_start: ~U[2026-01-12 15:50:03Z],
                  notification_period_end: nil,
                  cause_detail: "MAINTENANCE",
                  cause: :MAINTENANCE,
@@ -133,7 +133,7 @@ defmodule AlertsUI.Trapeze.WorkOrderTest do
                  stop_names_and_ids: [],
                  trip_ids: [],
                  trip_information_by_id: []
-               }
+               } = output
       end
     end
   end
