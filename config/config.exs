@@ -179,7 +179,7 @@ config :laboratory,
     {:fullstory_disabled, "Stop Fullstory",
      "When enabled, turns OFF Fullstory, our session tracker"},
     {:show_bulk_download_page, "Show Commuter Rail download page", "Shows a page where you
-    can download bulk Commuter Rail alerts."}
+    can download bulk Commuter Rail alerts. Environment: #{System.get_env("SENTRY_ENV", "could not get sentry env")}"}
   ],
   cookie: [
     # one month,
