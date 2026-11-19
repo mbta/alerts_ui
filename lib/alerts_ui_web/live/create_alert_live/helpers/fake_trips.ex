@@ -13,7 +13,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
   """
   alias MBTAV3API.Routes.Route
 
-  @fake_trip_file_path "./test/support/fixtures/extra_trips.json"
+  @fake_trip_file_path "priv/fixtures/extra_trips.json"
 
   @spec maybe_add_fake_trips([EnhancedSchedule.t()], boolean(), Route.type_int()) :: [
           EnhancedSchedule.t()
@@ -21,7 +21,8 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
   def maybe_add_fake_trips(schedules, show_fake_trips, route_type)
 
   def maybe_add_fake_trips(schedules, true, route_type) do
-    data = File.read!(@fake_trip_file_path)
+    file_path = Application.app_dir(:alerts_ui, @fake_trip_file_path)
+    data = File.read!(file_path)
     data = data |> Jason.decode!()
 
     now = DateTime.now!("America/New_York")
