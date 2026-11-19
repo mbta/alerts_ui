@@ -18,8 +18,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
   @spec maybe_add_fake_trips([EnhancedSchedule.t()], boolean(), Route.type_int()) :: [
           EnhancedSchedule.t()
         ]
-  def maybe_add_fake_trips(schedules, show_fake_trips, route_type)
-
   def maybe_add_fake_trips(schedules, show_fake_trips, route_type) do
     cond do
       # never show fake trips in prod
@@ -37,7 +35,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
   # sobelow warns about reading from a dynamic path file_path, but it is effectively a static path
   # sobelow_skip ["Traversal"]
   defp add_fake_trips(schedules, route_type) do
-    Application.get_env(:alerts_ui, :environment_name, "") === "staging"
     file_path = Application.app_dir(:alerts_ui, @fake_trip_file_path)
     data = File.read!(file_path)
     data = data |> Jason.decode!()
