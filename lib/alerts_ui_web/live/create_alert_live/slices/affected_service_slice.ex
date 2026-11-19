@@ -206,7 +206,14 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSlice do
           })
         end)
 
-      Changeset.cast(changeset, %{trip_information_by_id: trip_info}, [:trip_information_by_id])
+      filtered_trip_ids = Enum.filter(trip_ids, &(&1 in Map.keys(trip_info)))
+
+      changeset
+      |> Changeset.cast(%{trip_information_by_id: trip_info}, [:trip_information_by_id])
+      |> Changeset.cast(
+        %{trip_ids: filtered_trip_ids},
+        [:trip_ids]
+      )
     end
   end
 

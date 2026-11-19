@@ -1879,6 +1879,67 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
     end
 
     @tag :logged_in_user
+    test "trips get wiped out if a direction that doesn't include them is selected",
+         %{conn: conn} do
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route] end,
+           get: fn _ -> @route end,
+           get: fn _, _ -> @route end,
+           by_stop: fn _, _ -> [@route] end
+         ]},
+        {SchedulesRepo, [],
+         [
+           by_route_ids: fn _, _ ->
+             [@schedule_3, @schedule_3]
+           end,
+           end_of_rating: fn -> Date.add(@todays_date, 7) end
+         ]},
+        {StopsRepo, [],
+         [
+           by_route: fn _, _, _ -> [@stop] end,
+           by_route_type: fn _ -> [@stop] end,
+           all: fn _, _ -> [@stop] end,
+           by_trip: fn _ -> [@stop] end
+         ]}
+      ]) do
+        {:ok, view, _html} = live(conn, "/alerts/new")
+        view = get_to_submission_page(conn, view, "Commuter Rail", "Delay")
+        render_async(view)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => ["CR-Worcester"]}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "trip_ids"],
+          "alert_data" => %{"trip_ids" => ["trip-596"]}
+        })
+
+        render_async(view)
+
+        assert view |> element("#alert_data_trip_ids") |> render =~
+                 ~s(title="Trip ID trip-596" selected="" value="trip-596">596)
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "direction"],
+          "alert_data" => %{"direction" => "1"}
+        })
+
+        assert view |> element("#alert_data_trip_ids") |> render =~
+                 ~s(title="Trip ID trip-596" value="trip-596">596)
+      end
+    end
+
+    @tag :logged_in_user
     test "editing updates stop selection in the database", %{conn: conn} do
       trip = build(:trip_descriptor, %{trip_id: "trip-595"})
 
