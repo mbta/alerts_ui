@@ -23,7 +23,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.FakeTrips do
   def maybe_add_fake_trips(schedules, show_fake_trips, route_type) do
     cond do
       # never show fake trips in prod
-      Application.get_env(:alerts_ui, :environment_name, "") === "staging" ->
+      Application.get_env(:alerts_ui, :environment_name, "") === "prod" ->
         schedules
 
       show_fake_trips ->
