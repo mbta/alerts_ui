@@ -12,7 +12,6 @@ defmodule AlertsUIWeb.Components.ReviewModalTest do
   import Phoenix.LiveViewTest
   import Test.Support.Helpers
 
-  alias AlertsUI.ActivePeriodBuilder
   alias AlertsUI.Alerts
   alias AlertsUI.Models.EnhancedSchedule
   alias AlertsUIWeb.ReviewModal

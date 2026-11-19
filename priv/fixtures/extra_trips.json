@@ -1,0 +1,54 @@
+[
+    {
+        "route_id": "CR-Worcester",
+        "trip": {
+            "name": "Adventure",
+            "id": "fake_000",
+            "direction_id": 0
+        },
+        "stop": {
+            "name": "Hobbit Hole"
+        },
+        "last_stop_name": "Mt Doom",
+        "added_route_ids": []
+    },
+    {
+        "route_id": "CR-Worcester",
+        "trip": {
+            "name": "Adventure",
+            "id": "fake_001",
+            "direction_id": 0
+        },
+        "stop": {
+            "name": "The Shire"
+        },
+        "last_stop_name": "Mt Doom",
+        "added_route_ids": []
+    },
+    {
+        "route_id": "CR-Fairmount",
+        "trip": {
+            "name": "Adventure",
+            "id": "fake_002",
+            "direction_id": 0
+        },
+        "stop": {
+            "name": "Rivendell"
+        },
+        "last_stop_name": "Lothlorien",
+        "added_route_ids": []
+    },
+    {
+        "route_id": "Boat-F4",
+        "trip": {
+            "name": "Adventure",
+            "id": "fake_003",
+            "direction_id": 0
+        },
+        "stop": {
+            "name": "Rohan"
+        },
+        "last_stop_name": "Gondor",
+        "added_route_ids": []
+    }
+]
