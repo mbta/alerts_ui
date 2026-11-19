@@ -102,6 +102,7 @@ defmodule AlertsUIWeb.CreateAlertLive do
     # initialize the alert data form or throw an exception trying
     form_type = form_type_from_socket(socket)
     form_title = form_title_from_type(form_type)
+    show_fake_trips? = Map.get(socket.assigns, :show_fake_trips, false)
 
     if connected?(socket) do
       Phoenix.PubSub.subscribe(AlertsUI.PubSub, "persisting")
@@ -133,7 +134,8 @@ defmodule AlertsUIWeb.CreateAlertLive do
         # Used for keeping track of original state of an alert when changing its mode/effect type
         original_alert_form: nil,
         current_url: "",
-        show_new_bus_detours: AlertsUI.config(:show_new_bus_detours)
+        show_new_bus_detours: AlertsUI.config(:show_new_bus_detours),
+        show_fake_trips: show_fake_trips?
       })
       |> assign_new(:return_to, fn -> session["return_to"] end)
 
