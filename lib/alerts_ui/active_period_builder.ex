@@ -221,7 +221,9 @@ defmodule AlertsUI.ActivePeriodBuilder do
   def ensure_utc_datetime(nil), do: nil
 
   def ensure_utc_datetime(%NaiveDateTime{} = naive) do
-    naive |> DateTime.from_naive!("America/New_York") |> DateTime.shift_zone!("Etc/UTC")
+    naive
+    |> DTHelpers.safe_datetime_from_naive("America/New_York")
+    |> DateTime.shift_zone!("Etc/UTC")
   end
 
   def ensure_utc_datetime(%DateTime{} = datetime) do

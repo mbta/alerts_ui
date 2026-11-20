@@ -2,6 +2,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.Time do
   @moduledoc """
   Date and time utility functions.
   """
+  alias AlertsUI.Helpers.DateTime, as: DTHelpers
 
   def today do
     DateTime.now!("America/New_York") |> DateTime.to_date()
@@ -9,7 +10,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.Time do
 
   def localize(%NaiveDateTime{} = dt) do
     dt
-    |> DateTime.from_naive!("America/New_York")
+    |> DTHelpers.safe_datetime_from_naive("America/New_York")
     |> DateTime.to_naive()
   end
 

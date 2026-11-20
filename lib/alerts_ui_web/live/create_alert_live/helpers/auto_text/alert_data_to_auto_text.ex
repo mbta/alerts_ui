@@ -10,13 +10,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AlertDataToAutoText do
     routes = Map.get(alert_data, :routes, [])
     schedules = Map.get(alert_data, :schedules, [])
 
-    end_datetime =
-      build_one_time_active_period_end(
-        Map.get(alert_data, :active_period_end),
-        Map.get(alert_data, :active_period_end_specifier),
-        Map.get(alert_data, :alert_timing)
-      )
-
     branch_name = calcuate_branch_name(route_type, routes, schedules)
 
     conversion =
@@ -40,7 +33,7 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AlertDataToAutoText do
         end_time_specifier:
           Map.get(alert_data, :active_period_end_time_specifier, :end_of_service),
         start_datetime: Map.get(alert_data, :active_period_start),
-        end_datetime: end_datetime,
+        end_datetime: Map.get(alert_data, :active_period_end),
         start_date: Map.get(alert_data, :active_period_start_date),
         end_date: Map.get(alert_data, :active_period_end_date),
         start_time: Map.get(alert_data, :active_period_start_time),
@@ -61,8 +54,6 @@ defmodule AlertsUIWeb.CreateAlertLive.Helpers.AutoText.AlertDataToAutoText do
 
   defp safe_string_to_int(val) when is_binary(val), do: String.to_integer(val)
   defp safe_string_to_int(val), do: val
-
-  defp build_one_time_active_period_end(end_datetime, _, _), do: end_datetime
 
   defp get_stops(%{stops: stops}) when is_list(stops) do
     dedup_stops(stops)

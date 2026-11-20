@@ -5,6 +5,7 @@ defmodule AlertsUI.Models.ActivePeriod do
   """
   use AlertsUI.Schema
   import Ecto.Changeset
+  alias AlertsUI.Helpers.DateTime, as: DTHelpers
   alias AlertsUI.Models.Alert
 
   @start_of_service ~T[03:00:00]
@@ -87,7 +88,7 @@ defmodule AlertsUI.Models.ActivePeriod do
   def next_start_of_service_date(%NaiveDateTime{} = time, start_of_service_time) do
     # Always assume naive dates are America/New York
     time
-    |> DateTime.from_naive!("America/New_York")
+    |> DTHelpers.safe_datetime_from_naive("America/New_York")
     |> next_start_of_service_date(start_of_service_time)
   end
 
@@ -131,7 +132,7 @@ defmodule AlertsUI.Models.ActivePeriod do
   def end_of_service_date(%NaiveDateTime{} = time, end_of_service_time) do
     # Always assume naive dates are America/New York
     time
-    |> DateTime.from_naive!("America/New_York")
+    |> DTHelpers.safe_datetime_from_naive("America/New_York")
     |> end_of_service_date(end_of_service_time)
   end
 
@@ -158,7 +159,7 @@ defmodule AlertsUI.Models.ActivePeriod do
     time = DateTime.shift_zone!(time, "America/New_York")
 
     NaiveDateTime.new!(end_of_service_date(time, end_of_service_time), end_of_service_time)
-    |> DateTime.from_naive!("America/New_York")
+    |> DTHelpers.safe_datetime_from_naive("America/New_York")
     |> DateTime.shift_zone!("Etc/UTC")
   end
 
@@ -181,7 +182,9 @@ defmodule AlertsUI.Models.ActivePeriod do
 
   @spec datetime_to_service_date(DateTime.t() | NaiveDateTime.t()) :: Date.t()
   def datetime_to_service_date(%NaiveDateTime{} = naive_datetime) do
-    naive_datetime |> DateTime.from_naive!("America/New_York") |> datetime_to_service_date
+    naive_datetime
+    |> DTHelpers.safe_datetime_from_naive("America/New_York")
+    |> datetime_to_service_date
   end
 
   def datetime_to_service_date(datetime) do
