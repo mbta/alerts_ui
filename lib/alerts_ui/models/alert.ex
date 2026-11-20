@@ -17,6 +17,7 @@ defmodule AlertsUI.Models.Alert do
   use AlertsUI.Schema
   use Flop.Schema
   import Ecto.Changeset
+  alias AlertsUI.Helpers.DateTime, as: DTHelpers
 
   alias AlertsUI.Models.{
     ActivePeriod,
@@ -623,9 +624,14 @@ defmodule AlertsUI.Models.Alert do
     else
       active_period_start =
         case get_field(changeset, :active_period_start) do
-          %NaiveDateTime{} = naive -> DateTime.from_naive!(naive, "America/New_York")
-          %DateTime{} = dt -> DateTime.shift_zone!(dt, "America/New_York")
-          nil -> nil
+          %NaiveDateTime{} = naive ->
+            DTHelpers.safe_datetime_from_naive(naive, "America/New_York")
+
+          %DateTime{} = dt ->
+            DateTime.shift_zone!(dt, "America/New_York")
+
+          nil ->
+            nil
         end
 
       recurrence_days = get_field(changeset, :recurrence_days) || []
