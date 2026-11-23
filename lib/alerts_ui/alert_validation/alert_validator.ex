@@ -47,7 +47,7 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
     |> gather_alerts(base_url: base_url, api_key: api_key)
   end
 
-  @spec validate_trips_of_alerts(String.t(), String.t()) :: [invalid_alert_t()]
+  @spec validate_trips_of_alerts(String.t(), String.t()) :: %{String.t() => [String.t()]}
   def validate_trips_of_alerts(
         base_url \\ Application.get_env(:alerts_ui, :api_url),
         api_key \\ Application.get_env(:alerts_ui, :api_key)
@@ -87,6 +87,8 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
           alert_ids: trips_to_alerts[trip_id],
           last_service_date: last_service_date
         })
+      else
+        acc
       end
     end)
   end
