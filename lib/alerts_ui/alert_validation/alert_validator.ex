@@ -12,6 +12,12 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
+  alias MBTAV3API.Services.Repo, as: ServicesRepo
+  alias MBTAV3API.Services.Service
+
+  # the number of days before a service ends when we should notify that an alert has a
+  # soon-to-be invalid trip id
+  @notify_threshold_days 1
 
   @type invalid_alert_t :: %{
           alert_id: String.t(),
@@ -39,6 +45,50 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
     Alerts.list_all_open()
     |> Enum.filter(&(&1.primary_service_type == "2"))
     |> gather_alerts(base_url: base_url, api_key: api_key)
+  end
+
+  @spec validate_trips_of_alerts(String.t(), String.t()) :: [invalid_alert_t()]
+  def validate_trips_of_alerts(
+        base_url \\ Application.get_env(:alerts_ui, :api_url),
+        api_key \\ Application.get_env(:alerts_ui, :api_key)
+      ) do
+    tomorrow = Date.add(Date.utc_today(), 1)
+    opts = [base_url: base_url, api_key: api_key]
+
+    trips_to_alerts =
+      Alerts.list_all_open()
+      |> Enum.map(fn alert ->
+        %{
+          alert_id: alert.alert_id,
+          trip_ids: Alert.gather_trip_ids(alert)
+        }
+      end)
+      # Rearrange to group by trip_ids -> alert_id
+      |> Enum.reject(fn alert -> alert.trip_ids === [] end)
+      |> Enum.reduce(%{}, fn %{alert_id: alert_id, trip_ids: trip_ids}, acc ->
+        Enum.reduce(trip_ids, acc, fn trip_id, acc ->
+          Map.update(acc, trip_id, [alert_id], &[alert_id | &1])
+        end)
+      end)
+
+    trips_to_alerts
+    |> Map.keys()
+    |> Enum.reduce(%{}, fn trip_id, acc ->
+      trip_data = hd(SchedulesRepo.trips_by_ids([trip_id], [], opts))
+
+      last_service_date =
+        ServicesRepo.by_id(trip_data.service_id, opts)
+        |> Service.last_service_date()
+
+      notify? = Date.diff(last_service_date, tomorrow) <= @notify_threshold_days
+
+      if notify? do
+        Map.put(acc, trip_id, %{
+          alert_ids: trips_to_alerts[trip_id],
+          last_service_date: last_service_date
+        })
+      end
+    end)
   end
 
   defp gather_alerts(alerts, api_opts) do
