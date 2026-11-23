@@ -114,6 +114,18 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.NotificationPeriodSlice do
     |> force_change(:notification_period_start_date, now |> NaiveDateTime.to_date())
   end
 
+  def ensure_notification_start_for_specifier(changeset, :start_of_service, dt, nil, current_time) do
+    date = NaiveDateTime.to_date(current_time)
+
+    ensure_notification_start_for_specifier(
+      changeset,
+      :start_of_service,
+      dt,
+      date,
+      current_time
+    )
+  end
+
   def ensure_notification_start_for_specifier(changeset, :start_of_service, _, d, _) do
     datetime = NaiveDateTime.new!(d, ActivePeriod.start_of_service_time())
 
