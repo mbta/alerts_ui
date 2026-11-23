@@ -20,16 +20,16 @@ defmodule AlertsUI.Jobs.TripValidationWorker do
     |> log_results()
   end
 
-  def log_results(nil), do: :ok
+  def log_results(trip_id_map) when map_size(trip_id_map) == 0, do: :ok
 
   def log_results(trip_id_map) do
     trip_id_map
     |> Map.keys()
-    |> Enum.map(fn trip_id ->
+    |> Enum.each(fn trip_id ->
       %{alert_ids: alert_ids, last_service_date: last_service_date} = trip_id_map[trip_id]
 
       Logger.warning(
-        "Trip #{trip_id} will be invalid after #{last_service_date} but is still listed in alert(s) #{alert_ids}"
+        "Trip #{trip_id} will be invalid after #{last_service_date} but is still listed in alert(s) #{Enum.join(alert_ids, ",")}"
       )
     end)
 

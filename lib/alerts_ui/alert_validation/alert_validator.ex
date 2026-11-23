@@ -11,13 +11,13 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
   alias MBTAV3API.Facilities.Repo, as: FacilitiesRepo
   alias MBTAV3API.Routes.Repo, as: RoutesRepo
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
-  alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Services.Repo, as: ServicesRepo
   alias MBTAV3API.Services.Service
+  alias MBTAV3API.Stops.Repo, as: StopsRepo
 
   # the number of days before a service ends when we should notify that an alert has a
   # soon-to-be invalid trip id
-  @notify_threshold_days 1
+  @notify_threshold_days 10
 
   @type invalid_alert_t :: %{
           alert_id: String.t(),
