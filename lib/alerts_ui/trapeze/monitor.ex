@@ -8,6 +8,7 @@ defmodule AlertsUI.Trapeze.Monitor do
   import Ecto.Query
   require Logger
 
+  alias AlertsUI.Helpers.DateTime, as: DTHelpers
   alias AlertsUI.Repo
   alias AlertsUI.Trapeze.Models.TrapezeMonitor
 
@@ -71,7 +72,7 @@ defmodule AlertsUI.Trapeze.Monitor do
       cond do
         mtime != nil ->
           mtime
-          |> DateTime.from_naive!("America/New_York")
+          |> DTHelpers.safe_datetime_from_naive("America/New_York")
           |> DateTime.shift_zone!("Etc/UTC")
 
         feed != [] ->

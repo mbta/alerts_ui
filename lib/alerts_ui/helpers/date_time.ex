@@ -38,4 +38,14 @@ defmodule AlertsUI.Helpers.DateTime do
         raise "Error in rounding time to DST gap: #{e}"
     end
   end
+
+  @spec safe_datetime_from_naive(NaiveDateTime.t(), binary()) :: DateTime.t()
+  def safe_datetime_from_naive(%NaiveDateTime{} = naive_datetime, zone \\ "America/New_York") do
+    # intended to avoid DST issues when translating a NaiveDateTime to a DateTime
+    case DateTime.from_naive(naive_datetime, zone) do
+      {:ok, datetime} -> datetime
+      {:gap, _just_before, just_after} -> just_after
+      {:ambiguous, first_dt, _second_dt} -> first_dt
+    end
+  end
 end
