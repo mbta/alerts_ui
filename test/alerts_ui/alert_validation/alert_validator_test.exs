@@ -520,5 +520,97 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
                  }
       end
     end
+
+    test "returns empty if there are no services ending soon" do
+      today = Date.utc_today()
+      service_id = "service-1"
+      service_2 = "service-2"
+
+      with_mocks([
+        {SchedulesRepo, [],
+         [
+           trips_by_ids: fn
+             ["1"], [], [base_url: _, api_key: _] ->
+               [
+                 %Trip{id: "1", service_id: service_id}
+               ]
+
+             ["2"], [], [base_url: _, api_key: _] ->
+               [%Trip{id: "2", service_id: service_2}]
+           end
+         ]},
+        {ServicesRepo, [],
+         [
+           by_id: fn
+             ^service_id, _opts ->
+               %Service{id: service_id, end_date: Date.add(today, 7)}
+
+             ^service_2, _opts ->
+               %Service{id: service_2, end_date: Date.add(today, 10)}
+           end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "123",
+          informed_entity: [%{trip: %{trip_id: "1"}}, %{trip: %{trip_id: "2"}}]
+        })
+
+        assert AlertValidator.validate_trips_of_alerts() ==
+                 %{}
+      end
+    end
+
+    test "returns multiple entries" do
+      today = Date.utc_today()
+      tomorrow = Date.add(today, 1)
+      service_id = "service-1"
+      service_2 = "service-2"
+
+      with_mocks([
+        {SchedulesRepo, [],
+         [
+           trips_by_ids: fn
+             ["1"], [], [base_url: _, api_key: _] ->
+               [
+                 %Trip{id: "1", service_id: service_id}
+               ]
+
+             ["2"], [], [base_url: _, api_key: _] ->
+               [%Trip{id: "2", service_id: service_2}]
+           end
+         ]},
+        {ServicesRepo, [],
+         [
+           by_id: fn
+             ^service_id, _opts ->
+               %Service{id: service_id, end_date: Date.add(today, 1)}
+
+             ^service_2, _opts ->
+               %Service{id: service_2, end_date: today}
+           end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "123",
+          informed_entity: [%{trip: %{trip_id: "1"}}, %{trip: %{trip_id: "2"}}]
+        })
+
+        insert(:alert, %{
+          alert_id: "456",
+          informed_entity: [%{trip: %{trip_id: "1"}}]
+        })
+
+        insert(:alert, %{
+          alert_id: "789",
+          informed_entity: [%{trip: %{trip_id: "2"}}]
+        })
+
+        assert AlertValidator.validate_trips_of_alerts() ==
+                 %{
+                   "1" => %{alert_ids: ["123", "456"], last_service_date: tomorrow},
+                   "2" => %{alert_ids: ["123", "789"], last_service_date: today}
+                 }
+      end
+    end
   end
 end
