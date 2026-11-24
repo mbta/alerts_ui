@@ -17,7 +17,7 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
 
   # the number of days before a service ends when we should notify that an alert has a
   # soon-to-be invalid trip id
-  @notify_threshold_days 10
+  @notify_threshold_days 1
 
   @type invalid_alert_t :: %{
           alert_id: String.t(),
@@ -84,7 +84,7 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
 
       if notify? do
         Map.put(acc, trip_id, %{
-          alert_ids: trips_to_alerts[trip_id],
+          alert_ids: trips_to_alerts[trip_id] |> Enum.sort(),
           last_service_date: last_service_date
         })
       else

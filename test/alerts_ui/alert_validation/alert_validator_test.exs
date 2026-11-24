@@ -11,6 +11,8 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
   alias MBTAV3API.Routes.Route
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Schedules.Trip
+  alias MBTAV3API.Services.Repo, as: ServicesRepo
+  alias MBTAV3API.Services.Service
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
@@ -456,6 +458,66 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
 
         assert result ==
                  "The following Commuter Rail alerts have entities that no longer exist in upcoming GTFS:|Alert 345:|Trips: 2||Alert 234:|Stops: 2||Alert 123:|Routes: 2"
+      end
+    end
+  end
+
+  describe("validate_trips_of_alerts/1") do
+    test "finds alerts with trips with services that are ending soon" do
+      today = Date.utc_today()
+      tomorrow = Date.add(today, 1)
+      service_id = "service-1"
+      service_id_ending_soon = "service-2"
+
+      with_mocks([
+        {SchedulesRepo, [],
+         [
+           trips_by_ids: fn
+             ["1"], [], [base_url: _, api_key: _] ->
+               [
+                 %Trip{id: "1", service_id: service_id}
+               ]
+
+             ["2"], [], [base_url: _, api_key: _] ->
+               [%Trip{id: "2", service_id: service_id_ending_soon}]
+           end
+         ]},
+        {ServicesRepo, [],
+         [
+           by_id: fn
+             ^service_id, _opts ->
+               %Service{id: service_id, end_date: Date.add(today, 7)}
+
+             ^service_id_ending_soon, _opts ->
+               %Service{id: service_id_ending_soon, end_date: tomorrow}
+           end
+         ]}
+      ]) do
+        insert(:alert, %{
+          alert_id: "123",
+          informed_entity: [%{trip: %{trip_id: "1"}}, %{trip: %{trip_id: "2"}}]
+        })
+
+        insert(:alert, %{
+          alert_id: "234",
+          closed_timestamp: ~U[2023-10-14 00:01:00Z],
+          informed_entity: [%{trip: %{trip_id: "2"}}]
+        })
+
+        insert(:alert, %{
+          alert_id: "456",
+          informed_entity: [%{trip: %{trip_id: "1"}}]
+        })
+
+        insert(:alert, %{
+          alert_id: "789",
+          informed_entity: [%{trip: %{trip_id: "2"}}]
+        })
+
+        assert AlertValidator.validate_trips_of_alerts() ==
+                 %{
+                   "2" => %{alert_ids: ["123", "789"], last_service_date: tomorrow}
+                 }
       end
     end
   end
