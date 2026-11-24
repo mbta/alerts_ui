@@ -129,7 +129,9 @@ config :alerts_ui, Oban,
        # Update recurring alerts every day at 3:01 am EST
        {"1 8 * * *", AlertsUI.Jobs.RecurringAlertUpdater},
        # Validate alerts against production every day at 4:00 am EST
-       {"0 9 * * *", AlertsUI.Jobs.AlertValidationDailyWorker}
+       {"0 9 * * *", AlertsUI.Jobs.AlertValidationDailyWorker},
+       # Validate trips in alerts against API services every day at 4:00 am EST
+       {"0 9 * * *", AlertsUI.Jobs.TripValidationWorker}
      ]}
   ],
   queues: [default: 10]
