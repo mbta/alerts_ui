@@ -106,6 +106,43 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.NotificationPeriodSliceTest do
     end
 
     @tag :logged_in_user
+    test "does not throw error if datetime is nil", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_specifier" => "custom",
+          "notification_period_start" => nil
+        }
+      })
+
+      expected_value =
+        DateTime.now!("America/New_York") |> DateTime.to_iso8601() |> String.slice(0..-19//1)
+
+      assert render(view) =~ ~s(value="#{expected_value})
+    end
+
+    @tag :logged_in_user
+    test "does not throw error if date is nil", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/alerts/new")
+      view = get_to_submission_page(conn, view, "Bus", "Delay")
+
+      view
+      |> element("form")
+      |> render_change(%{
+        "alert_data" => %{
+          "notification_specifier" => "start_of_service",
+          "notification_period_start_date" => nil
+        }
+      })
+
+      assert render(view) =~ "Notifications can&#39;t be set in the past"
+    end
+
+    @tag :logged_in_user
     test "scheduled start time must not be in the past", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/alerts/new")
       view = get_to_submission_page(conn, view, "Bus", "Delay")
