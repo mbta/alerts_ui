@@ -3443,4 +3443,64 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
       end
     end
   end
+
+  describe "faked trips" do
+    @tag :logged_in_user
+    test "can save an alert with a faked trip", %{conn: conn} do
+      faked_trip_id = "fake_002"
+
+      with_mocks([
+        {RoutesRepo, [],
+         [
+           by_type: fn _ -> [@route_2] end,
+           get: fn _ -> @route_2 end,
+           get: fn _, _ -> @route_2 end,
+           all: fn _ -> [@route_2] end
+         ]},
+        {SchedulesRepo, [],
+         [by_route_ids: fn _, _ -> [] end, end_of_rating: fn -> Date.add(@todays_date, 7) end]},
+        {StopsRepo, [], [by_route: fn _, _, _ -> [@stop] end, all: fn _, _ -> [@stop] end]},
+        {RoutePatternsRepo, [], [by_route_id: fn _, _ -> [] end]}
+      ]) do
+        conn_with_flag_on = put_resp_cookie(conn, "show_fake_trips", "true")
+        {:ok, view, _html} = live(conn_with_flag_on, "/alerts/new")
+        view = get_to_submission_page(conn_with_flag_on, view, "Commuter Rail", "Delay")
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "route_ids"],
+          "alert_data" => %{"route_ids" => ["CR-Fairmount"]}
+        })
+
+        view
+        |> element("form")
+        |> render_change(%{
+          "_target" => ["alert_data", "trip_ids"],
+          "alert_data" => %{"trip_ids" => [faked_trip_id]}
+        })
+
+        render_async(view)
+
+        assert view |> element("#trip-selector-#{faked_trip_id}[selected]")
+
+        open_review_modal(view)
+        submit_alert(view)
+
+        new_alert = parse_alert_created_output(view)
+        informed_entities = new_alert.informed_entity
+        assert length(informed_entities) === 1
+        informed_entity = hd(new_alert.informed_entity)
+        assert informed_entity.trip.trip_id === faked_trip_id
+
+        # now try opening this alert without our flag on. the obsolete entities
+        # modal should come up since we are no longer supplying the fake trip
+        {:ok, view2, _html} = live(conn, "/alerts/edit/#{new_alert.alert_id}")
+
+        render_async(view2)
+
+        assert has_element?(view2, "#gtfs-warning-modal", "[FAKE] Adventure")
+      end
+    end
+  end
 end

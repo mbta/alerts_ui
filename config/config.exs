@@ -179,7 +179,9 @@ config :laboratory,
     {:fullstory_disabled, "Stop Fullstory",
      "When enabled, turns OFF Fullstory, our session tracker"},
     {:show_bulk_download_page, "Show Commuter Rail download page", "Shows a page where you
-    can download bulk Commuter Rail alerts."}
+    can download bulk Commuter Rail alerts."},
+    {:show_fake_trips, "Show faked trips (dev/staging only)",
+     "Allows selecting hard-coded fake trips from extra_trips.json. This flag is ignored in production."}
   ],
   cookie: [
     # one month,
