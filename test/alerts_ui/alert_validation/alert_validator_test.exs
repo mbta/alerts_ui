@@ -473,13 +473,11 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
         {SchedulesRepo, [],
          [
            trips_by_ids: fn
-             ["1"], [], [base_url: _, api_key: _] ->
+             _, [], [base_url: _, api_key: _] ->
                [
-                 %Trip{id: "1", service_id: service_id}
+                 %Trip{id: "1", service_id: service_id},
+                 %Trip{id: "2", service_id: service_id_ending_soon}
                ]
-
-             ["2"], [], [base_url: _, api_key: _] ->
-               [%Trip{id: "2", service_id: service_id_ending_soon}]
            end
          ]},
         {ServicesRepo, [],
@@ -530,13 +528,11 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
         {SchedulesRepo, [],
          [
            trips_by_ids: fn
-             ["1"], [], [base_url: _, api_key: _] ->
+             _, [], [base_url: _, api_key: _] ->
                [
-                 %Trip{id: "1", service_id: service_id}
+                 %Trip{id: "1", service_id: service_id},
+                 %Trip{id: "2", service_id: service_2}
                ]
-
-             ["2"], [], [base_url: _, api_key: _] ->
-               [%Trip{id: "2", service_id: service_2}]
            end
          ]},
         {ServicesRepo, [],
@@ -570,13 +566,11 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
         {SchedulesRepo, [],
          [
            trips_by_ids: fn
-             ["1"], [], [base_url: _, api_key: _] ->
+             _, [], [base_url: _, api_key: _] ->
                [
-                 %Trip{id: "1", service_id: service_id}
+                 %Trip{id: "1", service_id: service_id},
+                 %Trip{id: "2", service_id: service_2}
                ]
-
-             ["2"], [], [base_url: _, api_key: _] ->
-               [%Trip{id: "2", service_id: service_2}]
            end
          ]},
         {ServicesRepo, [],

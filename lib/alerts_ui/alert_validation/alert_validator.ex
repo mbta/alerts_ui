@@ -55,6 +55,7 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
     tomorrow = Date.add(Date.utc_today(), 1)
     opts = [base_url: base_url, api_key: api_key]
 
+    # Get all open alerts with trips, and make a dict of %{trip_id => [alert_ids]}
     trips_to_alerts =
       Alerts.list_all_open()
       |> Enum.map(fn alert ->
@@ -71,20 +72,21 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
         end)
       end)
 
-    trips_to_alerts
-    |> Map.keys()
-    |> Enum.reduce(%{}, fn trip_id, acc ->
-      trip_data = hd(SchedulesRepo.trips_by_ids([trip_id], [], opts))
+    # Query for all trip data
+    trips = SchedulesRepo.trips_by_ids(Map.keys(trips_to_alerts), [], opts)
 
+    # From trip data, get service data and find the service's last date and figure out if we should notify
+    trips
+    |> Enum.reduce(%{}, fn trip, acc ->
       last_service_date =
-        ServicesRepo.by_id(trip_data.service_id, opts)
+        ServicesRepo.by_id(trip.service_id, opts)
         |> Service.last_service_date()
 
       notify? = Date.diff(last_service_date, tomorrow) <= @notify_threshold_days
 
       if notify? do
-        Map.put(acc, trip_id, %{
-          alert_ids: trips_to_alerts[trip_id] |> Enum.sort(),
+        Map.put(acc, trip.id, %{
+          alert_ids: trips_to_alerts[trip.id] |> Enum.sort(),
           last_service_date: last_service_date
         })
       else
