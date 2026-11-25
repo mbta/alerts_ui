@@ -2402,6 +2402,8 @@ defmodule AlertsUIWeb.CreateAlertLive.Slices.AffectedServiceSliceTest do
           }
         })
 
+        render_async(view)
+
         open_review_modal(view)
 
         view
