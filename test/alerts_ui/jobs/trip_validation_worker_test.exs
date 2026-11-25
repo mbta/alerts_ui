@@ -93,7 +93,7 @@ defmodule AlertsUI.Jobs.TripValidationWorkerTest do
           informed_entity: [%{trip: %{trip_id: "1"}}, %{trip: %{trip_id: "2"}}]
         })
 
-        {:warning, log} =
+        {:ok, log} =
           with_log(fn ->
             TripValidationWorker.perform(%Job{args: %{}})
           end)

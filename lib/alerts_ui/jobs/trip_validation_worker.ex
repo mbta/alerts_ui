@@ -36,6 +36,6 @@ defmodule AlertsUI.Jobs.TripValidationWorker do
       )
     end)
 
-    :warning
+    :ok
   end
 end
