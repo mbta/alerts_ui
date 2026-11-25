@@ -52,7 +52,7 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
         base_url \\ Application.get_env(:alerts_ui, :api_url),
         api_key \\ Application.get_env(:alerts_ui, :api_key)
       ) do
-    tomorrow = Date.add(Date.utc_today(), 1)
+    today = Date.utc_today()
     opts = [base_url: base_url, api_key: api_key]
 
     # Get all open alerts with trips, and make a dict of %{trip_id => [alert_ids]}
@@ -83,7 +83,7 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
 
       last_service_date = Service.last_service_date(service)
 
-      notify? = Date.diff(last_service_date, tomorrow) <= @notify_threshold_days
+      notify? = Date.diff(last_service_date, today) <= @notify_threshold_days
 
       if notify? do
         Map.put(acc, trip.id, %{
