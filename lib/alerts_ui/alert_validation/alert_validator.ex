@@ -64,23 +64,24 @@ defmodule AlertsUI.AlertValidation.AlertValidator do
           trip_ids: Alert.gather_trip_ids(alert)
         }
       end)
-      # Rearrange to group by trip_ids -> alert_id
       |> Enum.reject(fn alert -> alert.trip_ids === [] end)
+      # Rearrange to group by trip_ids -> alert_id
       |> Enum.reduce(%{}, fn %{alert_id: alert_id, trip_ids: trip_ids}, acc ->
         Enum.reduce(trip_ids, acc, fn trip_id, acc ->
           Map.update(acc, trip_id, [alert_id], &[alert_id | &1])
         end)
       end)
 
-    # Query for all trip data
+    # Query for all trip and service data
     trips = SchedulesRepo.trips_by_ids(Map.keys(trips_to_alerts), [], opts)
+    services = ServicesRepo.by_ids(Enum.map(trips, fn t -> t.service_id end), [], opts)
 
-    # From trip data, get service data and find the service's last date and figure out if we should notify
+    # Find the corresponding service's last service date and figure out if we should notify
     trips
     |> Enum.reduce(%{}, fn trip, acc ->
-      last_service_date =
-        ServicesRepo.by_id(trip.service_id, opts)
-        |> Service.last_service_date()
+      service = Enum.find(services, fn service -> service.id === trip.service_id end)
+
+      last_service_date = Service.last_service_date(service)
 
       notify? = Date.diff(last_service_date, tomorrow) <= @notify_threshold_days
 

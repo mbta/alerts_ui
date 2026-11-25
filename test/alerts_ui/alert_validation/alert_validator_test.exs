@@ -482,12 +482,12 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
          ]},
         {ServicesRepo, [],
          [
-           by_id: fn
-             ^service_id, _opts ->
-               %Service{id: service_id, end_date: Date.add(today, 7)}
-
-             ^service_id_ending_soon, _opts ->
-               %Service{id: service_id_ending_soon, end_date: tomorrow}
+           by_ids: fn
+             _, _params, _opts ->
+               [
+                 %Service{id: service_id, end_date: Date.add(today, 7)},
+                 %Service{id: service_id_ending_soon, end_date: tomorrow}
+               ]
            end
          ]}
       ]) do
@@ -537,12 +537,12 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
          ]},
         {ServicesRepo, [],
          [
-           by_id: fn
-             ^service_id, _opts ->
-               %Service{id: service_id, end_date: Date.add(today, 7)}
-
-             ^service_2, _opts ->
-               %Service{id: service_2, end_date: Date.add(today, 10)}
+           by_ids: fn
+             _, _params, _opts ->
+               [
+                 %Service{id: service_id, end_date: Date.add(today, 7)},
+                 %Service{id: service_2, end_date: Date.add(today, 10)}
+               ]
            end
          ]}
       ]) do
@@ -575,12 +575,12 @@ defmodule AlertsUI.AlertValidation.AlertValidatorTest do
          ]},
         {ServicesRepo, [],
          [
-           by_id: fn
-             ^service_id, _opts ->
-               %Service{id: service_id, end_date: Date.add(today, 1)}
-
-             ^service_2, _opts ->
-               %Service{id: service_2, end_date: today}
+           by_ids: fn
+             _, _params, _opts ->
+               [
+                 %Service{id: service_id, end_date: Date.add(today, 1)},
+                 %Service{id: service_2, end_date: today}
+               ]
            end
          ]}
       ]) do

@@ -35,9 +35,12 @@ defmodule AlertsUI.Jobs.TripValidationWorkerTest do
          ]},
         {ServicesRepo, [],
          [
-           by_id: fn
-             service_id, _opts ->
-               %Service{id: service_id, end_date: Date.add(today, 7)}
+           by_ids: fn
+             _service_ids, _params, _opts ->
+               [
+                 %Service{id: service_id, end_date: Date.add(today, 7)},
+                 %Service{id: service_2, end_date: Date.add(today, 7)}
+               ]
            end
          ]}
       ]) do
@@ -76,12 +79,12 @@ defmodule AlertsUI.Jobs.TripValidationWorkerTest do
          ]},
         {ServicesRepo, [],
          [
-           by_id: fn
-             ^service_id, _opts ->
-               %Service{id: service_id, end_date: Date.add(today, 7)}
-
-             ^service_ending_soon, _opts ->
-               %Service{id: service_id, end_date: tomorrow}
+           by_ids: fn
+             _service_ids, _params, _opts ->
+               [
+                 %Service{id: service_id, end_date: Date.add(today, 7)},
+                 %Service{id: service_ending_soon, end_date: tomorrow}
+               ]
            end
          ]}
       ]) do
