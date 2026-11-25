@@ -18,12 +18,6 @@ config :alerts_ui,
   enhanced_sita_json_output_filename: "alerts_feed_enhanced_SITA.json",
   skate_file_path: "/detours/active.ndjson",
   skip_migrations: true,
-  trapeze_sftp_host: System.get_env("TRAPEZE_SFTP_HOST", ""),
-  trapeze_sftp_port: System.get_env("TRAPEZE_SFTP_PORT", ""),
-  trapeze_sftp_user: System.get_env("TRAPEZE_SFTP_USER", ""),
-  trapeze_sftp_password: System.get_env("TRAPEZE_SFTP_PASSWORD", ""),
-  trapeze_sftp_filename: System.get_env("TRAPEZE_SFTP_FILENAME", ""),
-  sentry_env: System.get_env("SENTRY_ENV"),
   ## Environment level flags
   # Whether to use translated strings for `cause_detail` and `effect_detail`
   translated_cause_effect_detail?: false,

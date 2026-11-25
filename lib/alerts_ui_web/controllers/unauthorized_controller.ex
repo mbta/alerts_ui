@@ -7,7 +7,7 @@ defmodule AlertsUIWeb.UnauthorizedController do
   def index(conn, _params) do
     text(
       conn,
-      "You are unauthorized to view #{System.get_env("SENTRY_ENV", "")} Alerts Manager. To receive access as an MBTA employee, please submit a ServiceNow ticket."
+      "You are unauthorized to view #{AlertsUI.config(:sentry_env)} Alerts Manager. To receive access as an MBTA employee, please submit a ServiceNow ticket."
     )
   end
 end
