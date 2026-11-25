@@ -11,11 +11,11 @@ defmodule AlertsUI.AlertValidation.AlertAssociationValidatorTest do
   alias MBTAV3API.Stops.Repo, as: StopsRepo
   alias MBTAV3API.Stops.Stop
 
-  @cr_alert_params %{
-    alert_id: "345",
-    primary_service_type: "2",
-    original_route_selections: ["Lowell Line|CR-Lowell"],
-    original_stop_selections: ["Wedgemere|place-NHRML-0073", "Bad Stop|place-nope"],
+  @ferry_alert_params %{
+    alert_id: "123",
+    primary_service_type: "4",
+    original_route_selections: ["Quincy Ferry|Boat-F7"],
+    original_stop_selections: ["Central Wharf|Boat-Aquarium"],
     original_trip_selections: ["595|CR-683322-595", "000|nope-444"]
   }
 
@@ -28,11 +28,11 @@ defmodule AlertsUI.AlertValidation.AlertAssociationValidatorTest do
     original_trip_selections: ["595|CR-683322-595", "000|nope-444"]
   }
 
-  @ferry_alert_params %{
-    alert_id: "123",
-    primary_service_type: "4",
-    original_route_selections: ["Quincy Ferry|Boat-F7"],
-    original_stop_selections: ["Central Wharf|Boat-Aquarium"],
+  @cr_alert_params %{
+    alert_id: "345",
+    primary_service_type: "2",
+    original_route_selections: ["Lowell Line|CR-Lowell"],
+    original_stop_selections: ["Wedgemere|place-NHRML-0073", "Bad Stop|place-nope"],
     original_trip_selections: ["595|CR-683322-595", "000|nope-444"]
   }
 
@@ -41,6 +41,18 @@ defmodule AlertsUI.AlertValidation.AlertAssociationValidatorTest do
     primary_service_type: "1",
     original_route_selections: ["Red Line|Red"],
     original_stop_selections: ["Alewife|place-alfcl", "Bad Stop|place-nope"],
+    original_trip_selections: []
+  }
+
+  @green_line_alert_params %{
+    alert_id: "567",
+    primary_service_type: "1",
+    original_route_selections: ["Green Line|Green"],
+    original_stop_selections: [
+      "Kent Street|place-kntst",
+      "Lechmere|place-lech",
+      "Bad Stop|place-nope"
+    ],
     original_trip_selections: []
   }
 
@@ -62,6 +74,32 @@ defmodule AlertsUI.AlertValidation.AlertAssociationValidatorTest do
                  [
                    %{
                      alert_id: "456",
+                     invalid_stops: ["place-nope"],
+                     invalid_trips: []
+                   }
+                 ]
+      end
+    end
+
+    test "correctly expands the green line" do
+      insert(:alert, @green_line_alert_params)
+
+      with_mocks([
+        {StopsRepo, [],
+         [
+           all: fn
+             ["filter[route]": "Green-B,Green-C,Green-D,Green-E"] ->
+               [
+                 %Stop{id: "place-kntst", name: "Kent Street"},
+                 %Stop{id: "place-lech", name: "Lechmere"}
+               ]
+           end
+         ]}
+      ]) do
+        assert AlertAssociationValidator.validate_alerts() ==
+                 [
+                   %{
+                     alert_id: "567",
                      invalid_stops: ["place-nope"],
                      invalid_trips: []
                    }

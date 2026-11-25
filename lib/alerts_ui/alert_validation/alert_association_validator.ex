@@ -9,6 +9,7 @@ defmodule AlertsUI.AlertValidation.AlertAssociationValidator do
 
   alias AlertsUI.Alerts
   alias AlertsUI.Models.Alert
+  alias AlertsUI.Routes
   alias MBTAV3API.Schedules.Repo, as: SchedulesRepo
   alias MBTAV3API.Stops.Repo, as: StopsRepo
 
@@ -37,7 +38,7 @@ defmodule AlertsUI.AlertValidation.AlertAssociationValidator do
     |> Enum.map(fn alert ->
       %{
         alert_id: alert.alert_id,
-        route_ids: Alert.gather_route_ids(alert),
+        route_ids: alert |> Alert.gather_route_ids() |> Routes.expanding_green_line(),
         stop_ids: Alert.gather_stop_ids(alert),
         trip_ids: Alert.gather_trip_ids(alert)
       }
