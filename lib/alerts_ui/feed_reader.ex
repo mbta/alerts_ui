@@ -35,7 +35,7 @@ defmodule AlertsUI.FeedReader do
   defp alerts_api_url(:standard_protobuf), do: build_s3_path() <> "alerts_feed.pb"
 
   defp build_s3_path do
-    "https://#{System.get_env("S3_BUCKET_NAME", "")}.s3.amazonaws.com/#{System.get_env("S3_BUCKET_PREFIX", "")}/"
+    "https://#{AlertsUI.config(:s3_bucket_name)}.s3.amazonaws.com/#{AlertsUI.config(:s3_bucket_prefix)}/"
   end
 
   defp parse_response(%{status: 200, body: json_body}),

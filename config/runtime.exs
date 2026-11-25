@@ -187,6 +187,8 @@ cond do
       dev_api_key: System.fetch_env!("DEV_API_KEY"),
       translated_cause_effect_detail?: true,
       trapeze_import?: false,
+      s3_bucket_name: System.get_env("S3_BUCKET_NAME", ""),
+      s3_bucket_prefix: System.get_env("S3_BUCKET_PREFIX", ""),
       show_new_bus_detours: true
 
     config :sentry,
