@@ -131,7 +131,8 @@ config :alerts_ui, Oban,
        # Validate alerts against production every day at 4:00 am EST
        {"0 9 * * *", AlertsUI.Jobs.AlertValidationDailyWorker},
         # Validate alert associations against production every day at 4:30 am EST
-       {"30 9 * * *", AlertsUI.Jobs.AlertAssociationDailyWorker}
+          {"*/5 * * * *", AlertsUI.Jobs.AlertAssociationDailyWorker}
+      #  {"30 9 * * *", AlertsUI.Jobs.AlertAssociationDailyWorker}
      ]}
   ],
   queues: [default: 10]
