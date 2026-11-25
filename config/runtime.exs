@@ -58,7 +58,9 @@ cond do
       dev_api_url: "https://api-dev.mbtace.com",
       dev_api_key: "",
       translated_cause_effect_detail?: true,
-      show_new_bus_detours: true
+      show_new_bus_detours: true,
+      s3_bucket_name: "fake-name",
+      s3_bucket_prefix: "fake-prefix"
 
     config :mbta_v3_api,
       base_url: "https://api-dev.mbtace.com/",
@@ -144,9 +146,12 @@ cond do
       trapeze_sftp_user: System.get_env("TRAPEZE_SFTP_USER", ""),
       trapeze_sftp_password: System.get_env("TRAPEZE_SFTP_PASSWORD", ""),
       trapeze_sftp_filename: System.get_env("TRAPEZE_SFTP_FILENAME", ""),
-      # below are used only for GTFS validation
+      # the dev_api keys below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
       dev_api_key: System.fetch_env!("DEV_API_KEY"),
+      git_sha: System.get_env("GIT_SHA", "none"),
+      s3_bucket_name: System.get_env("S3_BUCKET_NAME", ""),
+      s3_bucket_prefix: System.get_env("S3_BUCKET_PREFIX", ""),
       translated_cause_effect_detail?: get_translated_cause_effect_detail.(),
       show_new_bus_detours: get_bus_detours.()
 
@@ -185,8 +190,11 @@ cond do
       # below are used only for GTFS validation
       dev_api_url: String.replace_trailing(System.fetch_env!("DEV_API_URL"), "/", ""),
       dev_api_key: System.fetch_env!("DEV_API_KEY"),
+      git_sha: System.get_env("GIT_SHA", "none"),
       translated_cause_effect_detail?: true,
       trapeze_import?: false,
+      s3_bucket_name: System.get_env("S3_BUCKET_NAME", ""),
+      s3_bucket_prefix: System.get_env("S3_BUCKET_PREFIX", ""),
       show_new_bus_detours: true
 
     config :sentry,

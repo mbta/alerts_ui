@@ -5,6 +5,6 @@ defmodule AlertsUIWeb.VersionController do
   use AlertsUIWeb, :controller
 
   def index(conn, _params) do
-    text(conn, System.get_env("GIT_SHA", "none"))
+    text(conn, AlertsUI.config(:git_sha))
   end
 end

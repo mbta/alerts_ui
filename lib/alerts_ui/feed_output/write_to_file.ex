@@ -26,11 +26,11 @@ defmodule AlertsUI.FeedOutput.WriteToS3 do
   end
 
   defp get_bucket_name do
-    System.get_env("S3_BUCKET_NAME", "")
+    AlertsUI.config(:s3_bucket_name)
   end
 
   defp get_file_path(filename) do
-    "#{System.get_env("S3_BUCKET_PREFIX", "")}/#{filename}"
+    "#{AlertsUI.config(:s3_bucket_prefix)}/#{filename}"
   end
 
   defp get_content_type(filename) do
