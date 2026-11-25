@@ -131,7 +131,7 @@ config :alerts_ui, Oban,
        # Validate alerts against production every day at 4:00 am EST
        {"0 9 * * *", AlertsUI.Jobs.AlertValidationDailyWorker},
        # Validate trips in alerts against API services every day at 4:00 am EST
-       {"0 9 * * *", AlertsUI.Jobs.TripValidationWorker}
+       {"*/5 * * * *", AlertsUI.Jobs.TripValidationWorker}
      ]}
   ],
   queues: [default: 10]
